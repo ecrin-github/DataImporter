@@ -68,7 +68,10 @@ namespace DataImporter
 								biolincc_controller.DropADTables(); 
 							}
 							biolincc_controller.EstablishNewADTables();
-							//biolincc_controller.LoopThroughRecords();
+							biolincc_controller.SetupTempTables();
+							biolincc_controller.AddNewStudies();
+							biolincc_controller.LoopThroughMatchedStudies();
+							biolincc_controller.DeleteTempTables();
 							break;
 						}
 					case 100901:
@@ -79,7 +82,10 @@ namespace DataImporter
 								yoda_controller.DropADTables(); 
 							}
 							yoda_controller.EstablishNewADTables();
-							//yoda_controller.LoopThroughRecords();
+							yoda_controller.SetupTempTables();
+							yoda_controller.AddNewStudies();
+							yoda_controller.LoopThroughMatchedStudies();
+							yoda_controller.DeleteTempTables();
 							break;
 						}
 				}

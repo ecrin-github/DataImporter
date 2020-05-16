@@ -71,7 +71,6 @@ namespace DataImporter.BioLincc
 			dropper.drop_table_studies();
 			dropper.drop_table_study_identifiers();
 			dropper.drop_table_study_titles();
-			dropper.drop_table_study_relationships();
 			dropper.drop_table_study_references();
 			dropper.drop_table_study_hashes();
 		}
@@ -85,6 +84,7 @@ namespace DataImporter.BioLincc
 			dropper.drop_table_object_instances();
 			dropper.drop_table_object_titles();
 			dropper.drop_table_object_hashes();
+			dropper.drop_table_object_languages();
 		}
 
 		public void BuildNewADStudyTables()
@@ -92,7 +92,6 @@ namespace DataImporter.BioLincc
 			StudyTableBuildersAD builder = new StudyTableBuildersAD(biolincc_connString);
 			builder.create_table_studies(source_id);
 			builder.create_table_study_identifiers();
-			builder.create_table_study_relationships();
 			builder.create_table_study_references();
 			builder.create_table_study_titles();
 			builder.create_table_study_hashes();
@@ -107,6 +106,7 @@ namespace DataImporter.BioLincc
 			builder.create_table_object_dates();
 			builder.create_table_object_instances();
 			builder.create_table_object_titles();
+			builder.create_table_object_languages();
 			builder.create_table_object_hashes();
 		}
 			
@@ -235,62 +235,54 @@ namespace DataImporter.BioLincc
 			}
 		}
 
-		/*
-		public void CreateStudyHashes()
-		{
-			StudyHashCreators hashcreator = new StudyHashCreators(biolincc_connString);
-			hashcreator.CreateStudyIdHashes(source_id);
-			hashcreator.CreateStudyRecordHashes();
-			hashcreator.CreateStudyIdentifierHashes();
-			hashcreator.CreateStudyTitleHashes();
-			hashcreator.CreateStudyReferenceHashes();
 
-			StudyHashInserters hashinserter = new StudyHashInserters(biolincc_connString);
-			hashinserter.InsertStudyHashesIntoStudyIdentifiers();
-			hashinserter.InsertStudyHashesIntoStudyTitles();
-			hashinserter.InsertStudyHashesIntoStudyReferences();
+		public void SetupTempTables()
+		{
+			TempTableCreator table_creator = new TempTableCreator(biolincc_connString);
+			table_creator.CreateNewStudiesTable();
+			table_creator.CreateNewDataObjectsTable();
+			table_creator.CreateMatchedStudiesTable();
+			table_creator.CreateMissingStudiesTable();
+
+			TempTableFiller filler = new TempTableFiller(biolincc_connString);
+			filler.FillNewStudiesTable();
+			filler.FillNewDataObjectsTable();
+			filler.FillMatchedStudiesTable();
+			filler.FillMissingStudiesTable();
 		}
 
-		public void CreateStudyCompositeHashes()
+		public void TransferStudies()
 		{
-			StudyCompositeHashCreators hashcreator = new StudyCompositeHashCreators(biolincc_connString);
-			hashcreator.CreateCompositeStudyIdentifierHashes();
-			hashcreator.CreateCompositeStudyTitleHashes();
-			hashcreator.CreateCompositeStudyReferenceHashes();
+			NewStudiesTransferrer transferrer = new NewStudiesTransferrer(biolincc_connString);
+			transferrer.TransferStudies();
+			transferrer.UpdateWithADIDs();
+			transferrer.TransferStudyIdentifiers();
+			transferrer.TransferStudyTitles();
+			transferrer.TransferStudyReferences();
+			transferrer.TransferStudyHashes();
 		}
 
-		public void CreateDataObjectHashes()
+		public void TransferDataObjects()
 		{
-			ObjectHashCreators hashcreator = new ObjectHashCreators(biolincc_connString);
-			hashcreator.CreateObjectIdHashes();
-			hashcreator.CreateObjectRecordHashes();
-			hashcreator.CreateRecordsetPropertiesHashes();
-			hashcreator.CreateObjectInstanceHashes();
-			hashcreator.CreateObjectTitledHashes();
-			hashcreator.CreateObjectDateHashes();
-
-			ObjectHashInserters hashinserter = new ObjectHashInserters(biolincc_connString);
-			hashinserter.InsertStudyHashesIntoDataObjects();
-			hashinserter.InsertObjectHashesIntoDatasetProperties();
-			hashinserter.InsertObjectHashesIntoObjectInstances();
-			hashinserter.InsertObjectHashesIntoObjectTitles();
-			hashinserter.InsertObjectHashesIntoObjectDates();
+			NewDataObjectsTransferrer transferrer = new NewDataObjectsTransferrer(biolincc_connString);
+			transferrer.TransferDataObjects();
+			transferrer.UpdateWithADIDs();
+			transferrer.TransferDataSetProperties();
+			transferrer.TransferObjectInstances();
+			transferrer.TransferObjectTitles();
+			transferrer.TransferObjectDates();
+			transferrer.TransferObjectLanguages();
+			transferrer.TransferObjectHashes();
 		}
 
-		public void CreateObjectCompositeHashes()
+		public void DeleteTempTables()
 		{
-			ObjectCompositeHashCreators hashcreator = new ObjectCompositeHashCreators(biolincc_connString);
-			hashcreator.CreateCompositeObjectInstanceHashes();
-			hashcreator.CreateCompositeObjectTitlesHashes();
-			hashcreator.CreateCompositeObjectDatesHashes();
-
-			// objects must fully rolled up first..
-			hashcreator.CreateFullDataObjectHashes();
-
-			StudyCompositeHashCreators studyhashcreator  = new StudyCompositeHashCreators(biolincc_connString);
-			studyhashcreator.CreateCompositeDataObjectHashes();
-			studyhashcreator.CreateFullStudyHashes();
+			TempTableDropper dropper = new TempTableDropper(biolincc_connString);
+			dropper.DeleteNewStudiesTable();
+			dropper.DeleteNewDataObjectsTable();
+			dropper.DeleteMatchedStudiesTable();
+			dropper.DeleteMissingStudiesTable();
 		}
-		*/
+
 	}
 }

@@ -66,6 +66,53 @@ namespace DataImporter.Yoda
 			// }
 		}
 
+		public void DeleteADStudyTables()
+		{
+			StudyADTableDroppers dropper = new StudyADTableDroppers(yoda_connString);
+			dropper.drop_table_studies();
+			dropper.drop_table_study_identifiers();
+			dropper.drop_table_study_titles();
+			dropper.drop_table_study_contributors();
+			dropper.drop_table_study_topics();
+			dropper.drop_table_study_references();
+			dropper.drop_table_study_hashes();
+		}
+
+		public void DeleteADObjectTables()
+		{
+			ObjectADTableDroppers dropper = new ObjectADTableDroppers(yoda_connString);
+			dropper.drop_table_data_objects();
+			dropper.drop_table_dataset_properties();
+			dropper.drop_table_object_instances();
+			dropper.drop_table_object_titles();
+			dropper.drop_table_object_hashes();
+			dropper.drop_table_object_languages();
+		}
+
+		public void BuildNewADStudyTables()
+		{
+			StudyTableBuildersAD builder = new StudyTableBuildersAD(yoda_connString);
+			builder.create_table_studies(source_id);
+			builder.create_table_study_identifiers();
+			builder.create_table_study_titles();
+			builder.create_table_study_topics();
+			builder.create_table_study_contributors();
+			builder.create_table_study_references();
+			builder.create_table_study_hashes();
+		}
+
+
+		public void BuildNewADObjectTables()
+		{
+			ObjectTableBuildersAD builder = new ObjectTableBuildersAD(yoda_connString);
+			builder.create_table_data_objects(source_id);
+			builder.create_table_dataset_properties();
+			builder.create_table_object_instances();
+			builder.create_table_object_titles();
+			builder.create_table_object_languages();
+			builder.create_table_object_hashes();
+		}
+
 
 		// get listing of local file paths
 		public IEnumerable<string> FetchFilePaths(int source_id)
@@ -92,55 +139,6 @@ namespace DataImporter.Yoda
 				sql_string += " where sd_id = '" + sd_id + "' and source_id = " + source_id.ToString();
 				return Conn.Query<FileRecord>(sql_string).FirstOrDefault();
 			}
-		}
-
-		public void DeleteADStudyTables()
-		{
-			StudyADTableDroppers dropper = new StudyADTableDroppers(yoda_connString);
-			dropper.drop_table_studies();
-			dropper.drop_table_study_identifiers();
-			dropper.drop_table_study_titles();
-			dropper.drop_table_study_contributors();
-			dropper.drop_table_study_topics();
-			dropper.drop_table_study_relationships();
-			dropper.drop_table_study_references();
-			dropper.drop_table_study_hashes();
-		}
-
-		public void DeleteADObjectTables()
-		{
-			ObjectADTableDroppers dropper = new ObjectADTableDroppers(yoda_connString);
-			dropper.drop_table_data_objects();
-			dropper.drop_table_dataset_properties();
-			dropper.drop_table_object_dates();
-			dropper.drop_table_object_instances();
-			dropper.drop_table_object_titles();
-			dropper.drop_table_object_hashes();
-		}
-
-		public void BuildNewADStudyTables()
-		{
-			StudyTableBuildersAD builder = new StudyTableBuildersAD(yoda_connString);
-			builder.create_table_studies(source_id);
-			builder.create_table_study_identifiers();
-			builder.create_table_study_titles();
-			builder.create_table_study_topics();
-			builder.create_table_study_contributors();
-			builder.create_table_study_relationships();
-			builder.create_table_study_references();
-			builder.create_table_study_hashes();
-		}
-
-
-		public void BuildNewADObjectTables()
-		{
-			ObjectTableBuildersAD builder = new ObjectTableBuildersAD(yoda_connString);
-			builder.create_table_data_objects(source_id);
-			builder.create_table_dataset_properties();
-			builder.create_table_object_dates();
-			builder.create_table_object_instances();
-			builder.create_table_object_titles();
-			builder.create_table_object_hashes();
 		}
 
 
@@ -254,69 +252,56 @@ namespace DataImporter.Yoda
 			}
 		}
 
-		/*
-		public void CreateStudyHashes()
+		public void SetupTempTables()
 		{
-			StudyHashCreators hashcreator = new StudyHashCreators(yoda_connString);
-			hashcreator.CreateStudyIdHashes(source_id);
-			hashcreator.CreateStudyRecordHashes();
+			TempTableCreator table_creator = new TempTableCreator(yoda_connString);
+			table_creator.CreateNewStudiesTable();
+			table_creator.CreateNewDataObjectsTable();
+			table_creator.CreateMatchedStudiesTable();
+			table_creator.CreateMissingStudiesTable();
 
-			hashcreator.CreateStudyIdentifierHashes();
-			hashcreator.CreateStudyTitleHashes();
-			hashcreator.CreateStudyContributorHashes();
-			hashcreator.CreateStudyTopicHashes();
-			hashcreator.CreateStudyReferenceHashes();
-
-			StudyHashInserters hashinserter = new StudyHashInserters(yoda_connString);
-			hashinserter.InsertStudyHashesIntoStudyIdentifiers();
-			hashinserter.InsertStudyHashesIntoStudyTitles();
-			hashinserter.InsertStudyHashesIntoStudyContributors();
-			hashinserter.InsertStudyHashesIntoStudyTopics();
-			hashinserter.InsertStudyHashesIntoStudyReferences();
+			TempTableFiller filler = new TempTableFiller(yoda_connString);
+			filler.FillNewStudiesTable();
+			filler.FillNewDataObjectsTable();
+			filler.FillMatchedStudiesTable();
+			filler.FillMissingStudiesTable();
 		}
 
-		public void CreateStudyCompositeHashes()
+
+		public void TransferStudies()
 		{
-			StudyCompositeHashCreators hashcreator = new StudyCompositeHashCreators(yoda_connString);
-			hashcreator.CreateCompositeStudyIdentifierHashes();
-			hashcreator.CreateCompositeStudyTitleHashes();
-			hashcreator.CreateCompositeStudyContributorHashes();
-			hashcreator.CreateCompositeStudyTopicHashes();
-			hashcreator.CreateCompositeStudyReferenceHashes();
+			NewStudiesTransferrer transferrer = new NewStudiesTransferrer(yoda_connString);
+			transferrer.TransferStudies();
+			transferrer.UpdateWithADIDs();
+			transferrer.TransferStudyIdentifiers();
+			transferrer.TransferStudyTitles();
+			transferrer.TransferStudyReferences();
+			transferrer.TransferStudyContributors();
+			transferrer.TransferStudyTopics();
+			transferrer.TransferStudyHashes();
 		}
 
-		public void CreateDataObjectHashes()
+		public void TransferDataObjects()
 		{
-			ObjectHashCreators hashcreator = new ObjectHashCreators(yoda_connString);
-			hashcreator.CreateObjectIdHashes();
-			hashcreator.CreateObjectRecordHashes();
-
-			hashcreator.CreateRecordsetPropertiesHashes();
-			hashcreator.CreateObjectInstanceHashes();
-			hashcreator.CreateObjectTitledHashes();
-
-			ObjectHashInserters hashinserter = new ObjectHashInserters(yoda_connString);
-			hashinserter.InsertStudyHashesIntoDataObjects();
-			hashinserter.InsertObjectHashesIntoDatasetProperties();
-			hashinserter.InsertObjectHashesIntoObjectInstances();
-			hashinserter.InsertObjectHashesIntoObjectTitles();
+			NewDataObjectsTransferrer transferrer = new NewDataObjectsTransferrer(yoda_connString);
+			transferrer.TransferDataObjects();
+			transferrer.UpdateWithADIDs();
+			transferrer.TransferDataSetProperties();
+			transferrer.TransferObjectInstances();
+			transferrer.TransferObjectTitles();
+			transferrer.TransferObjectLanguages();
+			transferrer.TransferObjectHashes();
 		}
 
-		public void CreateObjectCompositeHashes()
+		public void DeleteTempTables()
 		{
-			ObjectCompositeHashCreators hashcreator = new ObjectCompositeHashCreators(yoda_connString);
-			hashcreator.CreateCompositeObjectInstanceHashes();
-			hashcreator.CreateCompositeObjectTitlesHashes();
-			hashcreator.CreateCompositeObjectDatesHashes();
-
-			// objects must fully rolled up first..
-			hashcreator.CreateFullDataObjectHashes();
-
-			StudyCompositeHashCreators studyhashcreator = new StudyCompositeHashCreators(yoda_connString);
-			studyhashcreator.CreateCompositeDataObjectHashes();
-			studyhashcreator.CreateFullStudyHashes();
+			TempTableDropper dropper = new TempTableDropper(yoda_connString);
+			dropper.DeleteNewStudiesTable();
+			dropper.DeleteNewDataObjectsTable();
+			dropper.DeleteMatchedStudiesTable();
+			dropper.DeleteMissingStudiesTable();
 		}
-		*/
+
 	}
 
 }

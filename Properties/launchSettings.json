@@ -2,7 +2,7 @@
   "profiles": {
     "DataImporter": {
       "commandName": "Project",
-      "commandLineArgs": "y 1"
+      "commandLineArgs": "b 1"
     }
   }
 }
