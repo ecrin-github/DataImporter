@@ -66,10 +66,10 @@ namespace DataImporter.Yoda
 					YodaRecord studyRegEntry = (YodaRecord)serializer.Deserialize(rdr);
 
 					// break up the file into relevant data classes
-					Study s = processor.ProcessData(repo, studyRegEntry, rec.download_datetime);
+					processor.ProcessData(repo);
 
 					// store the data in the database			
-					processor.StoreData(repo, s);  // FOR NOW!!!!!
+					processor.StoreData(repo);  
 
 					// update file record with last processed datetime
 					common_repo.UpdateStudyFileRecLastProcessed(rec.id);

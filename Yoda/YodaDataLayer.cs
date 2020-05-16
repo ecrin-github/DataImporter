@@ -124,8 +124,8 @@ namespace DataImporter.Yoda
 			builder.create_table_studies(source_id);
 			builder.create_table_study_identifiers();
 			builder.create_table_study_titles();
-			//builder.create_table_study_topics();
-			//builder.create_table_study_contributors();
+			builder.create_table_study_topics();
+			builder.create_table_study_contributors();
 			builder.create_table_study_relationships();
 			builder.create_table_study_references();
 			builder.create_table_study_hashes();

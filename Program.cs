@@ -68,7 +68,7 @@ namespace DataImporter
 								biolincc_controller.DropADTables(); 
 							}
 							biolincc_controller.EstablishNewADTables();
-							biolincc_controller.LoopThroughRecords();
+							//biolincc_controller.LoopThroughRecords();
 							break;
 						}
 					case 100901:
@@ -79,7 +79,7 @@ namespace DataImporter
 								yoda_controller.DropADTables(); 
 							}
 							yoda_controller.EstablishNewADTables();
-							yoda_controller.LoopThroughRecords();
+							//yoda_controller.LoopThroughRecords();
 							break;
 						}
 				}
