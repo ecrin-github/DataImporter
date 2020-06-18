@@ -23,8 +23,8 @@ Data in the accumulated data (ad) tables carries audit and status fields tro ini
 Once any data in the ad tables is 'consumed' by the aggregation process the status of the records revert to 0. The status is then reset during the next import process.
 
 ### Provenance
-Author: Steve Canham
-Organisation: ECRIN (https://ecrin.org)
-System: Clinical Research Metadata Repository (MDR)
-Project: EOSC Life
-Funding: EU H2020 programme, grant 824087
+* Author: Steve Canham
+* Organisation: ECRIN (https://ecrin.org)
+* System: Clinical Research Metadata Repository (MDR)
+* Project: EOSC Life
+* Funding: EU H2020 programme, grant 824087
