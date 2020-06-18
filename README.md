@@ -20,6 +20,7 @@ Data in the accumulated data (ad) tables carries audit and status fields tro ini
 3: Data confirmed as unchanged<br/>
 *Applies only to Study and Data Object records - i.e. the 'main' record for each and not their associated attribute records. Indicates that a) that the record **was** present in the sd data but b) that the study (including all of its attributes) oir the data object (including all of its attributes) was unchanged. The only thing that needs to be changed is therefore the 'data of data download' field in the Study or Data Object record, corresponding to the date of the most recent download. This date needs to be revised, which will then trigger a revision of the record's provenance data.*
 
+Once any data in the ad tables is 'consumed' by the aggregation process the status of the records revert to 0. The status is then reset during the next import process.
 
 ### Provenance
 Author: Steve Canham
