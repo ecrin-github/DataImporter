@@ -8,16 +8,20 @@ The system is currently a console app, and takes a single parameter. This is a 6
 
 ### Data Status codes
 Data in the accumulated data (ad) tables carries audit and status fields tro inidcate if it is new or has been revised. The codes are:<br/>
-0: No change
-All files in the source data folder will be converted into data in the sd tables. Used for relatively small sources and / or those that have no 'last revised date'
+0: No change<br/>
+*Applies to all record types. Indicates a) that the record was not present in the sd data and is assumed to be unchanged, and b) has already been transferred to the central mdr in an earlier aggregation. Any record with status 0 can be ignored in any later aggregation phase.*
 
-2: Harvest revised since (cutoff date)
-Processes only files that have a 'last revised date' greater than the cutoff date given. Harvests of this type therefore require a third parameter to be supplied.
+1: New data<br/>
+*Applies to all record types. Indicates that the record has been newly added from the session data, and that it must therefore be further added to the central systems in any later aggregation process. The provenance data of the parent Study or Data Object is also included. *
 
-3: Harvest those considered not completed
-Processes those files thast are marked as 'incomplete' in the logging system and ignores those marked as 'comnplete'. The latter designation is sometimes given to files that, whilst they do not contain a date last revised attribute, are old enough and seem to contain sufficient data that any further editing seems very unlikely. Note that even files that are 'complete', however, can ne periodically examined (e.g. on an annual basis) by over-riding the default download and harvest ssettings.
+2: Revised data<br/>
+*Applies to all record types. Indicates that the record has been revised in some way, and that the version in the ad tables has therefore replaced the version that was there previously. That revision needs to be passed onto the central mdr tables. Hashes are used in the system to more easily identify the 
 
-Provenance
+3: Data confirmed as unchanged<br/>
+*Applies only to Study and Data Object records - i.e. the 'main' record for each and not their associated attribute records. Indicates that a) that the record **was** present in the sd data but b) that the study (including all of its attributes) oir the data object (including all of its attributes) was unchanged. The only thing that needs to be changed is therefore the 'data of data download' field in the Study or Data Object record, corresponding to the date of the most recent download. This date needs to be revised, which will then trigger a revision of the record's provenance data.
+
+
+### Provenance
 Author: Steve Canham
 Organisation: ECRIN (https://ecrin.org)
 System: Clinical Research Metadata Repository (MDR)
