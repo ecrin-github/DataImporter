@@ -4,7 +4,7 @@ Transfers session data into the accumulated data tables.
 The program takes the data in the sd tables in each source database (the 'session data' created by the most recent harvest operation), and compares it with the accumulated data for each source, which is stored in the ad tables. New and revised data is both transferred to the ad tables, and marked as such so that it will be used in the later aggregation phase. 
 
 ### Parameters
-The system is currently a console app, and takes a single parameter. This is a 6 digit integer representing the source (e.g. 100120 is Clinical Trials.gov). The plan is to wrap the app in a UI at some later point.
+The system is currently a console app, and takes a single parameter. This is a 6 digit integer representing the source (e.g. 100120 is Clinical Trials.gov). Each source system needs to be imnported in turn before aggregation begins, though the exact ordering is not important. The plan is to wrap the app in a UI at some later point.
 
 ### Data Status codes
 Data in the accumulated data (ad) tables carries audit and status fields tro inidcate if it is new or has been revised. The codes are:<br/>
