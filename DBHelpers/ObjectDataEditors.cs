@@ -14,6 +14,19 @@ namespace DataImporter
 			db_conn = _db_conn;
 		}
 
+/*
+51  "instances" "Data Objects"
+52  "titles"    "Data Objects"
+53  "dates" "Data Objects"  
+54  "topics"    "Data Objects"
+55  "contributors"  "Data Objects" 
+56  "relationships" "Data Objects" 
+57  "descriptions"  "Data Objects" 
+58  "languages" "Data Objects" 
+59  "rights"    "Data Objects"
+*/
+
+
 
 		public void EditDataObjects()
 		{

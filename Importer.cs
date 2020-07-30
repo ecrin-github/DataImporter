@@ -39,12 +39,15 @@ namespace DataImporter
 					filler.IdentifyIdenticalStudies();
 					filler.IdentifyEditedStudies();
 					filler.IdentifyDeletedStudies();
+					filler.UpdateFullStudyHash();
 				}
 
 				filler.IdentifyNewDataObjects();
 				filler.IdentifyIdenticalDataObjects();
 				filler.IdentifyEditedDataObjects();
 				filler.IdentifyDeletedDataObjects();
+				filler.UpdateFullObjectHash();
+
 
 				// for studies with status 1, (= new) add these, their attributes,
 				// their data objects, and their 

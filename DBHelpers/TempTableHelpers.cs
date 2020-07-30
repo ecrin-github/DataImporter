@@ -71,18 +71,19 @@ namespace DataImporter
 		}
 
 
-        public void IdentifyEditedStudies()
+		public void IdentifyEditedStudies()
 		{
 			string sql_string = @"INSERT INTO ad.temp_studies (sd_sid, status)
 			SELECT s.sd_sid, 2 from sd.studies s
 			INNER JOIN ad.studies a
-			on s.sd_id = a.sd_id
+			on s.sd_sid = a.sd_sid
             where s.study_full_hash <> a.study_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
 				conn.Execute(sql_string);
 			}
+
 		}
 
 
@@ -91,7 +92,7 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.temp_studies (sd_sid, status)
 				SELECT s.sd_sid, 3 from sd.studies s
 				INNER JOIN ad.studies a
-				on s.sd_id = a.sd_id
+				on s.sd_sid = a.sd_sid
                 where s.study_full_hash = a.study_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
@@ -106,8 +107,27 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.temp_studies(sd_sid, status)
 			SELECT a.sd_sid, 4 from ad.studies a
 			LEFT JOIN sd.studies s
-			on a.sd_id = s.sd_id
+			on a.sd_sid = s.sd_sid
 			WHERE s.sd_id is null;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void UpdateFullStudyHash()
+		{
+			// Also ensure study_full_hash is updated to reflect new value
+			// The study record itself may not have changed, so a study
+			// record update cannot be used to make the edit 
+
+			string sql_string = @"UPDATE ad.studies a
+			  set study_full_hash = s.study_full_hash
+              FROM sd.studies s
+			  WHERE a.sd_sid = a.sd_sid
+              AND s.study_full_hash <> a.study_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
@@ -145,6 +165,10 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
+
+			// ensure object_full_hash is updated to reflect new value
+			// The object record itself may not have changed, so an object
+			// record update cannot be used to make the edit 
 		}
 
 
@@ -172,6 +196,26 @@ namespace DataImporter
 			on a.sd_sid = d.sd_sid
             and a.sd_oid = d.sd_oid
 			WHERE d.sd_oid is null;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void UpdateFullObjectHash()
+		{
+			// Also ensure study_full_hash is updated to reflect new value
+			// The study record itself may not have changed, so a study
+			// record update cannot be used to make the edit 
+
+			string sql_string = @"UPDATE ad.data_objects a
+			  set object_full_hash = s.object_full_hash
+              FROM sd.data_objects s
+			  WHERE a.sd_sid = a.sd_sid
+              AND a.sd_oid = a.sd_oid
+              AND s.object_full_hash <> a.object_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{

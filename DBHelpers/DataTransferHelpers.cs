@@ -32,8 +32,8 @@ namespace DataImporter
 			if (source.has_study_topics) adder.TransferStudyTopics();
 			if (source.has_study_features) adder.TransferStudyFeatures();
 			if (source.has_study_relationships) adder.TransferStudyRelationships();
-			if (source.has_study_links) adder.TransferStudyLinks();
-			if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
+			//if (source.has_study_links) adder.TransferStudyLinks();
+			//if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
 		}
 
 
@@ -122,8 +122,8 @@ namespace DataImporter
 			if (source.has_study_topics) editor.EditStudyTopics();
 			if (source.has_study_features) editor.EditStudyFeatures();
 			if (source.has_study_relationships) editor.EditStudyRelationships();
-			if (source.has_study_links) editor.EditStudyLinks();
-			if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
+			//if (source.has_study_links) editor.EditStudyLinks();
+			//if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
 		}
 
 
