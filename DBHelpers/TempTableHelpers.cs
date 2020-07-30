@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataImporter.DBHelpers
+namespace DataImporter
 {
 	class TempTableCreator
 	{
@@ -14,13 +14,13 @@ namespace DataImporter.DBHelpers
 			db_conn = _db_conn;
 		}
 
-		public void CreateNewStudiesTable()
+
+		public void CreateTempStudiesTable()
 		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_new_studies;
-            CREATE TABLE ad.temp_new_studies(
-                sd_id                  VARCHAR         NOT NULL PRIMARY KEY
-			  , study_hash_id          CHAR(32)        NOT NULL
-              , study_ad_id            INT             NULL
+			string sql_string = @"DROP TABLE IF EXISTS ad.temp_studies;
+            CREATE TABLE ad.temp_studies(
+                sd_sid                 VARCHAR         NOT NULL PRIMARY KEY
+              , status                 INT             NOT NULL
 			);";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
@@ -29,15 +29,13 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
-		public void CreateNewDataObjectsTable()
+		public void CreateTempDataObjectsTable()
 		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_new_data_objects;
-            CREATE TABLE IF NOT EXISTS ad.temp_new_data_objects(
-                sd_id                  VARCHAR         NOT NULL 
-              , do_id                  INT             NOT NULL
-			  , object_hash_id         CHAR(32)        NOT NULL
-              , object_ad_id           INT             NULL,
-              PRIMARY KEY (sd_id, do_id)
+			string sql_string = @"DROP TABLE IF EXISTS ad.temp_data_objects;
+            CREATE TABLE IF NOT EXISTS ad.temp_data_objects(
+                sd_oid                  VARCHAR         NOT NULL PRIMARY KEY
+              , sd_sid                  VARCHAR         NOT NULL
+              , status                  INT             NOT NULL
 			);";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
@@ -46,35 +44,6 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
-		public void CreateMatchedStudiesTable()
-		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_matched_studies;
-            CREATE TABLE IF NOT EXISTS ad.temp_matched_studies(
-                sd_id                  VARCHAR         NOT NULL PRIMARY KEY
-			  , study_hash_id          CHAR(32)        NOT NULL
-              , study_ad_id            INT             NULL
-			);";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void CreateMissingStudiesTable()
-		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_missing_studies;     
-            CREATE TABLE IF NOT EXISTS ad.temp_missing_studies(
-                sd_id                  VARCHAR         NOT NULL PRIMARY KEY
-			  , study_hash_id          CHAR(32)        NOT NULL
-              , study_ad_id            INT             NULL
-			);";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
 	}
 
 
@@ -87,13 +56,13 @@ namespace DataImporter.DBHelpers
 			db_conn = _db_conn;
 		}
 
-		public void FillNewStudiesTable()
+		public void IdentifyNewStudies()
 		{
-			string sql_string = @"INSERT INTO ad.temp_new_studies (sd_id, study_hash_id)
-            SELECT s.sd_id, s.hash_id from sd.studies s
+			string sql_string = @"INSERT INTO ad.temp_studies (sd_sid, status)
+            SELECT s.sd_sid, 1 from sd.studies s
             LEFT JOIN ad.studies a
-            on s.sd_id = a.sd_id 
-            WHERE a.sd_id is null;";
+            on s.sd_sid = a.sd_sid 
+            WHERE a.sd_sid is null;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
@@ -101,15 +70,14 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
-		public void FillNewDataObjectsTable()
+
+        public void IdentifyEditedStudies()
 		{
-			string sql_string = @"INSERT INTO ad.temp_new_data_objects(sd_id, do_id, object_hash_id)
-			SELECT d.sd_id, d.do_id, d.object_hash_id from sd.studies s
-			LEFT JOIN ad.studies a
+			string sql_string = @"INSERT INTO ad.temp_studies (sd_sid, status)
+			SELECT s.sd_sid, 2 from sd.studies s
+			INNER JOIN ad.studies a
 			on s.sd_id = a.sd_id
-            INNER JOIN sd.data_objects d
-            on s.sd_id = d.sd_id
-			WHERE a.sd_id is null;";
+            where s.study_full_hash <> a.study_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
@@ -117,23 +85,26 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
-		public void FillMatchedStudiesTable()
+
+		public void IdentifyIdenticalStudies()
 		{
-			string sql_string = @"INSERT INTO ad.temp_matched_studies (sd_id, study_hash_id)
-            SELECT s.sd_id, s.hash_id from sd.studies s
-            INNER JOIN ad.studies a
-            on s.sd_id = a.sd_id;";
+			string sql_string = @"INSERT INTO ad.temp_studies (sd_sid, status)
+				SELECT s.sd_sid, 3 from sd.studies s
+				INNER JOIN ad.studies a
+				on s.sd_id = a.sd_id
+                where s.study_full_hash = a.study_full_hash;";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
 				conn.Execute(sql_string);
 			}
 		}
+		
 
-		public void FillMissingStudiesTable()
+		public void IdentifyDeletedStudies()
 		{
-			string sql_string = @"INSERT INTO ad.temp_missing_studies(sd_id, study_hash_id)
-			SELECT a.sd_id, a.hash_id from ad.studies a
+			string sql_string = @"INSERT INTO ad.temp_studies(sd_sid, status)
+			SELECT a.sd_sid, 4 from ad.studies a
 			LEFT JOIN sd.studies s
 			on a.sd_id = s.sd_id
 			WHERE s.sd_id is null;";
@@ -144,6 +115,69 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
+
+		public void IdentifyNewDataObjects()
+		{
+			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
+			SELECT d.sd_oid, d.do_oid, 1 from sd.data_objects d
+			LEFT JOIN ad.data_objects a
+			on d.sd_sid = a.sd_sid
+            and d.sd_oid = a.sd_oid
+			WHERE a.sd_oid is null;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void IdentifyEditedDataObjects()
+		{
+			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
+				SELECT d.sd_oid, d.do_oid, 2 from sd.data_objects d
+				INNER JOIN ad.data_objects a
+				on d.sd_sid = a.sd_sid
+                and d.sd_oid = a.sd_oid
+                WHERE d.object_full_hash <> a.object_full_hash;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void IdentifyIdenticalDataObjects()
+		{
+			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
+				SELECTd.sd_oid, d.do_oid, 3 from sd.data_objects d
+				INNER JOIN ad.data_objects a
+				on d.sd_sid = a.sd_sid
+                and d.sd_oid = a.sd_oid
+                WHERE d.object_full_hash = a.object_full_hash;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void IdentifyDeletedDataObjects()
+		{
+			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
+			SELECT a.sd_oid, a.do_oid, 4 from ad.data_objects a
+			LEFT JOIN sd.data_objects d
+			on a.sd_sid = d.sd_sid
+            and a.sd_oid = d.sd_oid
+			WHERE d.sd_oid is null;";
+
+			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
 	}
 
 
@@ -156,36 +190,18 @@ namespace DataImporter.DBHelpers
 			db_conn = _db_conn;
 		}
 
-		public void DeleteNewStudiesTable()
+		public void DeleteTempStudiesTable()
 		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_new_studies;";
+			string sql_string = @"DROP TABLE IF EXISTS ad.temp_studies;";
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
 				conn.Execute(sql_string);
 			}
 		}
 
-		public void DeleteNewDataObjectsTable()
-		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_new_data_objects;";
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void DeleteMatchedStudiesTable()
-		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_matched_studies;";
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void DeleteMissingStudiesTable()
-		{
-			string sql_string = @"DROP TABLE IF EXISTS ad.temp_missing_studies;";
+		public void TempDataObjectsTable()
+{
+			string sql_string = @"DROP TABLE IF EXISTS ad.temp_data_objects;";
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
 				conn.Execute(sql_string);

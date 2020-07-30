@@ -6,19 +6,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.35" />
-    <PackageReference Include="Dapper.Contrib" Version="2.0.35" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.4" />
-    <PackageReference Include="Npgsql" Version="4.1.3.1" />
-    <PackageReference Include="PostgreSQLCopyHelper" Version="2.6.3" />
+    <Compile Remove="CTG\**" />
+    <Compile Remove="EuCTR\**" />
+    <Compile Remove="ISRCTN\**" />
+    <Compile Remove="PubMed\**" />
+    <EmbeddedResource Remove="CTG\**" />
+    <EmbeddedResource Remove="EuCTR\**" />
+    <EmbeddedResource Remove="ISRCTN\**" />
+    <EmbeddedResource Remove="PubMed\**" />
+    <None Remove="CTG\**" />
+    <None Remove="EuCTR\**" />
+    <None Remove="ISRCTN\**" />
+    <None Remove="PubMed\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EuCTR\" />
-    <Folder Include="CTG\" />
-    <Folder Include="ISRCTN\" />
-    <Folder Include="PubMed\" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="Dapper" Version="2.0.35" />
+    <PackageReference Include="Dapper.Contrib" Version="2.0.35" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
+    <PackageReference Include="Npgsql" Version="4.1.4" />
+    <PackageReference Include="PostgreSQLCopyHelper" Version="2.6.3" />
   </ItemGroup>
 
   <ItemGroup>

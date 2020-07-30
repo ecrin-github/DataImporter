@@ -1,16 +1,13 @@
 ﻿using Dapper;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace DataImporter.DBHelpers
+namespace DataImporter
 {
-    public class StudyADTableDroppers
+    public class StudyTableDroppers
     {
 		string db_conn;
 
-		public StudyADTableDroppers(string _db_conn)
+		public StudyTableDroppers(string _db_conn)
 		{
 			db_conn = _db_conn;
 		}
@@ -60,6 +57,15 @@ namespace DataImporter.DBHelpers
 			}
 		}
 
+		public void drop_table_study_features()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.study_features;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
 		public void drop_table_study_relationships()
 		{
 			string sql_string = @"DROP TABLE IF EXISTS ad.study_relationships;";
@@ -86,13 +92,32 @@ namespace DataImporter.DBHelpers
 				conn.Execute(sql_string);
 			}
 		}
+
+		public void drop_table_study_links()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.study_links;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_study_ipd_available()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.study_ipd_available;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
 	}
 
-	public class ObjectADTableDroppers
+
+	public class ObjectTableDroppers
 	{
 		string db_conn;
 
-		public ObjectADTableDroppers(string _db_conn)
+		public ObjectTableDroppers(string _db_conn)
 		{
 			db_conn = _db_conn;
 		}
@@ -172,6 +197,51 @@ namespace DataImporter.DBHelpers
 		public void drop_table_object_hashes()
 		{
 			string sql_string = @"DROP TABLE IF EXISTS ad.object_hashes;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_object_corrections()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.object_corrections;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_object_descriptions()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.object_descriptions;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_object_links()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.object_links;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_object_identifiers()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.object_identifiers;";
+			using (var conn = new NpgsqlConnection(db_conn))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void drop_table_object_public_types()
+		{
+			string sql_string = @"DROP TABLE IF EXISTS ad.object_public_types;";
 			using (var conn = new NpgsqlConnection(db_conn))
 			{
 				conn.Execute(sql_string);

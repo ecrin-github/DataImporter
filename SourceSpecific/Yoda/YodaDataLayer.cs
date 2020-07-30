@@ -66,81 +66,7 @@ namespace DataImporter.Yoda
 			// }
 		}
 
-		public void DeleteADStudyTables()
-		{
-			StudyADTableDroppers dropper = new StudyADTableDroppers(yoda_connString);
-			dropper.drop_table_studies();
-			dropper.drop_table_study_identifiers();
-			dropper.drop_table_study_titles();
-			dropper.drop_table_study_contributors();
-			dropper.drop_table_study_topics();
-			dropper.drop_table_study_references();
-			dropper.drop_table_study_hashes();
-		}
-
-		public void DeleteADObjectTables()
-		{
-			ObjectADTableDroppers dropper = new ObjectADTableDroppers(yoda_connString);
-			dropper.drop_table_data_objects();
-			dropper.drop_table_dataset_properties();
-			dropper.drop_table_object_instances();
-			dropper.drop_table_object_titles();
-			dropper.drop_table_object_hashes();
-			dropper.drop_table_object_languages();
-		}
-
-		public void BuildNewADStudyTables()
-		{
-			StudyTableBuildersAD builder = new StudyTableBuildersAD(yoda_connString);
-			builder.create_table_studies(source_id);
-			builder.create_table_study_identifiers();
-			builder.create_table_study_titles();
-			builder.create_table_study_topics();
-			builder.create_table_study_contributors();
-			builder.create_table_study_references();
-			builder.create_table_study_hashes();
-		}
-
-
-		public void BuildNewADObjectTables()
-		{
-			ObjectTableBuildersAD builder = new ObjectTableBuildersAD(yoda_connString);
-			builder.create_table_data_objects(source_id);
-			builder.create_table_dataset_properties();
-			builder.create_table_object_instances();
-			builder.create_table_object_titles();
-			builder.create_table_object_languages();
-			builder.create_table_object_hashes();
-		}
-
-
-		// get listing of local file paths
-		public IEnumerable<string> FetchFilePaths(int source_id)
-		{
-			using (NpgsqlConnection Conn = new NpgsqlConnection(_mon_connString))
-			{
-				string sql_string = "select local_path ";
-				sql_string += " from sf.source_data_studies ";
-				sql_string += " where source_id = " + source_id.ToString();
-				sql_string += " and local_path is not null";
-				sql_string += " order by local_path";
-				return Conn.Query<string>(sql_string);
-			}
-		}
-
-		// get record of interest
-		public FileRecord FetchFileRecord(string sd_id, int source_id)
-		{
-			using (NpgsqlConnection Conn = new NpgsqlConnection(_mon_connString))
-			{
-				string sql_string = "select id, source_id, sd_id, remote_url, last_sf_id, last_revised, ";
-				sql_string += " assume_complete, download_status, download_datetime, local_path ";
-				sql_string += " from sf.source_data_studies ";
-				sql_string += " where sd_id = '" + sd_id + "' and source_id = " + source_id.ToString();
-				return Conn.Query<FileRecord>(sql_string).FirstOrDefault();
-			}
-		}
-
+		
 
 		public void StoreStudy(StudyInDB st_db)
 		{
@@ -252,55 +178,7 @@ namespace DataImporter.Yoda
 			}
 		}
 
-		public void SetupTempTables()
-		{
-			TempTableCreator table_creator = new TempTableCreator(yoda_connString);
-			table_creator.CreateNewStudiesTable();
-			table_creator.CreateNewDataObjectsTable();
-			table_creator.CreateMatchedStudiesTable();
-			table_creator.CreateMissingStudiesTable();
 
-			TempTableFiller filler = new TempTableFiller(yoda_connString);
-			filler.FillNewStudiesTable();
-			filler.FillNewDataObjectsTable();
-			filler.FillMatchedStudiesTable();
-			filler.FillMissingStudiesTable();
-		}
-
-
-		public void TransferStudies()
-		{
-			NewStudiesTransferrer transferrer = new NewStudiesTransferrer(yoda_connString);
-			transferrer.TransferStudies();
-			transferrer.UpdateWithADIDs();
-			transferrer.TransferStudyIdentifiers();
-			transferrer.TransferStudyTitles();
-			transferrer.TransferStudyReferences();
-			transferrer.TransferStudyContributors();
-			transferrer.TransferStudyTopics();
-			transferrer.TransferStudyHashes();
-		}
-
-		public void TransferDataObjects()
-		{
-			NewDataObjectsTransferrer transferrer = new NewDataObjectsTransferrer(yoda_connString);
-			transferrer.TransferDataObjects();
-			transferrer.UpdateWithADIDs();
-			transferrer.TransferDataSetProperties();
-			transferrer.TransferObjectInstances();
-			transferrer.TransferObjectTitles();
-			transferrer.TransferObjectLanguages();
-			transferrer.TransferObjectHashes();
-		}
-
-		public void DeleteTempTables()
-		{
-			TempTableDropper dropper = new TempTableDropper(yoda_connString);
-			dropper.DeleteNewStudiesTable();
-			dropper.DeleteNewDataObjectsTable();
-			dropper.DeleteMatchedStudiesTable();
-			dropper.DeleteMissingStudiesTable();
-		}
 
 	}
 

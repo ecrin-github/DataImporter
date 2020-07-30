@@ -64,51 +64,6 @@ namespace DataImporter.BioLincc
 			//	  "folder_base": "C:\\MDR JSON\\Object JSON... "
 			// }
 		}
-
-		public void DeleteADStudyTables()
-		{
-			StudyADTableDroppers dropper = new StudyADTableDroppers(biolincc_connString);
-			dropper.drop_table_studies();
-			dropper.drop_table_study_identifiers();
-			dropper.drop_table_study_titles();
-			dropper.drop_table_study_references();
-			dropper.drop_table_study_hashes();
-		}
-
-		public void DeleteADObjectTables()
-		{
-			ObjectADTableDroppers dropper = new ObjectADTableDroppers(biolincc_connString);
-			dropper.drop_table_data_objects();
-			dropper.drop_table_dataset_properties();
-			dropper.drop_table_object_dates();
-			dropper.drop_table_object_instances();
-			dropper.drop_table_object_titles();
-			dropper.drop_table_object_hashes();
-			dropper.drop_table_object_languages();
-		}
-
-		public void BuildNewADStudyTables()
-		{
-			StudyTableBuildersAD builder = new StudyTableBuildersAD(biolincc_connString);
-			builder.create_table_studies(source_id);
-			builder.create_table_study_identifiers();
-			builder.create_table_study_references();
-			builder.create_table_study_titles();
-			builder.create_table_study_hashes();
-		}
-
-
-		public void BuildNewADObjectTables()
-		{
-			ObjectTableBuildersAD builder = new ObjectTableBuildersAD(biolincc_connString);
-			builder.create_table_data_objects(source_id);
-			builder.create_table_dataset_properties();
-			builder.create_table_object_dates();
-			builder.create_table_object_instances();
-			builder.create_table_object_titles();
-			builder.create_table_object_languages();
-			builder.create_table_object_hashes();
-		}
 			
 
 		public ObjectTypeDetails FetchDocTypeDetails(string doc_name)
@@ -236,53 +191,7 @@ namespace DataImporter.BioLincc
 		}
 
 
-		public void SetupTempTables()
-		{
-			TempTableCreator table_creator = new TempTableCreator(biolincc_connString);
-			table_creator.CreateNewStudiesTable();
-			table_creator.CreateNewDataObjectsTable();
-			table_creator.CreateMatchedStudiesTable();
-			table_creator.CreateMissingStudiesTable();
 
-			TempTableFiller filler = new TempTableFiller(biolincc_connString);
-			filler.FillNewStudiesTable();
-			filler.FillNewDataObjectsTable();
-			filler.FillMatchedStudiesTable();
-			filler.FillMissingStudiesTable();
-		}
-
-		public void TransferStudies()
-		{
-			NewStudiesTransferrer transferrer = new NewStudiesTransferrer(biolincc_connString);
-			transferrer.TransferStudies();
-			transferrer.UpdateWithADIDs();
-			transferrer.TransferStudyIdentifiers();
-			transferrer.TransferStudyTitles();
-			transferrer.TransferStudyReferences();
-			transferrer.TransferStudyHashes();
-		}
-
-		public void TransferDataObjects()
-		{
-			NewDataObjectsTransferrer transferrer = new NewDataObjectsTransferrer(biolincc_connString);
-			transferrer.TransferDataObjects();
-			transferrer.UpdateWithADIDs();
-			transferrer.TransferDataSetProperties();
-			transferrer.TransferObjectInstances();
-			transferrer.TransferObjectTitles();
-			transferrer.TransferObjectDates();
-			transferrer.TransferObjectLanguages();
-			transferrer.TransferObjectHashes();
-		}
-
-		public void DeleteTempTables()
-		{
-			TempTableDropper dropper = new TempTableDropper(biolincc_connString);
-			dropper.DeleteNewStudiesTable();
-			dropper.DeleteNewDataObjectsTable();
-			dropper.DeleteMatchedStudiesTable();
-			dropper.DeleteMissingStudiesTable();
-		}
 
 	}
 }

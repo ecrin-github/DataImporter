@@ -3,367 +3,168 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataImporter.DBHelpers
+namespace DataImporter
 {
-	class NewStudiesTransferrer
+	class DataTransferrer
 	{
-		string db_conn;
+		string conn_string;
+		Source source;
 
-		public NewStudiesTransferrer(string _db_conn)
+		public DataTransferrer(string _conn_string, Source _source)
 		{
-			db_conn = _db_conn;
+			conn_string = _conn_string;
+			source = _source;
 		}
 
 
-		public void TransferStudies()
-		{
-			string sql_string = @"INSERT INTO ad.studies (sd_id, hash_id, display_title,
-            title_lang_code, brief_description, bd_contains_html, data_sharing_statement,
-            dss_contains_html, study_start_year, study_start_month, study_type_id, 
-            study_status_id, study_enrolment, study_gender_elig_id, min_age, 
-            min_age_units_id, max_age, max_age_units_id, datetime_of_data_fetch,
-            record_hash, study_full_hash)
-            SELECT s.sd_id, s.hash_id, display_title,
-            title_lang_code, brief_description, bd_contains_html, data_sharing_statement,
-            dss_contains_html, study_start_year, study_start_month, study_type_id, 
-            study_status_id, study_enrolment, study_gender_elig_id, min_age, 
-            min_age_units_id, max_age, max_age_units_id, datetime_of_data_fetch,
-            record_hash, study_full_hash 
-            FROM sd.studies s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
+        public void AddNewStudies()
+        {
+			StudyDataAdder adder = new StudyDataAdder(conn_string);
+			adder.TransferStudies();
+			adder.TransferStudyIdentifiers();
+			adder.TransferStudyTitles();
+            adder.TransferStudyHashes();
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
+			// these are database dependent
+		
+			if (source.has_study_references) adder.TransferStudyReferences();
+			if (source.has_study_contributors) adder.TransferStudyContributors();
+			if (source.has_study_topics) adder.TransferStudyTopics();
+			if (source.has_study_features) adder.TransferStudyFeatures();
+			if (source.has_study_relationships) adder.TransferStudyRelationships();
+			if (source.has_study_links) adder.TransferStudyLinks();
+			if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
 		}
 
-		public void UpdateWithADIDs()
+
+		public void AddNewDataObjects()
 		{
-			string sql_string = @"UPDATE ad.temp_new_studies ns
-            SET study_ad_id = a.ad_id
-            FROM ad.studies a
-            WHERE a.sd_id = ns.sd_id;";
+			DataObjectDataAdder adder = new DataObjectDataAdder(conn_string);
+			adder.TransferDataObjects();
+			adder.TransferObjectInstances();
+			adder.TransferObjectTitles();
+			adder.TransferObjectHashes();
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			// these are database dependent		
+
+			if (source.has_dataset_properties) adder.TransferDataSetProperties();
+			if (source.has_object_dates) adder.TransferObjectDates();
+			if (source.has_object_languages) adder.TransferObjectLanguages();
+			if (source.has_object_pubmed_set)
 			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferStudyIdentifiers()
-		{
-			string sql_string = @"INSERT INTO ad.study_identifiers(study_ad_id, study_hash_id, sd_id,
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, identifier_link, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, identifier_link, record_hash
-            FROM sd.study_identifiers s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferStudyTitles()
-		{
-			string sql_string = @"INSERT INTO ad.study_titles(study_ad_id, study_hash_id, sd_id,
-            title_text, title_type_id, title_lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            title_text, title_type_id, title_lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash
-            FROM sd.study_titles s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id"; 
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferStudyReferences()
-		{
-			string sql_string = @"INSERT INTO ad.study_references(study_ad_id, study_hash_id, sd_id,
-            pmid, citation, doi, comments, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            pmid, citation, doi, comments, record_hash
-            FROM sd.study_references s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferStudyContributors()
-		{
-			string sql_string = @"INSERT INTO ad.study_contributors(study_ad_id, study_hash_id, sd_id,
-            contrib_type_id, is_individual, organisation_id, organisation_name,
-            person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            contrib_type_id, is_individual, organisation_id, organisation_name,
-            person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
-            FROM sd.study_contributors s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferStudyTopics()
-		{
-			string sql_string = @"INSERT INTO ad.study_topics(study_ad_id, study_hash_id, sd_id,
-            topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash
-            FROM sd.study_topics s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
+				adder.TransferObjectContributors();
+				adder.TransferObjectTopics();
+				adder.TransferObjectCorrections();
+				adder.TransferObjectDescriptions();
+				adder.TransferObjectIdentifiers();
+				adder.TransferObjectLinks();
+				adder.TransferObjectPublic_types();
 			}
 		}
 
 
-		public void TransferStudyRelationships()
-		{
-			string sql_string = @"INSERT INTO ad.study_relationships(study_ad_id, study_hash_id, sd_id,
-            relationship_type_id, target_sd_id, record_hash)
-            SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            relationship_type_id, target_sd_id, record_hash
-            FROM sd.study_relationships s
-            INNER JOIN ad.temp_new_studies ns
-            ON s.sd_id = ns.sd_id";
+	    public void UpdateDateOfStudyData()
+        {
+			string sql_string = @"with t as (   
+              select s.sd_sid, s.datetime_of_data_fetch 
+              from sd.studies s
+              inner join ad.temp_studies ts
+              on s.sd_sid  = ts.sd_sid
+              where ts.status in (2,3)  )
+          update ad.studies 
+          set datetime_of_data_fetch = t.datetime_of_data_fetch
+          from t
+          where sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(conn_string))
 			{
 				conn.Execute(sql_string);
 			}
 
-			// needs the target ad_id to be updated too...
-			sql_string = @"Update ad.study_relationships r
-            SET target_ad_id = a.ad_id
-            FROM ad.studies a
-            WHERE r.target_sd_id = a.sd_id;";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
 		}
 
 
-		public void TransferStudyFeatures()
-		{
-			string sql_string = @"INSERT INTO ;";
+		public void UpdateDateOfDataObjectData()
+        {
+			string sql_string = @"with t as (   
+              select d.sd_oid, d.sd_sid, d.datetime_of_data_fetch 
+              from sd.data_objects d
+              inner join ad.temp_data_objects td
+              on d.sd_oid  = td.sd_oid
+              and d.sd_sid  = td.sd_sid
+              where td.status in (2,3)  )
+          update ad.data_objects 
+          set datetime_of_data_fetch = t.datetime_of_data_fetch
+          from t
+          where sd_oid = t.sd_oid
+          and sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(conn_string))
 			{
 				conn.Execute(sql_string);
 			}
+
+
 		}
 
 
-		public void TransferStudyHashes()
+		public void UpdateEditedStudyData()
 		{
-			string sql_string = @"INSERT INTO ad.study_hashes(study_ad_id, study_hash_id, sd_id,
-			hash_type_id, composite_hash)
-			SELECT ns.study_ad_id, ns.study_hash_id, ns.sd_id, 
-            hash_type_id, composite_hash
-			FROM sd.study_hashes s
-			INNER JOIN ad.temp_new_studies ns
-			ON s.sd_id = ns.sd_id";
+			StudyDataEditor editor = new StudyDataEditor(conn_string);
+			editor.EditStudies();
+			editor.EditStudyIdentifiers();
+			editor.EditStudyTitles();
+			editor.EditStudyHashes();
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			// these are database dependent
+			if (source.has_study_references) editor.EditStudyReferences();
+			if (source.has_study_contributors) editor.EditStudyContributors();
+			if (source.has_study_topics) editor.EditStudyTopics();
+			if (source.has_study_features) editor.EditStudyFeatures();
+			if (source.has_study_relationships) editor.EditStudyRelationships();
+			if (source.has_study_links) editor.EditStudyLinks();
+			if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
+		}
+
+
+		public void UpdateEditedDataObjectData()
+		{
+			DataObjectDataEditor editor = new DataObjectDataEditor(conn_string);
+			editor.EditDataObjects();
+			editor.EditObjectInstances();
+			editor.EditObjectTitles();
+			editor.EditObjectHashes();
+
+			// these are database dependent		
+
+			if (source.has_dataset_properties) editor.EditDataSetProperties();
+			if (source.has_object_dates) editor.EditObjectDates();
+			if (source.has_object_languages) editor.EditObjectLanguages();
+			if (source.has_object_pubmed_set)
 			{
-				conn.Execute(sql_string);
+				editor.EditObjectContributors();
+				editor.EditObjectTopics();
+				editor.EditObjectCorrections();
+				editor.EditObjectDescriptions();
+				editor.EditObjectIdentifiers();
+				editor.EditObjectLinks();
+				editor.EditObjectPublic_types();
 			}
-		}
-	}
 
-
-	class NewDataObjectsTransferrer
-	{
-		string db_conn;
-
-		public NewDataObjectsTransferrer(string _db_conn)
-		{
-			db_conn = _db_conn;
 		}
 
 
-		public void TransferDataObjects()
+		public void RemoveDeletedStudyData()
 		{
-			string sql_string = @"INSERT INTO ad.data_objects(study_ad_id, object_hash_id, 
-            study_hash_id, sd_id, do_id, display_title, doi, doi_status_id, publication_year,
-            object_class_id, object_type_id, managing_org_id, managing_org, access_type_id,
-            access_details, access_details_url, url_last_checked, add_study_contribs,
-            add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash)
-            SELECT s.ad_id, nd.object_hash_id, 
-            study_hash_id, nd.sd_id, nd.do_id, d.display_title, doi, doi_status_id, publication_year,
-            object_class_id, object_type_id, managing_org_id, managing_org, access_type_id,
-            access_details, access_details_url, url_last_checked, add_study_contribs,
-            add_study_topics, d.datetime_of_data_fetch, d.record_hash, object_full_hash
-            FROM sd.data_objects d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id
-            INNER JOIN ad.studies s
-            ON d.sd_id = s.sd_id";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
 
-		public void UpdateWithADIDs()
-		{
-			string sql_string = @"UPDATE ad.temp_new_data_objects nd
-            SET object_ad_id = d.ad_id
-            FROM ad.data_objects d
-            WHERE nd.sd_id = d.sd_id
-            AND nd.do_id = d.do_id;";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
 		}
 
 
-		public void TransferDataSetProperties()
+		public void RemoveDeletedDataObjectData()
 		{
-			string sql_string = @"INSERT INTO ad.dataset_properties(object_ad_id, object_hash_id, 
-            sd_id, do_id, record_keys_type_id, record_keys_details, identifiers_type_id,
-            identifiers_details, consents_type_id, consents_details, record_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            nd.sd_id, nd.do_id, record_keys_type_id, record_keys_details, identifiers_type_id,
-            identifiers_details, consents_type_id, consents_details, record_hash
-            FROM sd.dataset_properties d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferObjectInstances()
-		{
-			string sql_string = @"INSERT INTO ad.object_instances(object_ad_id, object_hash_id, 
-            sd_id, do_id, instance_type_id, repository_org_id, repository_org,
-            url, url_accessible, url_last_checked, resource_type_id,
-            resource_size, resource_size_units, record_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            nd.sd_id, nd.do_id, instance_type_id, repository_org_id, repository_org,
-            url, url_accessible, url_last_checked, resource_type_id,
-            resource_size, resource_size_units, record_hash
-            FROM sd.object_instances d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferObjectTitles()
-		{
-			string sql_string = @"INSERT INTO ad.object_titles(object_ad_id, object_hash_id, 
-            sd_id, do_id, title_text, title_type_id, title_lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            nd.sd_id, nd.do_id, title_text, title_type_id, title_lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash
-            FROM sd.object_titles d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
 
 
-		public void TransferObjectLanguages()
-		{
-			string sql_string = @"INSERT INTO ad.object_languages(object_ad_id, object_hash_id, 
-            sd_id, do_id, lang_code, record_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            nd.sd_id, nd.do_id, lang_code, record_hash
-            FROM sd.object_languages d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-		public void TransferObjectDates()
-		{
-			string sql_string = @"INSERT INTO ad.object_dates(object_ad_id, object_hash_id, 
-            sd_id, do_id, date_type_id, is_date_range, date_as_string, start_year, 
-            start_month, start_day, end_year, end_month, end_day, details, record_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            nd.sd_id, nd.do_id, date_type_id, is_date_range, date_as_string, start_year, 
-            start_month, start_day, end_year, end_month, end_day, details, record_hash
-            FROM sd.object_dates d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-
-		public void TransferObjectHashes()
-		{
-			string sql_string = @"INSERT INTO ad.object_hashes(object_ad_id, object_hash_id, 
-            study_hash_id, sd_id, do_id, hash_type_id, composite_hash)
-            SELECT nd.object_ad_id, nd.object_hash_id, 
-            study_hash_id, nd.sd_id, nd.do_id, hash_type_id, composite_hash
-            FROM sd.object_hashes d
-            INNER JOIN ad.temp_new_data_objects nd
-            ON d.sd_id = nd.sd_id
-            AND d.do_id = nd.do_id";
-
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
-			{
-				conn.Execute(sql_string);
-			}
 		}
 
 	}

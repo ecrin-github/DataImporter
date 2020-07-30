@@ -1,8 +1,7 @@
-﻿using System;
-using DataImporter.Yoda;
-using DataImporter.BioLincc;
-using static System.Console;
-using System.Security.Cryptography.X509Certificates;
+﻿using static System.Console;
+using CommandLine;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DataImporter
 {
@@ -10,86 +9,59 @@ namespace DataImporter
 	{
 		static void Main(string[] args)
 		{
-			bool create_tables = false;
-			int source_id = 0;
+			var parsedArguments = Parser.Default.ParseArguments<Options>(args)
+			.WithParsed(RunOptions)
+			.WithNotParsed(HandleParseError);
+		}
 
-			if (args.Length == 0 && args.Length > 2)
+
+		private static void RunOptions(Options opts)
+		{
+			LoggingDataLayer logging_repo = new LoggingDataLayer();
+			Importer imp = new Importer();
+
+			if (opts.source_ids.Count() > 0)
 			{
-				WriteLine("sorry - one or two parameters are necessary");
-				WriteLine("The first a string to indicate the source");
-				WriteLine("The second either 0 or 1 to indicate whether tables need to be recreated");
-			}
-			else
-			{
-				string source = args[0];
-				switch (source.ToLower()[0])
+				foreach (int source_id in opts.source_ids)
 				{
-					case 'b':
-						{
-							source_id = 100900; break; // biolincc
-						}
-					case 'y':
-						{
-							source_id = 100901; break; // yoda
-						}
-				}
-
-				if (source_id == 0)
-				{
-					WriteLine("sorry - I don't recognise that source argument");
-				}
-
-				if (args.Length == 2)
-				{
-					string table_create = args[1];
-					// should be '0' or '1'
-					// to indicate create new ad tables use 1 
-					// default is 0, leave files as they are!
-					if (table_create == "1")
+					Source source = logging_repo.FetchSourceParameters(source_id);
+					if (source == null)
 					{
-						create_tables = true; // recreate tables
+						WriteLine("Sorry - the first argument does not correspond to a known source");
+					}
+					else
+					{
+						imp.Import(source, opts.build_tables);
 					}
 				}
 			}
+		}
 
-
-			// proceed if both required parameters are valid
-			if (source_id > 0)
-			{
-				DataLayer repo = new DataLayer();
-
-				switch (source_id)
-				{
-					case 100900:
-						{
-							BioLinccController biolincc_controller = new BioLinccController(repo, source_id);
-							if (create_tables) 
-							{
-								biolincc_controller.DropADTables(); 
-							}
-							biolincc_controller.EstablishNewADTables();
-							biolincc_controller.SetupTempTables();
-							biolincc_controller.AddNewStudies();
-							biolincc_controller.LoopThroughMatchedStudies();
-							biolincc_controller.DeleteTempTables();
-							break;
-						}
-					case 100901:
-						{
-							YodaController yoda_controller = new YodaController(repo, source_id);
-							if (create_tables) 
-							{
-								yoda_controller.DropADTables(); 
-							}
-							yoda_controller.EstablishNewADTables();
-							yoda_controller.SetupTempTables();
-							yoda_controller.AddNewStudies();
-							yoda_controller.LoopThroughMatchedStudies();
-							yoda_controller.DeleteTempTables();
-							break;
-						}
-				}
-			}
+		private static void HandleParseError(IEnumerable<Error> errs)
+		{
+			// handle errors
 		}
 	}
+
+
+	public class Options
+    {
+	// Lists the command line arguments and options
+
+	[Option('s', "source_ids", Required = true, Separator = ',', HelpText = "Comma separated list of Integer ids of data sources.")]
+	public IEnumerable<int> source_ids { get; set; }
+
+	
+	[Option('T', "build tables", Required = false, HelpText = "If present, forces the (re)creation of a new set of ad tables")]
+	public bool build_tables { get; set; }
+
+	/*
+    [Option('t', "harvest_type_id", Required = true, HelpText = "Integer representing type of harvest (1 = full, 2 = with cutoff date, 3 = incomplete files only).")]
+	public int harvest_type_id { get; set; }
+
+	[Option('d', "cutoff_date", Required = false, HelpText = "Only data revised or added since this date will be considered")]
+	public string cutoff_date { get; set; }
+	*/
+
+   }
 }
