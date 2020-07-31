@@ -21,12 +21,19 @@ namespace DataImporter
         {
 			StudyDataAdder adder = new StudyDataAdder(conn_string);
 			adder.TransferStudies();
+			Helpers.SendMessage("Added new studies");
+
 			adder.TransferStudyIdentifiers();
+			Helpers.SendMessage("Added new study identifiers");
+
 			adder.TransferStudyTitles();
-            adder.TransferStudyHashes();
+			Helpers.SendMessage("Added new study titles");
+
+			adder.TransferStudyHashes();
+			Helpers.SendMessage("Added new study hashes");
 
 			// these are database dependent
-		
+
 			if (source.has_study_references) adder.TransferStudyReferences();
 			if (source.has_study_contributors) adder.TransferStudyContributors();
 			if (source.has_study_topics) adder.TransferStudyTopics();
@@ -34,6 +41,8 @@ namespace DataImporter
 			if (source.has_study_relationships) adder.TransferStudyRelationships();
 			//if (source.has_study_links) adder.TransferStudyLinks();
 			//if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
+			Helpers.SendMessage("Added new source specific study data");
+
 		}
 
 
@@ -41,9 +50,16 @@ namespace DataImporter
 		{
 			DataObjectDataAdder adder = new DataObjectDataAdder(conn_string);
 			adder.TransferDataObjects();
+			Helpers.SendMessage("Added new data objects");
+
 			adder.TransferObjectInstances();
+			Helpers.SendMessage("Added new object instances");
+
 			adder.TransferObjectTitles();
+			Helpers.SendMessage("Added new object titles");
+
 			adder.TransferObjectHashes();
+			Helpers.SendMessage("Added new object hashes");
 
 			// these are database dependent		
 
@@ -60,6 +76,7 @@ namespace DataImporter
 				adder.TransferObjectLinks();
 				adder.TransferObjectPublic_types();
 			}
+			Helpers.SendMessage("Added new source specific object data");
 		}
 
 

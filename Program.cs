@@ -17,21 +17,19 @@ namespace DataImporter
 
 		private static void RunOptions(Options opts)
 		{
-			LoggingDataLayer logging_repo = new LoggingDataLayer();
-			Importer imp = new Importer();
-
 			if (opts.source_ids.Count() > 0)
 			{
 				foreach (int source_id in opts.source_ids)
 				{
-					Source source = logging_repo.FetchSourceParameters(source_id);
-					if (source == null)
+					DataLayer repo = new DataLayer(source_id);
+					if (repo.Source == null)
 					{
 						WriteLine("Sorry - the first argument does not correspond to a known source");
 					}
 					else
-					{
-						imp.Import(source, opts.build_tables);
+					{   
+						Importer imp = new Importer();
+						imp.Import(repo, opts.build_tables);
 					}
 				}
 			}
