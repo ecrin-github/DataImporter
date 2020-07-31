@@ -18,18 +18,13 @@ namespace DataImporter
 		public void EditStudies()
 		{
 			// if the record hash for the study has changed, then the data in the studies records should be changed
-			// study records will be a subset of those with status 2 in the temp table, 
-			// where the study record_hash in sd is different from the same record_hash in ad
 
 			string sql_string = @"with t as (
 			  select s.*
 			  from sd.studies s
-			  inner join ad.temp_studies ts
-			  on s.sd_sid = ts.sd_sid
-              inner join ad.studies a
-              on ts.sd_sid = a.sd_id
-			  where td.status = 2 
-              and s.record_hash <> a.record_hash
+			  inner join ad.studies a
+              on s.sd_sid = a.sd_sid
+			  where s.record_hash <> a.record_hash
               )
 			  update ad.studies
 			  set
@@ -413,7 +408,8 @@ namespace DataImporter
             set composite_hash = sh.composite_hash
             FROM sd.study_hashes sh
             WHERE ah.sd_sid = sh.sd_sid
-            AND ah.composite_hash = sh.composite_hash";
+            and ah.hash_type_id = sh.hash_type_id
+            AND ah.composite_hash <> sh.composite_hash";
 
 			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
 			{
