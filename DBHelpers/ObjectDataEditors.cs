@@ -7,14 +7,12 @@ namespace DataImporter
 {
 	class DataObjectDataEditor
 	{
-		string db_conn;
+		string connstring;
 
-		public DataObjectDataEditor(string _db_conn)
+		public DataObjectDataEditor(string _connstring)
 		{
-			db_conn = _db_conn;
+            connstring = _connstring;
 		}
-
-
 
 
 		public void EditDataObjects()
@@ -52,7 +50,7 @@ namespace DataImporter
              from t
 			 where sd_oid = t.sd_oid;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -85,7 +83,7 @@ namespace DataImporter
              from t
 			 where sd_oid = t.sd_oid;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -119,7 +117,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -153,7 +151,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -186,7 +184,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -219,7 +217,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -257,7 +255,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -291,7 +289,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_stringD);
                 conn.Execute(sql_stringI);
@@ -324,7 +322,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_stringD);
                 conn.Execute(sql_stringI);
@@ -359,7 +357,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -394,7 +392,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_stringD);
                 conn.Execute(sql_stringI);
@@ -427,7 +425,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_stringD);
                 conn.Execute(sql_stringI);
@@ -460,7 +458,7 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_stringD);
                 conn.Execute(sql_stringI);
@@ -482,7 +480,7 @@ namespace DataImporter
             and ah.hash_type_id = sh.hash_type_id
             AND ah.composite_hash <> sh.composite_hash";
 
-            using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+            using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}

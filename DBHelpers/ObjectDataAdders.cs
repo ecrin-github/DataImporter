@@ -7,11 +7,11 @@ namespace DataImporter
 {
 	class DataObjectDataAdder
 	{
-		string db_conn;
+		string connstring;
 
-		public DataObjectDataAdder(string _db_conn)
+		public DataObjectDataAdder(string _connstring)
 		{
-			db_conn = _db_conn;
+			connstring = _connstring;
 		}
 
 
@@ -32,7 +32,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -52,7 +52,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -73,7 +73,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -92,7 +92,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -110,7 +110,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -129,7 +129,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -152,7 +152,7 @@ namespace DataImporter
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -171,7 +171,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -189,7 +189,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -209,7 +209,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -228,7 +228,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -245,7 +245,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -262,7 +262,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -279,7 +279,7 @@ namespace DataImporter
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}

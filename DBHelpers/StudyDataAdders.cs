@@ -7,11 +7,11 @@ namespace DataImporter
 {
 	class StudyDataAdder
 	{
-		string db_conn;
+		string connstring;
 
-		public StudyDataAdder(string _db_conn)
+		public StudyDataAdder(string _connstring)
 		{
-			db_conn = _db_conn;
+			connstring = _connstring;
 		}
 
 
@@ -34,7 +34,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -53,7 +53,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -72,7 +72,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1"; 
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -89,7 +89,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -112,7 +112,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -131,7 +131,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -149,7 +149,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -167,7 +167,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -185,7 +185,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -203,7 +203,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -221,7 +221,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}

@@ -7,11 +7,11 @@ namespace DataImporter
 {
 	class TempTableCreator
 	{
-		string db_conn;
+		string connstring;
 
-		public TempTableCreator(string _db_conn)
+		public TempTableCreator(string _connstring)
 		{
-			db_conn = _db_conn;
+			connstring = _connstring;
 		}
 
 
@@ -23,7 +23,7 @@ namespace DataImporter
               , status                 INT             NOT NULL
 			);";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -38,7 +38,7 @@ namespace DataImporter
               , status                  INT             NOT NULL
 			);";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -49,11 +49,11 @@ namespace DataImporter
 
 	class TempTableFiller
 	{
-		string db_conn;
+		string connstring;
 
-		public TempTableFiller(string _db_conn)
+		public TempTableFiller(string _connstring)
 		{
-			db_conn = _db_conn;
+			connstring = _connstring;
 		}
 
 		public void IdentifyNewStudies()
@@ -64,7 +64,7 @@ namespace DataImporter
             on s.sd_sid = a.sd_sid 
             WHERE a.sd_sid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -79,7 +79,7 @@ namespace DataImporter
 			on s.sd_sid = a.sd_sid
             where s.study_full_hash <> a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -95,7 +95,7 @@ namespace DataImporter
 				on s.sd_sid = a.sd_sid
                 where s.study_full_hash = a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -110,7 +110,7 @@ namespace DataImporter
 			on a.sd_sid = s.sd_sid
 			WHERE s.sd_id is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -129,7 +129,7 @@ namespace DataImporter
 			  WHERE a.sd_sid = a.sd_sid
               AND s.study_full_hash <> a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -145,7 +145,7 @@ namespace DataImporter
             and d.sd_oid = a.sd_oid
 			WHERE a.sd_oid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -161,7 +161,7 @@ namespace DataImporter
                 and d.sd_oid = a.sd_oid
                 WHERE d.object_full_hash <> a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -181,7 +181,7 @@ namespace DataImporter
                 and d.sd_oid = a.sd_oid
                 WHERE d.object_full_hash = a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -197,7 +197,7 @@ namespace DataImporter
             and a.sd_oid = d.sd_oid
 			WHERE d.sd_oid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -217,7 +217,7 @@ namespace DataImporter
               AND a.sd_oid = a.sd_oid
               AND s.object_full_hash <> a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -227,17 +227,17 @@ namespace DataImporter
 
 	class TempTableDropper
 	{
-		string db_conn;
+		string connstring;
 
-		public TempTableDropper(string _db_conn)
+		public TempTableDropper(string _connstring)
 		{
-			db_conn = _db_conn;
+			connstring = _connstring;
 		}
 
 		public void DeleteTempStudiesTable()
 		{
 			string sql_string = @"DROP TABLE IF EXISTS ad.temp_studies;";
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -246,7 +246,7 @@ namespace DataImporter
 		public void TempDataObjectsTable()
 {
 			string sql_string = @"DROP TABLE IF EXISTS ad.temp_data_objects;";
-			using (var conn = new Npgsql.NpgsqlConnection(db_conn))
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
