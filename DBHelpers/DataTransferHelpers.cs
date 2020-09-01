@@ -161,8 +161,8 @@ namespace DataImporter
 			if (source.has_study_topics) editor.EditStudyTopics();
 			if (source.has_study_features) editor.EditStudyFeatures();
 			if (source.has_study_relationships) editor.EditStudyRelationships();
-			//if (source.has_study_links) editor.EditStudyLinks();
-			//if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
+			if (source.has_study_links) editor.EditStudyLinks();
+			if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
 
 			editor.UpdateStudiesLastImportedDate(import_id, source.id);
 		}
@@ -199,24 +199,53 @@ namespace DataImporter
 
 				editor.UpdateObjectsLastImportedDate(import_id, source.id);
 			}
-
 		}
 
 
 		public void RemoveDeletedStudyData()
 		{
-			StudyDataDeleter deleter = new StudyDataEditor(connString);
+			StudyDataDeleter deleter = new StudyDataDeleter(connString);
+			deleter.DeleteStudies();
+			deleter.DeleteStudyIdentifiers();
+			deleter.DeleteStudyTitles();
+			deleter.DeleteStudyHashes();
 
+			// these are database dependent
+			if (source.has_study_references) deleter.DeleteStudyReferences();
+			if (source.has_study_contributors) deleter.DeleteStudyContributors();
+			if (source.has_study_topics) deleter.DeleteStudyTopics();
+			if (source.has_study_features) deleter.DeleteStudyFeatures();
+			if (source.has_study_relationships) deleter.DeleteStudyRelationships();
+			if (source.has_study_links) deleter.DeleteStudyLinks();
+			if (source.has_study_ipd_available) deleter.DeleteStudyIpdAvailable();
 		}
 
 
 		public void RemoveDeletedDataObjectData()
 		{
 
-			DataObjectDataDeleter deleter = new DataObjectDataEditor(connString);
+			DataObjectDataDeleter deleter = new DataObjectDataDeleter(connString);
+			deleter.DeleteDataObjects();
+			deleter.DeleteObjectInstances();
+			deleter.DeleteObjectTitles();
+			deleter.DeleteObjectHashes();
+
+			// these are database dependent		
+
+			if (source.has_dataset_properties) deleter.DeleteDataSetProperties();
+			if (source.has_object_dates) deleter.DeleteObjectDates();
+			if (source.has_object_languages) deleter.DeleteObjectLanguages();
+			if (source.has_object_pubmed_set)
+			{
+				deleter.DeleteObjectContributors();
+				deleter.DeleteObjectTopics();
+				deleter.DeleteObjectCorrections();
+				deleter.DeleteObjectDescriptions();
+				deleter.DeleteObjectIdentifiers();
+				deleter.DeleteObjectLinks();
+				deleter.DeleteObjectPublic_types();
+			}
 		}
-
-
 	}
 
 }

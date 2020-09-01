@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -52,7 +53,7 @@ namespace DataImporter
 			  where sd_sid = t.sd_sid;";
             
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -61,6 +62,19 @@ namespace DataImporter
 
 		public void UpdateStudiesLastImportedDate(int last_import_id, int source_id)
 		{
+			string sql_string = @"Update sf.source_data_studies s
+            set last_import_id = " + last_import_id.ToString() + @", 
+            last_imported = current_timestamp
+            from ad.temp_studies ts
+            where s.sd_sid = ts.sd_sid and
+            s.source_id = " + source_id.ToString() + @"
+			and ts.status = 2";
+
+
+			using (var conn = new NpgsqlConnection(connstring))
+			{
+				conn.Execute(sql_string);
+			}
 
 		}
 
@@ -95,7 +109,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -136,7 +150,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -173,7 +187,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -214,7 +228,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -252,7 +266,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -288,7 +302,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -324,7 +338,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -360,7 +374,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -396,7 +410,7 @@ namespace DataImporter
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_stringD);
 				conn.Execute(sql_stringI);
@@ -417,7 +431,7 @@ namespace DataImporter
             and ah.hash_type_id = sh.hash_type_id
             AND ah.composite_hash <> sh.composite_hash";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
