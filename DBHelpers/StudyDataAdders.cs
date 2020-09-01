@@ -40,6 +40,25 @@ namespace DataImporter
 			}
 		}
 
+
+		public void UpdateStudiesLastImportedDate(int source_id, int last_import_id)
+        {
+			string sql_string = @"Update sf.source_data_studies s
+            set last_import_id = " + last_import_id.ToString() + @", 
+            last_imported = current_timestamp
+            from ad.temp_studies ts
+            where s.sd_sid = ts.sd_sid
+            s.source_id = " + source_id.ToString() + @"
+			and ts.status = 1";
+
+
+			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			{
+				conn.Execute(sql_string);
+			}
+
+		}
+
 		public void TransferStudyIdentifiers()
 		{
 			string sql_string = @"INSERT INTO ad.study_identifiers(sd_sid,

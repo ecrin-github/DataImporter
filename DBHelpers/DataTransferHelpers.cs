@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,19 +8,30 @@ namespace DataImporter
 {
 	class DataTransferrer
 	{
-		string conn_string;
+		string connString;
 		Source source;
+		ForeignTableManager FTM;
 
-		public DataTransferrer(string _conn_string, Source _source)
+		public DataTransferrer(string _connString, Source _source)
 		{
-			conn_string = _conn_string;
+			connString = _connString;
 			source = _source;
+			ForeignTableManager FTM = new ForeignTableManager(connString);
 		}
 
-
-        public void AddNewStudies()
+		public void EstablishForeignMonTables(string user_name, string password)
         {
-			StudyDataAdder adder = new StudyDataAdder(conn_string);
+			FTM.EstablishMonForeignTables(user_name, password);
+		}
+
+		public void DropForeignMonTables()
+		{
+			FTM.DropMonForeignTables();
+		}
+
+		public void AddNewStudies(int import_id)
+        {
+			StudyDataAdder adder = new StudyDataAdder(connString);
 			adder.TransferStudies();
 			Helpers.SendMessage("Added new studies");
 
@@ -39,16 +51,17 @@ namespace DataImporter
 			if (source.has_study_topics) adder.TransferStudyTopics();
 			if (source.has_study_features) adder.TransferStudyFeatures();
 			if (source.has_study_relationships) adder.TransferStudyRelationships();
-			//if (source.has_study_links) adder.TransferStudyLinks();
-			//if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
+			if (source.has_study_links) adder.TransferStudyLinks();
+			if (source.has_study_ipd_available) adder.TransferStudyIpdAvailable();
 			Helpers.SendMessage("Added new source specific study data");
 
+			adder.UpdateStudiesLastImportedDate(import_id, source.id);
 		}
 
 
-		public void AddNewDataObjects()
+		public void AddNewDataObjects(int import_id)
 		{
-			DataObjectDataAdder adder = new DataObjectDataAdder(conn_string);
+			DataObjectDataAdder adder = new DataObjectDataAdder(connString);
 			adder.TransferDataObjects();
 			Helpers.SendMessage("Added new data objects");
 
@@ -77,57 +90,66 @@ namespace DataImporter
 				adder.TransferObjectPublic_types();
 			}
 			Helpers.SendMessage("Added new source specific object data");
+
+			if (!source.has_study_tables)
+			{
+				// only update the object source data that come without 
+				// associated studies (chiefly PubMed)
+
+				adder.UpdateObjectsLastImportedDate(import_id, source.id);
+			}
 		}
 
 
 	    public void UpdateDateOfStudyData()
         {
-			string sql_string = @"with t as (   
-              select s.sd_sid, s.datetime_of_data_fetch 
-              from sd.studies s
-              inner join ad.temp_studies ts
-              on s.sd_sid  = ts.sd_sid
-              where ts.status in (2,3)  )
-          update ad.studies 
-          set datetime_of_data_fetch = t.datetime_of_data_fetch
-          from t
-          where sd_sid = t.sd_sid";
+			string sql_string = @"with t as 
+            (   
+                select s.sd_sid, s.datetime_of_data_fetch 
+                from sd.studies s
+                inner join ad.temp_studies ts
+                on s.sd_sid  = ts.sd_sid
+                where ts.status in (2,3)  
+            )
+            update ad.studies 
+            set datetime_of_data_fetch = t.datetime_of_data_fetch
+            from t
+            where sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(conn_string))
+			using (var conn = new Npgsql.NpgsqlConnection(connString))
 			{
 				conn.Execute(sql_string);
 			}
-
 		}
 
 
 		public void UpdateDateOfDataObjectData()
         {
-			string sql_string = @"with t as (   
-              select d.sd_oid, d.sd_sid, d.datetime_of_data_fetch 
-              from sd.data_objects d
-              inner join ad.temp_data_objects td
-              on d.sd_oid  = td.sd_oid
-              and d.sd_sid  = td.sd_sid
-              where td.status in (2,3)  )
-          update ad.data_objects 
-          set datetime_of_data_fetch = t.datetime_of_data_fetch
-          from t
-          where sd_oid = t.sd_oid
-          and sd_sid = t.sd_sid";
+			string sql_string = @"with t as 
+            (   
+                select d.sd_oid, d.sd_sid, d.datetime_of_data_fetch 
+                from sd.data_objects d
+                inner join ad.temp_data_objects td
+                on d.sd_oid  = td.sd_oid
+                and d.sd_sid  = td.sd_sid
+                where td.status in (2,3)  
+            )
+            update ad.data_objects 
+            set datetime_of_data_fetch = t.datetime_of_data_fetch
+            from t
+            where sd_oid = t.sd_oid
+            and sd_sid = t.sd_sid";
 
-			using (var conn = new Npgsql.NpgsqlConnection(conn_string))
+			using (var conn = new Npgsql.NpgsqlConnection(connString))
 			{
 				conn.Execute(sql_string);
 			}
-
-
 		}
 
 
-		public void UpdateEditedStudyData()
+		public void UpdateEditedStudyData(int import_id)
 		{
-			StudyDataEditor editor = new StudyDataEditor(conn_string);
+			StudyDataEditor editor = new StudyDataEditor(connString);
 			editor.EditStudies();
 			editor.EditStudyIdentifiers();
 			editor.EditStudyTitles();
@@ -141,12 +163,14 @@ namespace DataImporter
 			if (source.has_study_relationships) editor.EditStudyRelationships();
 			//if (source.has_study_links) editor.EditStudyLinks();
 			//if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
+
+			editor.UpdateStudiesLastImportedDate(import_id, source.id);
 		}
 
 
-		public void UpdateEditedDataObjectData()
+		public void UpdateEditedDataObjectData(int import_id)
 		{
-			DataObjectDataEditor editor = new DataObjectDataEditor(conn_string);
+			DataObjectDataEditor editor = new DataObjectDataEditor(connString);
 			editor.EditDataObjects();
 			editor.EditObjectInstances();
 			editor.EditObjectTitles();
@@ -168,12 +192,20 @@ namespace DataImporter
 				editor.EditObjectPublic_types();
 			}
 
+			if (!source.has_study_tables)
+			{
+				// only update the object source data that come without 
+				// associated studies (chiefly PubMed)
+
+				editor.UpdateObjectsLastImportedDate(import_id, source.id);
+			}
+
 		}
 
 
 		public void RemoveDeletedStudyData()
 		{
-
+			StudyDataDeleter deleter = new StudyDataEditor(connString);
 
 		}
 
@@ -181,8 +213,9 @@ namespace DataImporter
 		public void RemoveDeletedDataObjectData()
 		{
 
-
+			DataObjectDataDeleter deleter = new DataObjectDataEditor(connString);
 		}
+
 
 	}
 

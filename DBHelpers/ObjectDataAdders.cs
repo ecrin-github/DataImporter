@@ -39,6 +39,13 @@ namespace DataImporter
 		}
 
 
+		public void UpdateObjectsLastImportedDate(int last_import_id, int source_id)
+		{
+
+
+		}
+
+
 		public void TransferDataSetProperties()
 		{
 			string sql_string = @"INSERT INTO ad.dataset_properties(sd_oid, 

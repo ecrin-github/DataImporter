@@ -1,11 +1,9 @@
 ﻿using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Npgsql;
 
 namespace DataImporter
 {
-	class TempTableCreator
+    class TempTableCreator
 	{
 		string connstring;
 
@@ -13,7 +11,6 @@ namespace DataImporter
 		{
 			connstring = _connstring;
 		}
-
 
 		public void CreateTempStudiesTable()
 		{
@@ -23,7 +20,7 @@ namespace DataImporter
               , status                 INT             NOT NULL
 			);";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -38,12 +35,11 @@ namespace DataImporter
               , status                  INT             NOT NULL
 			);";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
 		}
-
 	}
 
 
@@ -64,7 +60,7 @@ namespace DataImporter
             on s.sd_sid = a.sd_sid 
             WHERE a.sd_sid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -79,7 +75,7 @@ namespace DataImporter
 			on s.sd_sid = a.sd_sid
             where s.study_full_hash <> a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -95,12 +91,12 @@ namespace DataImporter
 				on s.sd_sid = a.sd_sid
                 where s.study_full_hash = a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
 		}
-		
+
 
 		public void IdentifyDeletedStudies()
 		{
@@ -110,7 +106,7 @@ namespace DataImporter
 			on a.sd_sid = s.sd_sid
 			WHERE s.sd_id is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -129,7 +125,7 @@ namespace DataImporter
 			  WHERE a.sd_sid = a.sd_sid
               AND s.study_full_hash <> a.study_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -145,7 +141,7 @@ namespace DataImporter
             and d.sd_oid = a.sd_oid
 			WHERE a.sd_oid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -161,7 +157,7 @@ namespace DataImporter
                 and d.sd_oid = a.sd_oid
                 WHERE d.object_full_hash <> a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -181,7 +177,7 @@ namespace DataImporter
                 and d.sd_oid = a.sd_oid
                 WHERE d.object_full_hash = a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -197,7 +193,7 @@ namespace DataImporter
             and a.sd_oid = d.sd_oid
 			WHERE d.sd_oid is null;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
@@ -217,9 +213,74 @@ namespace DataImporter
               AND a.sd_oid = a.sd_oid
               AND s.object_full_hash <> a.object_full_hash;";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
+			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
+			}
+		}
+
+
+		public ImportEvent CreateImportEvent(int import_id, Source source, bool count_deleted)
+		{
+			ImportEvent import = new ImportEvent(import_id, source.id);
+			string sql_string = "";
+			if (source.has_study_tables)
+			{
+				sql_string = @"select count(*) from ad.temp_studies where status = 1;";
+				import.num_new_studies = GetScalarDBValue(sql_string);
+
+				sql_string = @"select count(*) from ad.temp_studies where status = 2;";
+				import.num_edited_studies = GetScalarDBValue(sql_string);
+
+				sql_string = @"select count(*) from ad.temp_studies where status = 3;";
+				import.num_unchanged_objects = GetScalarDBValue(sql_string);
+
+				if (count_deleted)
+                {
+					sql_string = @"select count(*) from ad.temp_studies where status = 4;";
+					import.num_deleted_studies = GetScalarDBValue(sql_string);
+				}
+				else
+                {
+					import.num_deleted_studies = 0;
+				}
+			}
+			else
+			{
+				import.num_new_studies = 0;
+				import.num_edited_studies = 0;
+				import.num_unchanged_objects = 0;
+				import.num_deleted_studies = 0;
+			}
+
+			sql_string = @"select count(*) from ad.temp_data_objects where status = 1;";
+			import.num_new_objects = GetScalarDBValue(sql_string);
+
+			sql_string = @"select count(*) from ad.temp_data_objects where status = 2;";
+			import.num_edited_objects = GetScalarDBValue(sql_string);
+
+			sql_string = @"select count(*) from ad.temp_data_objects where status = 3;";
+			import.num_unchanged_objects = GetScalarDBValue(sql_string);
+
+			if (count_deleted)
+			{
+				sql_string = @"select count(*) from ad.temp_data_objects where status = 4;";
+				import.num_deleted_objects = GetScalarDBValue(sql_string);
+			}
+			else
+			{
+				import.num_deleted_objects = 0;
+			}
+
+			return import;
+		}
+
+
+		private int GetScalarDBValue(string sql_string)
+        {
+			using (var Conn = new NpgsqlConnection(connstring))
+			{
+				return Conn.ExecuteScalar<int>(sql_string);
 			}
 		}
 	}

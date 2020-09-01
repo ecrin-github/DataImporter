@@ -59,6 +59,12 @@ namespace DataImporter
 		}
 
 
+		public void UpdateStudiesLastImportedDate(int last_import_id, int source_id)
+		{
+
+		}
+
+
 		public void EditStudyIdentifiers()
 		{
 			// Where the composite hash value indicates that a change has taken place in one or more 
@@ -337,7 +343,7 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = ????
+               WHERE hash_type_id = 18
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
@@ -373,7 +379,7 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = ???
+               WHERE hash_type_id = 19
                AND sh.composite_hash <> ah.composite_hash
             )
             ";

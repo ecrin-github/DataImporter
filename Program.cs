@@ -27,9 +27,10 @@ namespace DataImporter
 						WriteLine("Sorry - the first argument does not correspond to a known source");
 					}
 					else
-					{   
+					{
+						LoggingDataLayer logging_repo = new LoggingDataLayer(); 
 						Importer imp = new Importer();
-						imp.Import(repo, opts.build_tables);
+						imp.Import(repo, logging_repo, opts.build_tables);
 					}
 				}
 			}

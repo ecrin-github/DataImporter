@@ -57,7 +57,13 @@ namespace DataImporter
 		}
 
 
-		public void EditDataSetProperties()
+        public void UpdateObjectsLastImportedDate(int last_import_id, int source_idd)
+        {
+
+        }
+
+
+        public void EditDataSetProperties()
 		{
             // if the record hash for the dataset properties has changed, then 
             // the data should be changed
@@ -305,7 +311,7 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = ???
+               WHERE hash_type_id = 61
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
@@ -373,7 +379,7 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = ???
+               WHERE hash_type_id = 63
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
@@ -408,7 +414,7 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = ???
+               WHERE hash_type_id = 60
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
@@ -441,7 +447,7 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = ???
+               WHERE hash_type_id = 62
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
