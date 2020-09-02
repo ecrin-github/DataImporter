@@ -276,7 +276,7 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
               , record_status_id       INT             NOT NULL default 1
 			);
-            CREATE INDEX study_hashes_sd_id ON ad.study_hashes(sd_id);";
+            CREATE INDEX study_hashes_sd_sid ON ad.study_hashes(sd_sid);";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{

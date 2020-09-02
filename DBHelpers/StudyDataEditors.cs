@@ -27,7 +27,7 @@ namespace DataImporter
               on s.sd_sid = a.sd_sid
 			  where s.record_hash <> a.record_hash
               )
-			  update ad.studies
+			  update ad.studies a
 			  set
 				  display_title = t.display_title,
 				  title_lang_code = t.title_lang_code, 
@@ -38,19 +38,19 @@ namespace DataImporter
 				  study_start_year = t.study_start_year,
 				  study_start_month = t.study_start_month,
 				  study_type_id = t.study_type_id, 
-				  study_status_id = t.study_status_id
+				  study_status_id = t.study_status_id,
 				  study_enrolment = t.study_enrolment, 
 				  study_gender_elig_id = t.study_gender_elig_id, 
 				  min_age = t.min_age, 
 				  min_age_units_id = t.min_age_units_id, 
-				  max_age = t.max_age
+				  max_age = t.max_age,
 				  max_age_units_id = t.max_age_units_id, 
 				  datetime_of_data_fetch = t.datetime_of_data_fetch,
 				  record_hash = t.record_hash,
-				  date_last_edited = " + DateTime.Now.ToString() + @",
-				  status = 2
+				  last_edited_on = current_timestamp,
+				  record_status_id = 2
 			  from t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
             
 
 			using (var conn = new NpgsqlConnection(connstring))
@@ -60,13 +60,13 @@ namespace DataImporter
 		}
 
 
-		public void UpdateStudiesLastImportedDate(int last_import_id, int source_id)
+		public void UpdateStudiesLastImportedDate(int import_id, int source_id)
 		{
-			string sql_string = @"Update sf.source_data_studies s
-            set last_import_id = " + last_import_id.ToString() + @", 
+			string sql_string = @"Update mon_sf.source_data_studies s
+            set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
             from ad.temp_studies ts
-            where s.sd_sid = ts.sd_sid and
+            where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 2";
 
@@ -90,21 +90,22 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 11
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 11
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_identifiers
+			string sql_stringD = sql_string + @"DELETE from ad.study_identifiers a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_identifiers(sd_sid,
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, identifier_link, record_hash)
-            SELECT s.sd_id, 
+            identifier_date, identifier_link, record_hash, record_status_id)
+            SELECT s.sd_sid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, identifier_link, record_hash
+            identifier_date, identifier_link, record_hash, 2
             FROM sd.study_identifiers s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -131,21 +132,22 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 12
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 12
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_titles
+			string sql_stringD = sql_string + @"DELETE from ad.study_titles a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_titles(sd_sid,
             title_text, title_type_id, title_lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash)
-            SELECT s.sd_id, 
+            is_default, comments, comparison_text, record_hash, record_status_id)
+            SELECT s.sd_sid, 
             title_text, title_type_id, title_lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash
+            is_default, comments, comparison_text, record_hash, 2
             FROM sd.study_titles s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -169,23 +171,23 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 17
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 17
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_references
+			string sql_stringD = sql_string + @"DELETE from ad.study_references a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_references(sd_sid,
-            pmid, citation, doi, comments, record_hash)
-            SELECT s.sd_id, 
-            pmid, citation, doi, comments, record_hash
+            pmid, citation, doi, comments, record_hash, record_status_id)
+            SELECT s.sd_sid, 
+            pmid, citation, doi, comments, record_hash, 2
             FROM sd.study_references s
-            INNER JOIN ad.temp_studies t
             INNER JOIN t
-            on s.sd_sid = t.sd_sid";
+            on s.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -205,25 +207,26 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 15
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id= 15
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_contributors
+			string sql_stringD = sql_string + @"DELETE from ad.study_contributors a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_contributors(sd_sid,
              contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
-            SELECT s.sd_id, 
+            affil_org_id_type, record_hash, record_status_id)
+            SELECT s.sd_sid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
+            affil_org_id_type, record_hash, 2
             FROM sd.study_contributors s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -247,21 +250,22 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 14
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 14
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_topics
+			string sql_stringD = sql_string + @"DELETE from ad.study_topics a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_topics(sd_sid,
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash)
-            SELECT s.sd_id, 
+            where_found, record_hash, record_status_id)
+            SELECT s.sd_sid, 
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash
+            where_found, record_hash, 2
             FROM sd.study_topics s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -285,19 +289,20 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 16
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 16
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_relationships
+			string sql_stringD = sql_string + @"DELETE from ad.study_relationships a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_relationships(sd_sid,
-            relationship_type_id, target_sd_id, record_hash)
-            SELECT s.sd_id, 
-            relationship_type_id, target_sd_id, record_hash
+            relationship_type_id, target_sd_sid, record_hash, record_status_id)
+            SELECT s.sd_sid, 
+            relationship_type_id, target_sd_sid, record_hash, 2
             FROM sd.study_relationships s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -321,19 +326,20 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 13
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 13
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_features
+			string sql_stringD = sql_string + @"DELETE from ad.study_features a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_features(sd_sid,
-            feature_type_id, feature_value_id, record_hash)
-            SELECT s.sd_id, 
-            feature_type_id, feature_value_id, record_hash
+            feature_type_id, feature_value_id, record_hash, record_status_id)
+            SELECT s.sd_sid, 
+            feature_type_id, feature_value_id, record_hash, 2
             FROM sd.study_features s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -357,19 +363,20 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 18
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 18
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_links
+			string sql_stringD = sql_string + @"DELETE from ad.study_links a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_links(sd_sid,
-            link_label, link_url, record_hash)
-            SELECT s.sd_id, 
-            link_label, link_url, record_hash
+            link_label, link_url, record_hash, record_status_id)
+            SELECT s.sd_sid, 
+            link_label, link_url, record_hash, 2
             FROM sd.study_links s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -393,19 +400,20 @@ namespace DataImporter
                sd.study_hashes sh
                INNER JOIN ad.study_hashes ah
                on sh.sd_sid = ah.sd_sid
-               WHERE hash_type_id = 19
+               and sh.hash_type_id = ah.hash_type_id
+               WHERE sh.hash_type_id = 19
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.study_ipd_available
+			string sql_stringD = sql_string + @"DELETE from ad.study_ipd_available a
 			USING t
-			WHERE sd_sid = t.sd_sid; ";
+			WHERE a.sd_sid = t.sd_sid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.study_ipd_available(sd_sid,
-            ipd_id, ipd_type, ipd_url, ipd_comment, record_hash)
-            SELECT s.sd_id, 
-            ipd_id, ipd_type, ipd_url, ipd_comment, record_hash
+            ipd_id, ipd_type, ipd_url, ipd_comment, record_hash, record_status_id)
+            SELECT s.sd_sid, 
+            ipd_id, ipd_type, ipd_url, ipd_comment, record_hash, 2
             FROM sd.study_ipd_available s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";

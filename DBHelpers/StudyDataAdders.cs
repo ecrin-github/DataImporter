@@ -42,13 +42,13 @@ namespace DataImporter
 		}
 
 
-		public void UpdateStudiesLastImportedDate(int source_id, int last_import_id)
+		public void UpdateStudiesLastImportedDate(int import_id, int source_id)
         {
-			string sql_string = @"Update sf.source_data_studies s
-            set last_import_id = " + last_import_id.ToString() + @", 
+			string sql_string = @"Update mon_sf.source_data_studies s
+            set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
             from ad.temp_studies ts
-            where s.sd_sid = ts.sd_sid and
+            where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 1";
 
@@ -65,7 +65,7 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.study_identifiers(sd_sid,
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
             identifier_date, identifier_link, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
             identifier_date, identifier_link, record_hash
             FROM sd.study_identifiers s
@@ -84,7 +84,7 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.study_titles(sd_sid,
             title_text, title_type_id, title_lang_code, lang_usage_id,
             is_default, comments, comparison_text, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             title_text, title_type_id, title_lang_code, lang_usage_id,
             is_default, comments, comparison_text, record_hash
             FROM sd.study_titles s
@@ -102,7 +102,7 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.study_references(sd_sid,
             pmid, citation, doi, comments, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             pmid, citation, doi, comments, record_hash
             FROM sd.study_references s
             INNER JOIN ad.temp_studies ts
@@ -122,7 +122,7 @@ namespace DataImporter
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
             affil_org_id_type, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
@@ -143,7 +143,7 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.study_topics(sd_sid,
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
             where_found, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
             where_found, record_hash
             FROM sd.study_topics s
@@ -161,9 +161,9 @@ namespace DataImporter
 		public void TransferStudyRelationships()
 		{
 			string sql_string = @"INSERT INTO ad.study_relationships(sd_sid,
-            relationship_type_id, target_sd_id, record_hash)
-            SELECT s.sd_id, 
-            relationship_type_id, target_sd_id, record_hash
+            relationship_type_id, target_sd_sid, record_hash)
+            SELECT s.sd_sid, 
+            relationship_type_id, target_sd_sid, record_hash
             FROM sd.study_relationships s
             INNER JOIN ad.temp_studies ts
             ON s.sd_sid = ts.sd_sid
@@ -180,7 +180,7 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.study_features(sd_sid,
 			feature_type_id, feature_value_id, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             feature_type_id, feature_value_id, record_hash
             FROM sd.study_features s
             INNER JOIN ad.temp_studies ts
@@ -198,7 +198,7 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.study_links(sd_sid,
 			link_label, link_url, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             link_label, link_url, record_hash
             FROM sd.study_links s
             INNER JOIN ad.temp_studies ts
@@ -216,7 +216,7 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.study_ipd_available(sd_sid,
 			ipd_id, ipd_type, ipd_url, ipd_comment, record_hash)
-            SELECT s.sd_id, 
+            SELECT s.sd_sid, 
             ipd_id, ipd_type, ipd_url, ipd_comment, record_hash
             FROM sd.study_ipd_available s
             INNER JOIN ad.temp_studies ts
@@ -234,7 +234,7 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.study_hashes(sd_sid,
 			hash_type_id, composite_hash)
-			SELECT s.sd_id, 
+			SELECT s.sd_sid, 
             hash_type_id, composite_hash
 			FROM sd.study_hashes s
 			INNER JOIN ad.temp_studies ts

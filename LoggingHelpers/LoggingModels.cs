@@ -54,6 +54,7 @@ namespace DataImporter
 		{
 			id = _id;
 			source_id = _source_id;
+			time_started = DateTime.Now;
 		}
 	}
 

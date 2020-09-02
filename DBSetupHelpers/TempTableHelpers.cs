@@ -79,7 +79,6 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
-
 		}
 
 
@@ -104,7 +103,7 @@ namespace DataImporter
 			SELECT a.sd_sid, 4 from ad.studies a
 			LEFT JOIN sd.studies s
 			on a.sd_sid = s.sd_sid
-			WHERE s.sd_id is null;";
+			WHERE s.sd_sid is null;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -135,7 +134,7 @@ namespace DataImporter
 		public void IdentifyNewDataObjects()
 		{
 			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
-			SELECT d.sd_oid, d.do_oid, 1 from sd.data_objects d
+			SELECT d.sd_oid, d.sd_sid, 1 from sd.data_objects d
 			LEFT JOIN ad.data_objects a
 			on d.sd_sid = a.sd_sid
             and d.sd_oid = a.sd_oid
@@ -151,7 +150,7 @@ namespace DataImporter
 		public void IdentifyEditedDataObjects()
 		{
 			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
-				SELECT d.sd_oid, d.do_oid, 2 from sd.data_objects d
+				SELECT d.sd_oid, d.sd_sid, 2 from sd.data_objects d
 				INNER JOIN ad.data_objects a
 				on d.sd_sid = a.sd_sid
                 and d.sd_oid = a.sd_oid
@@ -171,7 +170,7 @@ namespace DataImporter
 		public void IdentifyIdenticalDataObjects()
 		{
 			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
-				SELECTd.sd_oid, d.do_oid, 3 from sd.data_objects d
+				SELECT d.sd_oid, d.sd_sid, 3 from sd.data_objects d
 				INNER JOIN ad.data_objects a
 				on d.sd_sid = a.sd_sid
                 and d.sd_oid = a.sd_oid
@@ -187,7 +186,7 @@ namespace DataImporter
 		public void IdentifyDeletedDataObjects()
 		{
 			string sql_string = @"INSERT INTO ad.temp_data_objects(sd_oid, sd_sid, status)
-			SELECT a.sd_oid, a.do_oid, 4 from ad.data_objects a
+			SELECT a.sd_oid, a.sd_sid, 4 from ad.data_objects a
 			LEFT JOIN sd.data_objects d
 			on a.sd_sid = d.sd_sid
             and a.sd_oid = d.sd_oid
@@ -233,7 +232,7 @@ namespace DataImporter
 				import.num_edited_studies = GetScalarDBValue(sql_string);
 
 				sql_string = @"select count(*) from ad.temp_studies where status = 3;";
-				import.num_unchanged_objects = GetScalarDBValue(sql_string);
+				import.num_unchanged_studies = GetScalarDBValue(sql_string);
 
 				if (count_deleted)
                 {
@@ -249,7 +248,7 @@ namespace DataImporter
 			{
 				import.num_new_studies = 0;
 				import.num_edited_studies = 0;
-				import.num_unchanged_objects = 0;
+				import.num_unchanged_studies = 0;
 				import.num_deleted_studies = 0;
 			}
 

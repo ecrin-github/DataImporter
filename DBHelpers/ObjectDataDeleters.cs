@@ -23,9 +23,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.data_objects
+			  delete from ad.data_objects a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -33,15 +33,30 @@ namespace DataImporter
 			}
 		}
 
+		public void UpdateObjectsDeletedDate(int import_id, int source_id)
+		{
+			string sql_string = @"Update mon_sf.source_data_objects s
+            set last_import_id = " + (-1 * import_id).ToString() + @", 
+            last_imported = current_timestamp
+            from ad.temp_data_objects ts
+            where s.sd_id = ts.sd_sid and
+            s.source_id = " + source_id.ToString() + @"
+            and ts.status = 4;";
 
-        public void DeleteDataSetProperties()
+			using (var conn = new NpgsqlConnection(connstring))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+		public void DeleteDataSetProperties()
 		{
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.dataset_properties
+			  delete from ad.dataset_properties a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -54,9 +69,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_instances
+			  delete from ad.object_instances a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -70,9 +85,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_titles
+			  delete from ad.object_titles a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -87,9 +102,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_languages
+			  delete from ad.object_languages a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -103,9 +118,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_dates
+			  delete from ad.object_dates a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -119,9 +134,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_contributors
+			  delete from ad.object_contributors a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -134,9 +149,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_topics
+			  delete from ad.object_topics a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -150,9 +165,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_corrections
+			  delete from ad.object_corrections a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -166,9 +181,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_descriptions
+			  delete from ad.object_descriptions a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -182,9 +197,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_identifiers
+			  delete from ad.object_identifiers a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -198,9 +213,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_links
+			  delete from ad.object_links a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -214,9 +229,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_public_types
+			  delete from ad.object_public_types a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -233,9 +248,9 @@ namespace DataImporter
             string sql_string = @"with t as (
 			      select * from ad.temp_data_objects
 			      where status = 4)
-			  delete from ad.object_hashes
+			  delete from ad.object_hashes a
               using t
-			  where sd_oid = t.sd_oid;";
+			  where a.sd_oid = t.sd_oid;";
 
             using (var conn = new NpgsqlConnection(connstring))
 			{

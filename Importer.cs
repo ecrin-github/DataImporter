@@ -71,8 +71,10 @@ namespace DataImporter
 				{
 					transferrer.AddNewStudies(import_id);
 				}
-				transferrer.AddNewDataObjects(import_id);
-
+				if (import.num_new_objects > 0)
+				{
+					transferrer.AddNewDataObjects(import_id);
+				}
 
 				// update studies and data objects 'data of data' for recently 
 				// downloaded data that previously existed (= status of 2 and 3 
@@ -96,9 +98,12 @@ namespace DataImporter
 				// Finally, remove any deleted studies / objects from the ad tables
 				if (source.has_study_tables)
 				{
-					transferrer.RemoveDeletedStudyData();
+					transferrer.RemoveDeletedStudyData(import_id);
 				}
-				transferrer.RemoveDeletedDataObjectData();
+				if (import.num_deleted_objects > 0)
+				{
+					transferrer.RemoveDeletedDataObjectData(import_id);
+				}
 
 				// ensure that the full hash records have been updated
 				// may not have been if change was only in attribute(s)
@@ -117,8 +122,6 @@ namespace DataImporter
 				TempTableDropper temp_dropper = new TempTableDropper(connstring);
 				temp_dropper.DeleteTempStudiesTable();
 				temp_dropper.TempDataObjectsTable();
-
-
 			}
 		}
 	}

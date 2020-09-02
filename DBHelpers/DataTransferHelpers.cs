@@ -16,7 +16,7 @@ namespace DataImporter
 		{
 			connString = _connString;
 			source = _source;
-			ForeignTableManager FTM = new ForeignTableManager(connString);
+			FTM = new ForeignTableManager(connString);
 		}
 
 		public void EstablishForeignMonTables(string user_name, string password)
@@ -111,10 +111,10 @@ namespace DataImporter
                 on s.sd_sid  = ts.sd_sid
                 where ts.status in (2,3)  
             )
-            update ad.studies 
+            update ad.studies s
             set datetime_of_data_fetch = t.datetime_of_data_fetch
             from t
-            where sd_sid = t.sd_sid";
+            where s.sd_sid = t.sd_sid";
 
 			using (var conn = new Npgsql.NpgsqlConnection(connString))
 			{
@@ -134,11 +134,11 @@ namespace DataImporter
                 and d.sd_sid  = td.sd_sid
                 where td.status in (2,3)  
             )
-            update ad.data_objects 
+            update ad.data_objects s
             set datetime_of_data_fetch = t.datetime_of_data_fetch
             from t
-            where sd_oid = t.sd_oid
-            and sd_sid = t.sd_sid";
+            where s.sd_oid = t.sd_oid
+            and s.sd_sid = t.sd_sid";
 
 			using (var conn = new Npgsql.NpgsqlConnection(connString))
 			{
@@ -202,7 +202,7 @@ namespace DataImporter
 		}
 
 
-		public void RemoveDeletedStudyData()
+		public void RemoveDeletedStudyData(int import_id)
 		{
 			StudyDataDeleter deleter = new StudyDataDeleter(connString);
 			deleter.DeleteStudies();
@@ -218,10 +218,12 @@ namespace DataImporter
 			if (source.has_study_relationships) deleter.DeleteStudyRelationships();
 			if (source.has_study_links) deleter.DeleteStudyLinks();
 			if (source.has_study_ipd_available) deleter.DeleteStudyIpdAvailable();
+
+			deleter.UpdateStudiesDeletedDate(import_id, source.id);
 		}
 
 
-		public void RemoveDeletedDataObjectData()
+		public void RemoveDeletedDataObjectData(int import_id)
 		{
 
 			DataObjectDataDeleter deleter = new DataObjectDataDeleter(connString);
@@ -244,6 +246,11 @@ namespace DataImporter
 				deleter.DeleteObjectIdentifiers();
 				deleter.DeleteObjectLinks();
 				deleter.DeleteObjectPublic_types();
+			}
+
+			if (!source.has_study_tables)
+			{
+				deleter.UpdateObjectsDeletedDate(import_id, source.id);
 			}
 		}
 	}

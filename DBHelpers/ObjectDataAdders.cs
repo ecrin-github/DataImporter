@@ -40,16 +40,15 @@ namespace DataImporter
 		}
 
 
-		public void UpdateObjectsLastImportedDate(int last_import_id, int source_id)
+		public void UpdateObjectsLastImportedDate(int import_id, int source_id)
 		{
-			string sql_string = @"Update sf.source_data_objects s
-            set last_import_id = " + last_import_id.ToString() + @", 
+			string sql_string = @"Update mon_sf.source_data_objects s
+            set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
             from ad.temp_data_objects ts
-            where s.sd_sid = ts.sd_sid and
+            where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 1";
-
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{

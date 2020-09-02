@@ -59,7 +59,7 @@ namespace DataImporter
 			{
 				string sql_string = "select max(id) from sf.import_events ";
 				int last_id = Conn.ExecuteScalar<int>(sql_string);
-				return last_id + 1;
+				return (last_id == 0) ? 10001 : last_id + 1;
 			}
 
 
@@ -195,6 +195,7 @@ namespace DataImporter
 
 		public int StoreImportEvent(ImportEvent import)
 		{
+			import.time_ended = DateTime.Now;
 			using (var conn = new NpgsqlConnection(connString))
 			{
 				return (int)conn.Insert<ImportEvent>(import);

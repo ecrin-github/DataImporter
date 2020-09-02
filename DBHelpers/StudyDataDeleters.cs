@@ -23,9 +23,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.studies
+			  delete from ad.studies a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -34,15 +34,15 @@ namespace DataImporter
 		}
 
 
-		public void UpdateStudiesLastImportedDate(int last_import_id, int source_id)
+		public void UpdateStudiesDeletedDate(int import_id, int source_id)
 		{
-			string sql_string = @"Update sf.source_data_studies s
-            set last_import_id = " + last_import_id.ToString() + @", 
+			string sql_string = @"Update mon_sf.source_data_studies s
+            set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
             from ad.temp_studies ts
-            where s.sd_sid = ts.sd_sid and
+            where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
-			and ts.status = 2";
+			and ts.status = 4";
 
 
 			using (var conn = new NpgsqlConnection(connstring))
@@ -62,16 +62,14 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_identifiers
+			  delete from ad.study_identifiers a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
 				conn.Execute(sql_string);
 			}
-
-			
 		}
 
 
@@ -85,9 +83,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_titles
+			  delete from ad.study_titles a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -105,9 +103,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_references
+			  delete from ad.study_references a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -124,9 +122,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_contributors
+			  delete from ad.study_contributors a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -144,9 +142,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_topics
+			  delete from ad.study_topics a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -164,9 +162,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_relationships
+			  delete from ad.study_relationships a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -184,9 +182,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_features
+			  delete from ad.study_features a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -204,9 +202,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_links
+			  delete from ad.study_links a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 			
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -224,9 +222,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_ipd_available
+			  delete from ad.study_ipd_available a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -241,9 +239,9 @@ namespace DataImporter
 			string sql_string = @"with t as (
 			      select * from ad.temp_studies
 			      where status = 4)
-			  delete from ad.study_hashes
+			  delete from ad.study_hashes a
               using t
-			  where sd_sid = t.sd_sid;";
+			  where a.sd_sid = t.sd_sid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{

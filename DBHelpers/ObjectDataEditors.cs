@@ -28,7 +28,7 @@ namespace DataImporter
               on d.sd_oid = a.sd_oid
 			  where d.record_hash <> a.record_hash
               )
-             UPDATE ad.data_objects 
+             UPDATE ad.data_objects a
 			 set 
              display_title = t.display_title, 
              doi = t.doi,  
@@ -46,10 +46,10 @@ namespace DataImporter
              add_study_topics = t.add_study_topics,  
              datetime_of_data_fetch = t.datetime_of_data_fetch,  
              record_hash = t.record_hash, 
-             date_last_edited = " + DateTime.Now.ToString() + @",
-			 status = 2
+             last_edited_on = current_timestamp,
+			 record_status_id = 2
              from t
-			 where sd_oid = t.sd_oid;";
+			 where a.sd_oid = t.sd_oid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -58,13 +58,13 @@ namespace DataImporter
 		}
 
 
-        public void UpdateObjectsLastImportedDate(int last_import_id, int source_id)
+        public void UpdateObjectsLastImportedDate(int import_id, int source_id)
         {
-            string sql_string = @"Update sf.source_data_objects s
-            set last_import_id = " + last_import_id.ToString() + @", 
+            string sql_string = @"Update mon_sf.source_data_objects s
+            set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
             from ad.temp_data_objects ts
-            where s.sd_sid = ts.sd_sid and
+            where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 2 ";
 
@@ -87,8 +87,8 @@ namespace DataImporter
 			  inner join ad.dataset_properties a
               on d.sd_oid = a.sd_oid
 			  where d.record_hash <> a.record_hash
-              )
-             UPDATE ad.data_objects 
+             )
+             UPDATE ad.dataset_properties a
 			 set 
              record_keys_type_id = t.record_keys_type_id, 
              record_keys_details = t.record_keys_details, 
@@ -97,10 +97,10 @@ namespace DataImporter
              consents_type_id = t.consents_type_id, 
              consents_details = t.consents_details,  
              record_hash = t.record_hash, 
-             date_last_edited = " + DateTime.Now.ToString() + @",
-			 status = 2
+             last_edited_on = current_timestamp,
+			 record_status_id = 2
              from t
-			 where sd_oid = t.sd_oid;";
+			 where a.sd_oid = t.sd_oid;";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -115,23 +115,24 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 51
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 51
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_instances
+			string sql_stringD = sql_string + @"DELETE from ad.object_instances a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_instances(sd_oid, 
             instance_type_id, repository_org_id, repository_org,
             url, url_accessible, url_last_checked, resource_type_id,
-            resource_size, resource_size_units, record_hash)
+            resource_size, resource_size_units, record_hash, record_status_id)
             SELECT d.sd_oid, 
             instance_type_id, repository_org_id, repository_org,
             url, url_accessible, url_last_checked, resource_type_id,
-            resource_size, resource_size_units, record_hash
+            resource_size, resource_size_units, record_hash, 2
             FROM sd.object_instances d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -151,21 +152,23 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 52
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 52
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_titles
+			string sql_stringD = sql_string + @"DELETE from ad.object_titles a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_titles(sd_oid, 
             title_text, title_type_id, title_lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash)
+            lang_usage_id, is_default, comments, comparison_text, 
+            record_hash, record_status_id)
             SELECT d.sd_oid, 
             title_text, title_type_id, title_lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash
+            lang_usage_id, is_default, comments, comparison_text, record_hash, 2
             FROM sd.object_titles d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -186,19 +189,20 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 58
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 58
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_languages
+			string sql_stringD = sql_string + @"DELETE from ad.object_languages a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_languages(sd_oid, 
-            lang_code, record_hash)
+            lang_code, record_hash, record_status_id)
             SELECT d.sd_oid, 
-            lang_code, record_hash
+            lang_code, record_hash, 2
             FROM sd.object_languages d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -218,21 +222,25 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 53
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 53
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_dates
+			string sql_stringD = sql_string + @"DELETE from ad.object_dates a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
-            start_month, start_day, end_year, end_month, end_day, details, record_hash)
+            start_month, start_day, end_year, end_month, end_day, details, 
+            record_hash, record_status_id)
             SELECT d.sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
-            start_month, start_day, end_year, end_m
+            start_month, start_day, end_year, end_month, end_day, details, 
+            record_hash, 2
+            FROM sd.object_dates d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
@@ -251,25 +259,26 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 55
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 55
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_contributors
+			string sql_stringD = sql_string + @"DELETE from ad.object_contributors a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_contributors(sd_oid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
+            affil_org_id_type, record_hash, record_status_id)
             SELECT d.sd_oid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
+            affil_org_id_type, record_hash, 2
             FROM sd.object_contributors d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -289,21 +298,22 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 54
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 54
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_topics
+            string sql_stringD = sql_string + @"DELETE from ad.object_topics a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_topics(sd_oid, 
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash)
+            where_found, record_hash, record_status_id)
             SELECT d.sd_oid,  
             topic_type_id, topic_value, topic_ct_id, topic_ct_code,
-            where_found, record_hash
+            where_found, record_hash, 2
             FROM sd.object_topics d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -324,19 +334,21 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 61
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 61
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_corrections
+            string sql_stringD = sql_string + @"DELETE from ad.object_corrections a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_corrections(sd_oid, 
-            ref_type, ref_source, pmid, pmid_version, notes, record_hash)
+            ref_type, ref_source, pmid, pmid_version, notes, record_hash,
+            record_status_id)
             SELECT d.sd_oid,  
-            ref_type, ref_source, pmid, pmid_version, notes, record_hash
+            ref_type, ref_source, pmid, pmid_version, notes, record_hash, 2
             FROM sd.object_corrections d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -357,21 +369,22 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 57
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 57
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_descriptions
+			string sql_stringD = sql_string + @"DELETE from ad.object_descriptions a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_descriptions(sd_oid, 
             description_type_id, label, description_text, lang_code, 
-            contains_html, record_hash)
+            contains_html, record_hash, record_status_id)
             SELECT d.sd_oid, 
             description_type_id, label, description_text, lang_code, 
-            contains_html, record_hash
+            contains_html, record_hash, 2
             FROM sd.object_descriptions d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -392,21 +405,22 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 63
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 63
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_identifiers
+            string sql_stringD = sql_string + @"DELETE from ad.object_identifiers a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_identifiers(sd_oid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, record_hash)
+            identifier_date, record_hash, record_status_id)
             SELECT d.sd_oid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
-            identifier_date, record_hash
+            identifier_date, record_hash, 2
             FROM sd.object_identifiers d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -427,19 +441,20 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 60
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 60
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_links
+            string sql_stringD = sql_string + @"DELETE from ad.object_links a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_links(sd_oid, 
-            bank_sequence, bank_name, accession_number, record_hash)
+            bank_sequence, bank_name, accession_number, record_hash, record_status_id)
             SELECT d.sd_oid, 
-            bank_sequence, bank_name, accession_number, record_hash
+            bank_sequence, bank_name, accession_number, record_hash, 2
             FROM sd.object_links d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
@@ -460,19 +475,20 @@ namespace DataImporter
                sd.object_hashes sh
                INNER JOIN ad.object_hashes ah
                on sh.sd_oid = ah.sd_oid
-               WHERE hash_type_id = 62
+               and sh.hash_type_id = ah.hash_type_id 
+               WHERE sh.hash_type_id = 62
                AND sh.composite_hash <> ah.composite_hash
             )
             ";
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_public_types
+            string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
 			USING t
-			WHERE sd_oid = t.sd_oid; ";
+			WHERE a.sd_oid = t.sd_oid; ";
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_public_types(sd_oid, 
-            type_name, record_hash)
+            type_name, record_hash, record_status_id)
             SELECT d.sd_oid, 
-            type_name, record_hash
+            type_name, record_hash, 2
             FROM sd.object_public_types d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
