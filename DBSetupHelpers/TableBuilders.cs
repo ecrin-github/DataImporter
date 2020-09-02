@@ -12,6 +12,15 @@ namespace DataImporter
 			connstring = _connstring;
 		}
 
+		public void create_ad_schema()
+		{
+			string sql_string = @"CREATE SCHEMA IF NOT EXISTS ad;";
+
+			using (var conn = new NpgsqlConnection(connstring))
+			{
+				conn.Execute(sql_string);
+			}
+		}
 
 		public void create_table_studies()
 		{
@@ -41,7 +50,9 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
               , record_status_id       INT             NOT NULL default 1
 			);
-            CREATE INDEX studies_sid ON ad.studies(sd_sid);";
+            CREATE INDEX studies_sid ON ad.studies(sd_sid);
+            CREATE INDEX studies_hash ON ad.studies(record_hash);
+            CREATE INDEX studies_full_hash ON ad.studies(study_full_hash);";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -276,7 +287,8 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
               , record_status_id       INT             NOT NULL default 1
 			);
-            CREATE INDEX study_hashes_sd_sid ON ad.study_hashes(sd_sid);";
+            CREATE INDEX study_hashes_sd_sid ON ad.study_hashes(sd_sid);
+            CREATE INDEX study_hashes_composite_hash ON ad.study_hashes(composite_hash);";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -299,7 +311,7 @@ namespace DataImporter
 	    public void create_table_data_objects()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.data_objects(
-				sd_oid                 CHAR(32)        NULL
+				sd_oid                 CHAR(24)        NULL
               , sd_sid                 VARCHAR         NOT NULL
 			  , display_title          VARCHAR         NULL
 			  , doi                    VARCHAR         NULL 
@@ -324,7 +336,9 @@ namespace DataImporter
               , record_status_id       INT             NOT NULL default 1
 			);    
             CREATE INDEX data_objects_sd_oid ON ad.data_objects(sd_oid);
-			CREATE INDEX data_objects_sd_sid ON ad.data_objects(sd_sid);";
+			CREATE INDEX data_objects_sd_sid ON ad.data_objects(sd_sid);
+            CREATE INDEX data_objects_hash ON ad.data_objects(record_hash);
+            CREATE INDEX data_objects_full_hash ON ad.data_objects(object_full_hash);";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -336,7 +350,7 @@ namespace DataImporter
 		public void create_table_dataset_properties()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.dataset_properties(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , record_keys_type_id    INT             NULL 
 			  , record_keys_details    VARCHAR         NULL    
 			  , identifiers_type_id    INT             NULL  
@@ -361,7 +375,7 @@ namespace DataImporter
 		public void create_table_object_dates()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_dates(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , date_type_id           INT             NULL
 			  , is_date_range          BOOLEAN         NULL default false
 			  , date_as_string         VARCHAR         NULL
@@ -390,7 +404,7 @@ namespace DataImporter
 		public void create_table_object_instances()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_instances(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , instance_type_id       INT             NOT NULL  default 1
 			  , repository_org_id      INT             NULL
 			  , repository_org         VARCHAR         NULL
@@ -418,7 +432,7 @@ namespace DataImporter
 		public void create_table_object_titles()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_titles(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , title_text             VARCHAR         NULL
 			  , title_type_id          INT             NULL
 			  , title_lang_code        VARCHAR         NOT NULL default 'en'
@@ -444,7 +458,7 @@ namespace DataImporter
 		public void create_table_object_contributors()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_contributors(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , contrib_type_id        INT             NULL
 			  , is_individual          BOOLEAN         NULL
 			  , organisation_id        INT             NULL
@@ -476,7 +490,7 @@ namespace DataImporter
 		public void create_table_object_topics()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_topics(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , topic_type_id          INT             NULL
 			  , topic_value            VARCHAR         NULL
 			  , topic_ct_id            INT             NULL
@@ -500,7 +514,7 @@ namespace DataImporter
 		public void create_table_object_languages()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_languages(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
               , lang_code              VARCHAR         NULL default 'en'
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
@@ -519,7 +533,7 @@ namespace DataImporter
 		public void create_table_object_corrections()
 		{
 			string sql_string = @"CREATE TABLE ad.object_corrections(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , ref_type               VARCHAR         NULL 
 			  , ref_source             VARCHAR         NULL 
 			  , pmid                   VARCHAR         NULL 
@@ -542,7 +556,7 @@ namespace DataImporter
 		public void create_table_object_descriptions()
 		{
 			string sql_string = @"CREATE TABLE ad.object_descriptions(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , description_type_id    INT             NULL
 			  , label                  VARCHAR         NULL
 			  , description_text       VARCHAR         NULL
@@ -565,7 +579,7 @@ namespace DataImporter
 		public void create_table_object_identifiers()
 		{
 			string sql_string = @"CREATE TABLE ad.object_identifiers(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
               , identifier_value       VARCHAR         NULL
 			  , identifier_type_id     INT             NULL
 			  , identifier_org_id      INT             NULL
@@ -588,7 +602,7 @@ namespace DataImporter
 		public void create_table_object_links()
 		{
 			string sql_string = @"CREATE TABLE ad.object_links(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , bank_sequence          INT             NULL
 			  , bank_name              VARCHAR         NULL
 			  , accession_number       VARCHAR         NULL
@@ -609,7 +623,7 @@ namespace DataImporter
 		public void create_table_object_public_types()
 		{
 			string sql_string = @"CREATE TABLE ad.object_public_types(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , type_name              VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
@@ -629,7 +643,7 @@ namespace DataImporter
 		public void create_table_object_hashes()
 		{
 			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_hashes(
-                sd_oid                 CHAR(32)        NULL
+                sd_oid                 CHAR(24)        NULL
 			  , hash_type_id           INT             NULL
               , composite_hash         CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
@@ -637,7 +651,8 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
               , record_status_id       INT             NOT NULL default 1
 			);
-            CREATE INDEX object_hashes_sd_oid ON ad.object_hashes(sd_oid);";
+            CREATE INDEX object_hashes_sd_oid ON ad.object_hashes(sd_oid);
+            CREATE INDEX object_hashes_composite_hash ON ad.object_hashes(composite_hash);"; 
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{

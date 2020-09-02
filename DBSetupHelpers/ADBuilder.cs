@@ -60,6 +60,7 @@ namespace DataImporter
 			// these common to all databases
 
 			StudyTableBuildersAD builder = new StudyTableBuildersAD(connString);
+			builder.create_ad_schema();
 			builder.create_table_studies();
 			builder.create_table_study_identifiers();
 			builder.create_table_study_titles();

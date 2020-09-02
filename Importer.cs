@@ -100,18 +100,16 @@ namespace DataImporter
 				{
 					transferrer.RemoveDeletedStudyData(import_id);
 				}
-				if (import.num_deleted_objects > 0)
-				{
-					transferrer.RemoveDeletedDataObjectData(import_id);
-				}
+				transferrer.RemoveDeletedDataObjectData(import_id);
+
 
 				// ensure that the full hash records have been updated
 				// may not have been if change was only in attribute(s)
 				if (source.has_study_tables)
 				{
-					filler.UpdateFullStudyHash();
+					transferrer.UpdateFullStudyHash();
 				}
-				filler.UpdateFullObjectHash();
+				transferrer.UpdateFullObjectHash();
 				Helpers.SendMessage("Full hash values updated");
 
 				logging_repo.StoreImportEvent(import);

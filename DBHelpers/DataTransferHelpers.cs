@@ -120,6 +120,7 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
+			Helpers.SendMessage("Updated dates of study data");
 		}
 
 
@@ -144,6 +145,7 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
+			Helpers.SendMessage("Updated dates of data object data");
 		}
 
 
@@ -165,6 +167,7 @@ namespace DataImporter
 			if (source.has_study_ipd_available) editor.EditStudyIpdAvailable();
 
 			editor.UpdateStudiesLastImportedDate(import_id, source.id);
+			Helpers.SendMessage("Edited study data");
 		}
 
 
@@ -199,6 +202,7 @@ namespace DataImporter
 
 				editor.UpdateObjectsLastImportedDate(import_id, source.id);
 			}
+			Helpers.SendMessage("Edited data object data");
 		}
 
 
@@ -220,6 +224,8 @@ namespace DataImporter
 			if (source.has_study_ipd_available) deleter.DeleteStudyIpdAvailable();
 
 			deleter.UpdateStudiesDeletedDate(import_id, source.id);
+
+			Helpers.SendMessage("Deleted now missing study data");
 		}
 
 
@@ -252,7 +258,45 @@ namespace DataImporter
 			{
 				deleter.UpdateObjectsDeletedDate(import_id, source.id);
 			}
-		}
-	}
 
+			Helpers.SendMessage("Deleted now missing data object data");
+		}
+
+
+		public void UpdateFullStudyHash()
+		{
+			// Ensure study_full_hash is updated to reflect new value
+			// The study record itself may not have changed, so the study
+			// record update above cannot be used to make the edit 
+
+			string sql_string = @"UPDATE ad.studies a
+			  set study_full_hash = s.study_full_hash
+              FROM sd.studies s
+			  WHERE s.sd_sid = a.sd_sid;";
+
+			using (var conn = new NpgsqlConnection(connString))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+
+		public void UpdateFullObjectHash()
+		{
+			// Ensure object_full_hash is updated to reflect new value
+			// The object record itself may not have changed, so the object
+			// record update above cannot be used to make the edit 
+
+			string sql_string = @"UPDATE ad.data_objects a
+			  set object_full_hash = s.object_full_hash
+              FROM sd.data_objects s
+			  WHERE s.sd_oid = a.sd_oid;";
+
+			using (var conn = new NpgsqlConnection(connString))
+			{
+				conn.Execute(sql_string);
+			}
+		}
+
+	}
 }
