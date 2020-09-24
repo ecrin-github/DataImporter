@@ -29,6 +29,8 @@ namespace DataImporter
 		public bool uses_language_default { get; set; }
 		public bool has_object_languages { get; set; }
 		public bool has_object_dates { get; set; }
+		public bool has_object_relationships { get; set; }
+		public bool has_object_rights { get; set; }
 		public bool has_object_pubmed_set { get; set; }
 	}
 
