@@ -32,6 +32,7 @@ namespace DataImporter
              object_type_id = t.object_type_id,  
              managing_org_id = t.managing_org_id,  
              managing_org = t.managing_org,  
+             lang_code = t.lang_code, 
              access_type_id = t.access_type_id, 
              access_details = t.access_details,  
              access_details_url = t.access_details_url,  
@@ -43,7 +44,7 @@ namespace DataImporter
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
              from (select * from sd.data_objects s
-			   INNER JOIN ad.objects_catalogue ts
+			   INNER JOIN ad.import_object_recs ts
                ON s.sd_oid = ts.sd_oid
                where ts.object_rec_status = 2) t;";
 
@@ -59,10 +60,10 @@ namespace DataImporter
             string sql_string = @"Update mon_sf.source_data_objects s
             set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
-            from ad.objects_catalogue ts
+            from ad.import_object_recs ts
             where s.sd_id = ts.sd_oid and
             s.source_id = " + source_id.ToString() + @"
-			and ts.status = 2";
+			and ts.object_dataset_status = 4";
 
             using (var conn = new NpgsqlConnection(connstring))
             {
@@ -97,9 +98,9 @@ namespace DataImporter
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
     		   from (select * from sd.dataset_properties s
-			   INNER JOIN ad.objects_catalogue ts
+			   INNER JOIN ad.import_object_recs ts
                ON s.sd_oid = ts.sd_oid
-               where ts.object_rec_status = 2) t;"; 
+               where object_dataset_status = 4) t;"; 
 
             using (var conn = new NpgsqlConnection(connstring))
 			{
@@ -111,7 +112,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 51)"; 
 
 			string sql_stringD = sql_string + @"DELETE from ad.object_instances a
@@ -142,7 +143,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 52)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_titles a
@@ -166,40 +167,13 @@ namespace DataImporter
 			}
 
 		}
-
-
-		public void EditObjectLanguages()
-		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.objects_changed_atts 
-               WHERE hash_type_id = 58)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_languages a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_languages(sd_oid, 
-            lang_code, record_hash)
-            SELECT d.sd_oid, 
-            lang_code, record_hash
-            FROM sd.object_languages d
-            INNER JOIN t
-            on d.sd_oid = t.sd_oid";
-
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+		
 
 		public void EditObjectDates()
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 53)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_dates a
@@ -228,7 +202,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 55)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_contributors a
@@ -261,7 +235,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 54)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_topics a
@@ -293,7 +267,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 61)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_corrections a
@@ -321,7 +295,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 57)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_descriptions a
@@ -351,7 +325,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 63)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_identifiers a
@@ -381,7 +355,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 60)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_links a
@@ -409,7 +383,7 @@ namespace DataImporter
 		{
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 62)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
@@ -437,7 +411,7 @@ namespace DataImporter
         {
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 56)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
@@ -465,7 +439,7 @@ namespace DataImporter
         {
             string sql_string = @"with t as (
                SELECT sd_oid from 
-               ad.objects_changed_atts 
+               ad.import_object_changed_atts 
                WHERE hash_type_id = 59)";
 
             string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
@@ -512,7 +486,7 @@ namespace DataImporter
         public void DeleteRecords(string table_name)
         {
             string sql_string = @"with t as (
-			      select sd_oid from ad.objects_catalogue
+			      select sd_oid from ad.import_object_recs
 			      where status = 4)
 			  delete from ad." + table_name + @" a
               using t
@@ -530,7 +504,7 @@ namespace DataImporter
             string sql_string = @"Update mon_sf.source_data_objects s
             set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
-            from ad.objects_catalogue ts
+            from ad.import_object_recs ts
             where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
             and ts.status = 4;";

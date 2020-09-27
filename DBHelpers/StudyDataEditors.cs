@@ -42,7 +42,7 @@ namespace DataImporter
 				  record_hash = t.record_hash,
 				  last_edited_on = current_timestamp
 			  from (select * from sd.studies s
-			        INNER JOIN ad.studies_catalogue ts
+			        INNER JOIN ad.import_study_recs ts
                     ON s.sd_sid = ts.sd_sid
                     where ts.study_rec_status = 2) t";
 
@@ -61,7 +61,7 @@ namespace DataImporter
 			string sql_string = @"Update mon_sf.source_data_studies s
             set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
-            from ad.studies_catalogue ts
+            from ad.import_study_recs ts
             where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 2";
@@ -84,7 +84,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 11)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_identifiers a
@@ -120,7 +120,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 12)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_titles a
@@ -153,7 +153,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 17)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_references a
@@ -183,7 +183,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 15)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_contributors a
@@ -220,7 +220,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 14)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_topics a
@@ -255,7 +255,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 16)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_relationships a
@@ -286,7 +286,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 13)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_features a
@@ -317,7 +317,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 18)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_links a
@@ -348,7 +348,7 @@ namespace DataImporter
 
 			string sql_string = @"with t as (
                SELECT sd_sid from 
-               ad.studies_changed_atts 
+               ad.import_study_changed_atts 
                WHERE hash_type_id = 19)";
 
 			string sql_stringD = sql_string + @"DELETE from ad.study_ipd_available a
@@ -395,7 +395,7 @@ namespace DataImporter
 		public void DeleteRecords(string table_name)
 		{
 			string sql_string = @"with t as (
-			      select sd_sid from ad.studies_catalogue
+			      select sd_sid from ad.import_study_recs
 			      where status = 4)
 			  delete from ad." + table_name + @" a
               using t
@@ -413,7 +413,7 @@ namespace DataImporter
 			string sql_string = @"Update mon_sf.source_data_studies s
             set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
-            from ad.studies_catalogue ts
+            from ad.import_study_recs ts
             where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 4";

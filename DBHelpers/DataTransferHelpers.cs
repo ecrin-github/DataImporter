@@ -40,16 +40,16 @@ namespace DataImporter
 		public void AddNewStudies(int import_id)
         {
 			study_adder.TransferStudies();
-			Helpers.SendMessage("Added new studies");
+			StringHelpers.SendFeedback("Added new studies");
 
 			study_adder.TransferStudyIdentifiers();
-			Helpers.SendMessage("Added new study identifiers");
+			StringHelpers.SendFeedback("Added new study identifiers");
 
 			study_adder.TransferStudyTitles();
-			Helpers.SendMessage("Added new study titles");
+			StringHelpers.SendFeedback("Added new study titles");
 
 			study_adder.TransferStudyHashes();
-			Helpers.SendMessage("Added new study hashes");
+			StringHelpers.SendFeedback("Added new study hashes");
 
 			// these are database dependent
 
@@ -60,7 +60,7 @@ namespace DataImporter
 			if (source.has_study_relationships) study_adder.TransferStudyRelationships();
 			if (source.has_study_links) study_adder.TransferStudyLinks();
 			if (source.has_study_ipd_available) study_adder.TransferStudyIpdAvailable();
-			Helpers.SendMessage("Added new source specific study data");
+			StringHelpers.SendFeedback("Added new source specific study data");
 
 			study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
 		}
@@ -69,25 +69,21 @@ namespace DataImporter
 		public void AddNewDataObjects(int import_id)
 		{
 			object_adder.TransferDataObjects();
-			Helpers.SendMessage("Added new data objects");
+			StringHelpers.SendFeedback("Added new data objects");
 
 			object_adder.TransferObjectInstances();
-			Helpers.SendMessage("Added new object instances");
+			StringHelpers.SendFeedback("Added new object instances");
 
 			object_adder.TransferObjectTitles();
-			Helpers.SendMessage("Added new object titles");
+			StringHelpers.SendFeedback("Added new object titles");
 
 			object_adder.TransferObjectHashes();
-			Helpers.SendMessage("Added new object hashes");
+			StringHelpers.SendFeedback("Added new object hashes");
 
 			// these are database dependent		
 
 			if (source.has_dataset_properties) object_adder.TransferDataSetProperties();
 			if (source.has_object_dates) object_adder.TransferObjectDates();
-			if (source.has_object_languages) object_adder.TransferObjectLanguages();
-
-			// if not - ?? delete and create an 'artificial' object language table?
-
 			if (source.has_object_rights) object_adder.TransferObjectRights();
 			if (source.has_object_relationships) object_adder.TransferObjectRelationships();
 			if (source.has_object_pubmed_set)
@@ -100,7 +96,7 @@ namespace DataImporter
 				object_adder.TransferObjectDBLinks();
 				object_adder.TransferObjectPublicationTypes();
 			}
-			Helpers.SendMessage("Added new source specific object data");
+			StringHelpers.SendFeedback("Added new source specific object data");
 
 			if (!source.has_study_tables)
 			{
@@ -118,7 +114,7 @@ namespace DataImporter
             (   
                 select s.sd_sid, s.datetime_of_data_fetch 
                 from sd.studies s
-                inner join ad.studies_catalogue ts
+                inner join ad.import_study_recs ts
                 on s.sd_sid  = ts.sd_sid
                 where ts.status in (2,3)  
             )
@@ -131,7 +127,7 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
-			Helpers.SendMessage("Updated dates of study data");
+			StringHelpers.SendFeedback("Updated dates of study data");
 		}
 
 
@@ -141,7 +137,7 @@ namespace DataImporter
             (   
                 select d.sd_oid, d.datetime_of_data_fetch 
                 from sd.data_objects d
-                inner join ad.objects_catalogue td
+                inner join ad.import_object_recs td
                 on d.sd_oid  = td.sd_oid
                 where td.status in (2,3)  
             )
@@ -154,7 +150,7 @@ namespace DataImporter
 			{
 				conn.Execute(sql_string);
 			}
-			Helpers.SendMessage("Updated dates of data object data");
+			StringHelpers.SendFeedback("Updated dates of data object data");
 		}
 
 
@@ -175,7 +171,7 @@ namespace DataImporter
 			if (source.has_study_ipd_available) study_editor.EditStudyIpdAvailable();
 
 			study_editor.UpdateStudiesLastImportedDate(import_id, source.id);
-			Helpers.SendMessage("Edited study data");
+			StringHelpers.SendFeedback("Edited study data");
 		}
 
 
@@ -190,7 +186,6 @@ namespace DataImporter
 
 			if (source.has_dataset_properties) object_editor.EditDataSetProperties();
 			if (source.has_object_dates) object_editor.EditObjectDates();
-			if (source.has_object_languages) object_editor.EditObjectLanguages();
 			if (source.has_object_rights) object_editor.EditObjectRights();
 			if (source.has_object_relationships) object_editor.EditObjectRelationships();
 			if (source.has_object_pubmed_set)
@@ -211,7 +206,7 @@ namespace DataImporter
 
 				object_editor.UpdateObjectsLastImportedDate(import_id, source.id);
 			}
-			Helpers.SendMessage("Edited data object data");
+			StringHelpers.SendFeedback("Edited data object data");
 		}
 
 
@@ -233,7 +228,7 @@ namespace DataImporter
 
 			study_editor.UpdateStudiesDeletedDate(import_id, source.id);
 
-			Helpers.SendMessage("Deleted now missing study data");
+			StringHelpers.SendFeedback("Deleted now missing study data");
 		}
 
 
@@ -248,7 +243,6 @@ namespace DataImporter
 
 			if (source.has_dataset_properties) object_editor.DeleteRecords("dataset_properties"); 
 			if (source.has_object_dates) object_editor.DeleteRecords("object_dates");
-			if (source.has_object_languages) object_editor.DeleteRecords("object_languages");
 			if (source.has_object_pubmed_set)
 			{
 				object_editor.DeleteRecords("object_contributors");;
@@ -265,7 +259,7 @@ namespace DataImporter
 				object_editor.UpdateObjectsDeletedDate(import_id, source.id);
 			}
 
-			Helpers.SendMessage("Deleted now missing data object data");
+			StringHelpers.SendFeedback("Deleted now missing data object data");
 		}
 
 

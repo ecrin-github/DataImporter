@@ -20,16 +20,16 @@ namespace DataImporter
 		{
 			string sql_string = @"INSERT INTO ad.data_objects(sd_oid, sd_sid, 
             display_title, version, doi, doi_status_id, publication_year,
-            object_class_id, object_type_id, managing_org_id, managing_org, access_type_id,
+            object_class_id, object_type_id, managing_org_id, managing_org, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash)
             SELECT d.sd_oid, d.sd_sid, 
             display_title, version, doi, doi_status_id, publication_year,
-            object_class_id, object_type_id, managing_org_id, managing_org, access_type_id,
+            object_class_id, object_type_id, managing_org_id, managing_org, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash
             FROM sd.data_objects d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -45,7 +45,7 @@ namespace DataImporter
 			string sql_string = @"Update mon_sf.source_data_objects s
             set last_import_id = " + import_id.ToString() + @", 
             last_imported = current_timestamp
-            from ad.objects_catalogue ts
+            from ad.import_object_recs ts
             where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 1";
@@ -74,7 +74,7 @@ namespace DataImporter
 			consent_research_type, consent_genetic_only, consent_no_methods, consent_details,
 			record_hash
             FROM sd.dataset_properties d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -95,7 +95,7 @@ namespace DataImporter
             url, url_accessible, url_last_checked, resource_type_id,
             resource_size, resource_size_units, resource_comments, record_hash
             FROM sd.object_instances d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -114,7 +114,7 @@ namespace DataImporter
             title_type_id, title_text, lang_code,
             lang_usage_id, is_default, comments, comparison_text, record_hash
             FROM sd.object_titles d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -123,24 +123,7 @@ namespace DataImporter
 				conn.Execute(sql_string);
 			}
 		}
-
-
-		public void TransferObjectLanguages()
-		{
-			string sql_string = @"INSERT INTO ad.object_languages(sd_oid, 
-            lang_code, record_hash)
-            SELECT d.sd_oid, 
-            lang_code, record_hash
-            FROM sd.object_languages d
-            INNER JOIN ad.objects_catalogue nd
-            ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
-
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+		
 
 		public void TransferObjectDates()
 		{
@@ -151,7 +134,7 @@ namespace DataImporter
             date_type_id, is_date_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash
             FROM sd.object_dates d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -174,7 +157,7 @@ namespace DataImporter
             person_identifier, identifier_type, person_affiliation, affil_org_id,
             affil_org_id_type, record_hash
             FROM sd.object_contributors d
-            INNER JOIN ad.objects_catalogue nd
+            INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
             WHERE nd.status = 1;";
 
@@ -195,7 +178,7 @@ namespace DataImporter
             topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
             original_value, comments, record_hash
             FROM sd.object_topics d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -213,7 +196,7 @@ namespace DataImporter
             SELECT d.sd_oid,  
             ref_type, ref_source, pmid, pmid_version, notes, record_hash
             FROM sd.object_comments d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -233,7 +216,7 @@ namespace DataImporter
             description_type_id, label, description_text, lang_code, 
             contains_html, record_hash
             FROM sd.object_descriptions d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -252,7 +235,7 @@ namespace DataImporter
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
             identifier_date, record_hash
             FROM sd.object_identifiers d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -269,7 +252,7 @@ namespace DataImporter
             SELECT d.sd_oid, 
             db_sequence, db_name, id_in_db, record_hash
             FROM sd.object_db_links d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -286,7 +269,7 @@ namespace DataImporter
             SELECT d.sd_oid, 
             type_name, record_hash
             FROM sd.object_publication_types d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -304,7 +287,7 @@ namespace DataImporter
             SELECT d.sd_oid, 
             rights_name, rights_uri, comments, record_hash
             FROM sd.object_public_types d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -322,7 +305,7 @@ namespace DataImporter
             SELECT d.sd_oid, 
             relationship_type_id, target_sd_oid, record_hash
             FROM sd.object_public_types d
-			INNER JOIN ad.objects_catalogue nd
+			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
 			WHERE nd.status = 1; ";
 
@@ -343,7 +326,7 @@ namespace DataImporter
                  SELECT d.sd_oid,  
                  hash_type_id, composite_hash
                  FROM sd.object_hashes d
-                 INNER JOIN ad.objects_catalogue nd
+                 INNER JOIN ad.import_object_recs nd
 			     ON d.sd_oid = nd.sd_oid
 			     WHERE nd.status = 1
 			     and d.hash_type_id = " + n.ToString();

@@ -96,7 +96,6 @@ namespace DataImporter
 
 			if (source.has_dataset_properties) object_builder.create_table_dataset_properties();
 			if (source.has_object_dates) object_builder.create_table_object_dates();
-			if (source.has_object_languages) object_builder.create_table_object_languages();
 			if (source.has_object_relationships) object_builder.create_table_object_relationships();
 			if (source.has_object_rights) object_builder.create_table_object_rights();
 			if (source.has_object_pubmed_set)
@@ -111,5 +110,4 @@ namespace DataImporter
 			}
 		}
 	}
-
 }

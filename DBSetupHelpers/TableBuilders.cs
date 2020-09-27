@@ -349,6 +349,7 @@ namespace DataImporter
 			  , object_type_id         INT             NULL
 			  , managing_org_id        INT             NULL
 			  , managing_org           VARCHAR         NULL
+              , lang_code              VARCHAR         NULL
 			  , access_type_id         INT             NULL
 			  , access_details         VARCHAR         NULL
 			  , access_details_url     VARCHAR         NULL
@@ -557,25 +558,6 @@ namespace DataImporter
 		}
 
 
-		public void create_table_object_languages()
-		{
-			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_languages(
-                id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-			  , sd_oid                 CHAR(24)        NULL
-              , lang_code              VARCHAR         NULL
-              , record_hash            CHAR(32)        NULL
-              , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
-			);
-            CREATE INDEX object_languages_sd_oid ON ad.object_languages(sd_oid);";
-
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
 		public void create_table_object_comments()
 		{
 			string sql_string = @"CREATE TABLE ad.object_comments(
@@ -598,6 +580,7 @@ namespace DataImporter
 				conn.Execute(sql_string);
 			}
 		}
+
 
 		public void create_table_object_descriptions()
 		{

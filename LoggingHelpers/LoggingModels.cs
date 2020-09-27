@@ -26,8 +26,6 @@ namespace DataImporter
 		public bool has_study_links { get; set; }
 		public bool has_study_ipd_available { get; set; }
 		public bool has_dataset_properties { get; set; }
-		public bool uses_language_default { get; set; }
-		public bool has_object_languages { get; set; }
 		public bool has_object_dates { get; set; }
 		public bool has_object_relationships { get; set; }
 		public bool has_object_rights { get; set; }
@@ -57,6 +55,36 @@ namespace DataImporter
 			id = _id;
 			source_id = _source_id;
 			time_started = DateTime.Now;
+		}
+	}
+
+	[Table("ad.history_master_list")]
+	public class HistoryRecord
+	{
+		[ExplicitKey]
+		public int id { get; set; }
+		public int? num_new_studies { get; set; }
+		public int? num_edited_studies { get; set; }
+		public int? num_unchanged_studies { get; set; }
+		public int? num_deleted_studies { get; set; }
+		public int? num_new_objects { get; set; }
+		public int? num_edited_objects { get; set; }
+		public int? num_unchanged_objects { get; set; }
+		public int? num_deleted_objects { get; set; }
+		public DateTime? time_created { get; set; }
+
+		public HistoryRecord(ImportEvent imp)
+		{
+			id = imp.id;
+			num_new_studies = imp.num_new_studies;
+			num_edited_studies = imp.num_edited_studies;
+			num_unchanged_studies = imp.num_unchanged_studies;
+			num_deleted_studies = imp.num_deleted_studies;
+			num_new_objects = imp.num_new_objects;
+			num_edited_objects = imp.num_edited_objects;
+			num_unchanged_objects = imp.num_unchanged_objects;
+			num_deleted_objects = imp.num_deleted_objects;
+    		time_created = DateTime.Now;
 		}
 	}
 

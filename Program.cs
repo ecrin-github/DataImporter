@@ -21,7 +21,6 @@ namespace DataImporter
 			
 			if (opts.source_ids.Count() > 0)
 			{
-		
 				foreach (int source_id in opts.source_ids)
 				{
 					DataLayer repo = new DataLayer(source_id);
@@ -31,7 +30,7 @@ namespace DataImporter
 					}
 					else
 					{
-						imp.Import(repo, logging_repo, opts.build_tables);
+						imp.Import(source_id, repo, logging_repo, opts.build_tables);
 					}
 				}
 			}
