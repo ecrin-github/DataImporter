@@ -9,12 +9,16 @@ namespace DataImporter
 	class DataObjectDataAdder
 	{
 		string connstring;
+		DBUtilities dbu;
 
 		public DataObjectDataAdder(string _connstring)
 		{
 			connstring = _connstring;
+			dbu = new DBUtilities(connstring);
 		}
 
+
+		#region Table data transfer
 
 		public void TransferDataObjects()
 		{
@@ -31,29 +35,9 @@ namespace DataImporter
             FROM sd.data_objects d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-
-		public void UpdateObjectsLastImportedDate(int import_id, int source_id)
-		{
-			string sql_string = @"Update mon_sf.source_data_objects s
-            set last_import_id = " + import_id.ToString() + @", 
-            last_imported = current_timestamp
-            from ad.import_object_recs ts
-            where s.sd_id = ts.sd_sid and
-            s.source_id = " + source_id.ToString() + @"
-			and ts.status = 1";
-
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "data_objects", "adding");
 		}
 
 
@@ -76,13 +60,11 @@ namespace DataImporter
             FROM sd.dataset_properties d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "dataset_properties", "adding");
 		}
+
 
 		public void TransferObjectInstances()
 		{
@@ -97,12 +79,9 @@ namespace DataImporter
             FROM sd.object_instances d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_instances", "adding");
 		}
 
 		public void TransferObjectTitles()
@@ -116,12 +95,9 @@ namespace DataImporter
             FROM sd.object_titles d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_titles", "adding");
 		}
 		
 
@@ -136,12 +112,9 @@ namespace DataImporter
             FROM sd.object_dates d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_dates", "adding");
 		}
 
 		public void TransferObjectContributors()
@@ -159,12 +132,9 @@ namespace DataImporter
             FROM sd.object_contributors d
             INNER JOIN ad.import_object_recs nd
             ON d.sd_oid = nd.sd_oid
-            WHERE nd.status = 1;";
+            WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_contributors", "adding");
 		}
 
 		public void TransferObjectTopics()
@@ -180,12 +150,9 @@ namespace DataImporter
             FROM sd.object_topics d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_topics", "adding");
 		}
 
 
@@ -198,12 +165,9 @@ namespace DataImporter
             FROM sd.object_comments d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_comments", "adding");
 		}
 
 
@@ -218,12 +182,9 @@ namespace DataImporter
             FROM sd.object_descriptions d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_descriptions", "adding");
 		}
 
 		public void TransferObjectIdentifiers()
@@ -237,12 +198,9 @@ namespace DataImporter
             FROM sd.object_identifiers d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_identifiers", "adding");
 		}
 
 		public void TransferObjectDBLinks()
@@ -254,12 +212,9 @@ namespace DataImporter
             FROM sd.object_db_links d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_db_links", "adding");
 		}
 
 		public void TransferObjectPublicationTypes()
@@ -271,50 +226,60 @@ namespace DataImporter
             FROM sd.object_publication_types d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_publication_types", "adding");
 		}
 
 
 		public void TransferObjectRights()
 		{
-			string sql_string = @"INSERT INTO ad.object_public_types(sd_oid, 
+			string sql_string = @"INSERT INTO ad.object_rights(sd_oid, 
             rights_name, rights_uri, comments, record_hash)
             SELECT d.sd_oid, 
             rights_name, rights_uri, comments, record_hash
-            FROM sd.object_public_types d
+            FROM sd.object_rights d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_rights", "adding");
 		}
 
 
 		public void TransferObjectRelationships()
 		{
-			string sql_string = @"INSERT INTO ad.object_public_types(sd_oid, 
+			string sql_string = @"INSERT INTO ad.object_relationships(sd_oid, 
             relationship_type_id, target_sd_oid, record_hash)
             SELECT d.sd_oid, 
             relationship_type_id, target_sd_oid, record_hash
-            FROM sd.object_public_types d
+            FROM sd.object_relationships d
 			INNER JOIN ad.import_object_recs nd
 			ON d.sd_oid = nd.sd_oid
-			WHERE nd.status = 1; ";
+			WHERE nd.status = 1";
 
-			using (var conn = new Npgsql.NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+			dbu.ExecuteTransferSQL(sql_string, "object_relationships", "adding");
 		}
 
+		#endregion
+
+
+		public void UpdateObjectsLastImportedDate(int import_id, int source_id)
+		{
+			string top_string = @"UPDATE mon_sf.source_data_objects src
+                          set last_import_id = " + import_id.ToString() + @", 
+                          last_imported = current_timestamp
+                          from 
+                             (select so.id, so.sd_oid 
+                              FROM sd.data_objects so
+                              INNER JOIN ad.import_object_recs ts
+                              ON so.sd_oid = ts.sd_oid
+                             ";
+			string base_string = @" where s.sd_sid = src.sd_id and
+                              src.source_id = " + source_id.ToString();
+
+			dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "adding");
+		}
 
 
 		public void TransferObjectHashes()
@@ -331,13 +296,10 @@ namespace DataImporter
 			     WHERE nd.status = 1
 			     and d.hash_type_id = " + n.ToString();
 
-				using (var conn = new NpgsqlConnection(connstring))
-				{
-					conn.Execute(sql_string);
-				}
+				dbu.ExecuteSQL(sql_string);
+				StringHelpers.SendFeedback("Inserting object hashes - type " + n.ToString());
 			}
 		}
 
 	}
-
 }

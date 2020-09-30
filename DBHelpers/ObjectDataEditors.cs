@@ -9,14 +9,16 @@ namespace DataImporter
 	class DataObjectDataEditor
 	{
 		string connstring;
+        DBUtilities dbu;
 
-		public DataObjectDataEditor(string _connstring)
+        public DataObjectDataEditor(string _connstring)
 		{
             connstring = _connstring;
-		}
+            dbu = new DBUtilities(connstring);
+        }
 
 
-		public void EditDataObjects()
+        public void EditDataObjects()
 		{
             // if the record hash for the data object has changed, then 
             // the data in the data objects records should be changed
@@ -43,33 +45,14 @@ namespace DataImporter
              datetime_of_data_fetch = t.datetime_of_data_fetch,  
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
-             from (select * from sd.data_objects s
+             from (select * from sd.data_objects so
 			   INNER JOIN ad.import_object_recs ts
-               ON s.sd_oid = ts.sd_oid
-               where ts.object_rec_status = 2) t;";
+               ON so.sd_oid = ts.sd_oid ";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+            dbu.EditEntityRecords(sql_string, 
+                                  " where ts.object_rec_status = 2) t",
+                                  "data_objects");
 		}
-
-
-        public void UpdateObjectsLastImportedDate(int import_id, int source_id)
-        {
-            string sql_string = @"Update mon_sf.source_data_objects s
-            set last_import_id = " + import_id.ToString() + @", 
-            last_imported = current_timestamp
-            from ad.import_object_recs ts
-            where s.sd_id = ts.sd_oid and
-            s.source_id = " + source_id.ToString() + @"
-			and ts.object_dataset_status = 4";
-
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
-        }
 
 
         public void EditDataSetProperties()
@@ -97,27 +80,22 @@ namespace DataImporter
              consent_details = t.consent_details,  
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
-    		   from (select * from sd.dataset_properties s
+    		   from (select * from sd.dataset_properties so
 			   INNER JOIN ad.import_object_recs ts
-               ON s.sd_oid = ts.sd_oid
-               where object_dataset_status = 4) t;"; 
+               ON so.sd_oid = ts.sd_oid ";
 
-            using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+            dbu.EditEntityRecords(sql_string,
+                                  " where object_dataset_status = 4) t",
+                                  "dataset_properties");
 		}
 
-		public void EditObjectInstances()
-		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 51)"; 
 
-			string sql_stringD = sql_string + @"DELETE from ad.object_instances a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+        #region Table data edits
+
+        public void EditObjectInstances()
+		{
+            string sql_string = dbu.GetObjectTString(51);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_instances"); 
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_instances(sd_oid, 
             instance_type_id, repository_org_id, repository_org,
@@ -131,24 +109,13 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_instances");
+        }
 
 		public void EditObjectTitles()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 52)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_titles a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            string sql_string = dbu.GetObjectTString(52);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_titles"); 
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_titles(sd_oid, 
             title_type_id, title_text, lang_code,
@@ -160,26 +127,15 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_titles");
+        }
 		
 
 		public void EditObjectDates()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 53)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_dates a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
+            string sql_string = dbu.GetObjectTString(53);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_dates");
+ 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash)
@@ -190,24 +146,13 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_dates");
+        }
 
         public void EditObjectContributors()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 55)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_contributors a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            string sql_string = dbu.GetObjectTString(55);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_contributors");
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_contributors(sd_oid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
@@ -223,24 +168,13 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_contributors");
+        }
 
 		public void EditObjectTopics()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 54)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_topics a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            string sql_string = dbu.GetObjectTString(54);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_topics");
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_topics(sd_oid, 
             topic_type_id, mesh_coded, topic_code, topic_value, 
@@ -254,53 +188,31 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_topics");
         }
 
 
         public void EditObjectComments()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 61)";
+            string sql_string = dbu.GetObjectTString(61);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_comments");
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_corrections a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-            string sql_stringI = sql_string + @"INSERT INTO ad.object_corrections(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_comments(sd_oid, 
             ref_type, ref_source, pmid, pmid_version, notes, record_hash)
             SELECT d.sd_oid,  
             ref_type, ref_source, pmid, pmid_version, notes, record_hash
-            FROM sd.object_corrections d
+            FROM sd.object_comments d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_comments");
         }
 
 
         public void EditObjectDescriptions()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 57)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_descriptions a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            string sql_string = dbu.GetObjectTString(57);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_descriptions");
 
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_descriptions(sd_oid, 
             description_type_id, label, description_text, lang_code, 
@@ -312,25 +224,14 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_stringD);
-				conn.Execute(sql_stringI);
-			}
-
-		}
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_descriptions");
+        }
 
 
 		public void EditObjectIdentifiers()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 63)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_identifiers a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            string sql_string = dbu.GetObjectTString(63);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_identifiers");
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_identifiers(sd_oid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
@@ -342,148 +243,168 @@ namespace DataImporter
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_identifiers");
         }
 
 
         public void EditObjectDBLinks()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 60)";
+            string sql_string = dbu.GetObjectTString(60);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_db_links");
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_links a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-            string sql_stringI = sql_string + @"INSERT INTO ad.object_links(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_db_links(sd_oid, 
             db_sequence, db_name, id_in_db, record_hash)
             SELECT d.sd_oid, 
             db_sequence, db_name, id_in_db, record_hash
-            FROM sd.object_links d
+            FROM sd.object_db_links d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_db_links");
         }
 
 
         public void EditObjectPublicationTypes()
 		{
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 62)";
+            string sql_string = dbu.GetObjectTString(62);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_publication_types");
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-            string sql_stringI = sql_string + @"INSERT INTO ad.object_public_types(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_publication_types(sd_oid, 
             type_name, record_hash)
             SELECT d.sd_oid, 
             type_name, record_hash
-            FROM sd.object_public_types d
+            FROM sd.object_publication_types d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
-        }
-
-
-        public void EditObjectRelationships()
-        {
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 56)";
-
-            string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-            string sql_stringI = sql_string + @"INSERT INTO ad.object_public_types(sd_oid, 
-            relationship_type_id, target_sd_oid, record_hash)
-            SELECT d.sd_oid, 
-            relationship_type_id, target_sd_oid, record_hash
-            FROM sd.object_public_types d
-            INNER JOIN t
-            on d.sd_oid = t.sd_oid";
-
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_publication_types");
         }
 
 
         public void EditObjectRights()
         {
-            string sql_string = @"with t as (
-               SELECT sd_oid from 
-               ad.import_object_changed_atts 
-               WHERE hash_type_id = 59)";
+            string sql_string = dbu.GetObjectTString(59);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_rights");
 
-            string sql_stringD = sql_string + @"DELETE from ad.object_public_types a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
-
-            string sql_stringI = sql_string + @"INSERT INTO ad.object_public_types(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_rights(sd_oid, 
             rights_name, rights_uri, comments, record_hash)
             SELECT d.sd_oid, 
             rights_name, rights_uri, comments, record_hash
-            FROM sd.object_public_types d
+            FROM sd.object_rights d
             INNER JOIN t
             on d.sd_oid = t.sd_oid";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_stringD);
-                conn.Execute(sql_stringI);
-            }
-
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_rights");
         }
 
-        public void EditObjectHashes()
-		{
 
-            // Need to ensure that the hashes themselves are all up to date
-            // (for the next comparison)
+        public void EditObjectRelationships()
+        {
+            string sql_string = dbu.GetObjectTString(56);
+            string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_relationships");
+
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_relationships(sd_oid, 
+            relationship_type_id, target_sd_oid, record_hash)
+            SELECT d.sd_oid, 
+            relationship_type_id, target_sd_oid, record_hash
+            FROM sd.object_relationships d
+            INNER JOIN t
+            on d.sd_oid = t.sd_oid";
+
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_relationships");
+        }
+
+        #endregion
+
+
+        public void UpdateObjectsLastImportedDate(int import_id, int source_id)
+        {
+            string top_string = @"UPDATE mon_sf.source_data_objects src
+                          set last_import_id = " + import_id.ToString() + @", 
+                          last_imported = current_timestamp
+                          from 
+                             (select so.id, so.sd_oid 
+                              FROM sd.data_objects so
+                              INNER JOIN ad.import_object_recs ts
+                              ON so.sd_oid = ts.sd_oid
+                             ";
+            string base_string = @" where s.sd_sid = src.sd_id and
+                              src.source_id = " + source_id.ToString();
+
+            dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "editing");
+        }
+
+
+        public void UpdateDateOfDataObjectData()
+        {
+           string top_sql = @"with t as
+            (
+                select so.sd_oid, so.datetime_of_data_fetch
+                from sd.data_objects so
+                inner join ad.import_object_recs td
+                on so.sd_oid = td.sd_oid
+                where td.status in (2, 3)";
+
+            string base_sql = @")
+            update ad.data_objects s
+            set datetime_of_data_fetch = t.datetime_of_data_fetch
+            from t
+            where s.sd_oid = t.sd_oid";
+
+            dbu.UpdateDateOfData("data_objects", top_sql, base_sql);
+        }
+
+
+        public void UpdateObjectCompositeHashes()
+		{
+            // Need to ensure that the hashes themselves are all up to date (for the next comparison)
             // Change the ones that have been changed in sd
+            // if a very large studies (and therefore hash) table may need to chunk using a link to the 
+            // sd.data_objects table....
 
             string sql_string = @"UPDATE ad.object_hashes ah
-            set composite_hash = sh.composite_hash
-            FROM sd.object_hashes sh
-            WHERE ah.sd_oid = sh.sd_oid
-            and ah.hash_type_id = sh.hash_type_id
-            AND ah.composite_hash <> sh.composite_hash";
+                    set composite_hash = so.composite_hash
+                    FROM 
+                        (SELECT st.id, ia.sd_oid, ia.hash_type_id, ia.composite_hash
+                         FROM ad.import_object_changed_atts ia
+                         INNER JOIN sd.data_objects st
+                         on ia.sd_oid = st.sd_oid
+                         where ia.status = 2) so
+                    WHERE ah.sd_oid = so.sd_oid
+                    and ah.hash_type_id = so.hash_type_id ";
 
-            using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
+            dbu.EditStudyHashes("data_objects", sql_string);
 		}
 
+        public void AddNewlyCreatedObjectHashTypes()
+        {
+            // for new sd_sid / hash type combinations
 
-        public void DeleteRecords(string table_name)
+            string sql_string = @"INSERT INTO ad.object_hashes(sd_oid, 
+                 hash_type_id, composite_hash)
+                 SELECT ia.sd_oid, ia.hash_type_id, ia.composite_hash
+                 FROM ad.import_object_changed_atts ia
+			     WHERE ia.status = 1";
+
+            dbu.ExecuteSQL(sql_string);
+            StringHelpers.SendFeedback("Inserting new object hashtype combinations in object hash records");
+        }
+
+
+        public void DropNewlyDeletedObjectHashTypes()
+        {
+            string sql_string = @"DELETE FROM ad.object_hashes sh
+                 USING ad.import_object_changed_atts ia
+                 WHERE sh.sd_oid = ia.sd_oid   
+                 and sh.hash_type_id = ia.hash_type_id 
+			     and ia.status = 4";
+
+            dbu.ExecuteSQL(sql_string);
+            StringHelpers.SendFeedback("Dropping deleted object hashtype combinations from object hash records");
+        }
+
+
+        public void DeleteObjectRecords(string table_name)
         {
             string sql_string = @"with t as (
 			      select sd_oid from ad.import_object_recs
@@ -492,10 +413,7 @@ namespace DataImporter
               using t
 			  where a.sd_oid = t.sd_oid;";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            dbu.ExecuteSQL(sql_string);
         }
 
 
@@ -505,14 +423,28 @@ namespace DataImporter
             set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
             from ad.import_object_recs ts
-            where s.sd_id = ts.sd_sid and
+            where s.sd_id = ts.sd_oid and
             s.source_id = " + source_id.ToString() + @"
             and ts.status = 4;";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            dbu.ExecuteSQL(sql_string);
+        }
+
+
+        public void UpdateFullObjectHash()
+        {
+            // Ensure object_full_hash is updated to reflect new value
+            // The object record itself may not have changed, so the object
+            // record update above cannot be used to make the edit.
+            
+            string sql_string = @"UPDATE ad.data_objects a
+			        set object_full_hash = so.object_full_hash
+                    FROM sd.data_objects so
+			        WHERE so.sd_oid = a.sd_oid ";
+
+            // Chunked by the dbu routine to 100,000 records at a time
+
+            dbu.UpdateFullHashes("data_objects", sql_string);
         }
 
     }

@@ -9,14 +9,19 @@ namespace DataImporter
 	class StudyDataAdder
 	{
 		string connstring;
+        DBUtilities dbu;
 
-		public StudyDataAdder(string _connstring)
+
+        public StudyDataAdder(string _connstring)
 		{
 			connstring = _connstring;
+            dbu = new DBUtilities(connstring);
 		}
 
 
-		public void TransferStudies()
+        #region Table data transfer
+
+        public void TransferStudies()
 		{
 			string sql_string = @"INSERT INTO ad.studies (sd_sid, display_title,
             title_lang_code, brief_description, bd_contains_html, data_sharing_statement,
@@ -35,29 +40,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
-
-
-		public void UpdateStudiesLastImportedDate(int import_id, int source_id)
-        {
-			string sql_string = @"Update mon_sf.source_data_studies s
-            set last_import_id = " + import_id.ToString() + @", 
-            last_imported = current_timestamp
-            from ad.import_study_recs ts
-            where s.sd_id = ts.sd_sid and
-            s.source_id = " + source_id.ToString() + @"
-			and ts.status = 1";
-
-
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-
+            dbu.ExecuteTransferSQL(sql_string, "studies", "adding");
 		}
 
 		public void TransferStudyIdentifiers()
@@ -73,11 +56,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_identifiers", "adding");
+        }
 
 		public void TransferStudyTitles()
 		{
@@ -90,13 +70,10 @@ namespace DataImporter
             FROM sd.study_titles s
             INNER JOIN ad.import_study_recs ts
             ON s.sd_sid = ts.sd_sid
-            where ts.status = 1"; 
+            where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_titles", "adding");
+        }
 
 		public void TransferStudyReferences()
 		{
@@ -109,11 +86,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_references", "adding");
+        }
 
 		public void TransferStudyContributors()
 		{
@@ -132,11 +106,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_contributors", "adding");
+        }
 
 		public void TransferStudyTopics()
 		{
@@ -153,11 +124,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_topics", "adding");
+        }
 
 
 		public void TransferStudyRelationships()
@@ -171,11 +139,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_relationships", "adding");
+        }
 
 
 		public void TransferStudyFeatures()
@@ -189,11 +154,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_features", "adding");
+        }
 
 
 		public void TransferStudyLinks()
@@ -207,11 +169,8 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_links", "adding");
+        }
 
 
 		public void TransferStudyIpdAvailable()
@@ -225,16 +184,33 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-			using (var conn = new NpgsqlConnection(connstring))
-			{
-				conn.Execute(sql_string);
-			}
-		}
+            dbu.ExecuteTransferSQL(sql_string, "study_ipd_available", "adding");
+        }
+
+        #endregion
 
 
-		public void TransferStudyHashes()
+        public void UpdateStudiesLastImportedDate(int import_id, int source_id)
+        {
+            string top_string = @"Update mon_sf.source_data_studies src
+                          set last_import_id = " + import_id.ToString() + @", 
+                          last_imported = current_timestamp
+                          from 
+                             (select so.id, so.sd_sid 
+                             FROM sd.studies so
+                             INNER JOIN ad.import_study_recs ts
+                             ON so.sd_sid = ts.sd_sid
+                             ";
+           string base_string = @" where s.sd_oid = src.sd_id and
+                              src.source_id = " + source_id.ToString();
+
+            dbu.UpdateLastImportedDate("studies", top_string, base_string, "adding");
+        }
+
+
+        public void TransferStudyHashes()
 		{
-			for (int n = 11; n < 20; n++)
+			for (int n = 11; n < 21; n++)
 			{
 				string sql_string = @"INSERT INTO ad.study_hashes(sd_sid,
 			      hash_type_id, composite_hash)
@@ -246,11 +222,10 @@ namespace DataImporter
                   where ts.status = 1
                   and s.hash_type_id = " + n.ToString();
 
-				using (var conn = new NpgsqlConnection(connstring))
-				{
-					conn.Execute(sql_string);
-				}
-			}
+                dbu.ExecuteSQL(sql_string);
+                StringHelpers.SendFeedback("Inserting study hashes - type " + n.ToString());
+            }
 		}
-	}
+
+    }
 }

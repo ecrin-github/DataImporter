@@ -107,50 +107,13 @@ namespace DataImporter
 			}
 		}
 
-
-	    public void UpdateDateOfStudyData()
+		public void UpdateDatesOfData()
         {
-			string sql_string = @"with t as 
-            (   
-                select s.sd_sid, s.datetime_of_data_fetch 
-                from sd.studies s
-                inner join ad.import_study_recs ts
-                on s.sd_sid  = ts.sd_sid
-                where ts.status in (2,3)  
-            )
-            update ad.studies s
-            set datetime_of_data_fetch = t.datetime_of_data_fetch
-            from t
-            where s.sd_sid = t.sd_sid";
-
-			using (var conn = new Npgsql.NpgsqlConnection(connString))
+			if (source.has_study_tables)
 			{
-				conn.Execute(sql_string);
+				study_editor.UpdateDateOfStudyData();
 			}
-			StringHelpers.SendFeedback("Updated dates of study data");
-		}
-
-
-		public void UpdateDateOfDataObjectData()
-        {
-			string sql_string = @"with t as 
-            (   
-                select d.sd_oid, d.datetime_of_data_fetch 
-                from sd.data_objects d
-                inner join ad.import_object_recs td
-                on d.sd_oid  = td.sd_oid
-                where td.status in (2,3)  
-            )
-            update ad.data_objects s
-            set datetime_of_data_fetch = t.datetime_of_data_fetch
-            from t
-            where s.sd_oid = t.sd_oid";
-
-			using (var conn = new Npgsql.NpgsqlConnection(connString))
-			{
-				conn.Execute(sql_string);
-			}
-			StringHelpers.SendFeedback("Updated dates of data object data");
+			object_editor.UpdateDateOfDataObjectData();
 		}
 
 
@@ -159,7 +122,6 @@ namespace DataImporter
 			study_editor.EditStudies();
 			study_editor.EditStudyIdentifiers();
 			study_editor.EditStudyTitles();
-			study_editor.EditStudyHashes();
 
 			// these are database dependent
 			if (source.has_study_references) study_editor.EditStudyReferences();
@@ -172,6 +134,10 @@ namespace DataImporter
 
 			study_editor.UpdateStudiesLastImportedDate(import_id, source.id);
 			StringHelpers.SendFeedback("Edited study data");
+
+			study_editor.UpdateStudyCompositeHashes();
+			study_editor.AddNewlyCreatedStudyHashTypes();
+			study_editor.DropNewlyDeletedStudyHashTypes();
 		}
 
 
@@ -180,7 +146,6 @@ namespace DataImporter
 			object_editor.EditDataObjects();
 			object_editor.EditObjectInstances();
 			object_editor.EditObjectTitles();
-			object_editor.EditObjectHashes();
 
 			// these are database dependent		
 
@@ -199,6 +164,10 @@ namespace DataImporter
 				object_editor.EditObjectPublicationTypes();
 			}
 
+			object_editor.UpdateObjectCompositeHashes();
+			object_editor.AddNewlyCreatedObjectHashTypes();
+			object_editor.DropNewlyDeletedObjectHashTypes();
+
 			if (!source.has_study_tables)
 			{
 				// only update the object source data that come without 
@@ -212,19 +181,19 @@ namespace DataImporter
 
 		public void RemoveDeletedStudyData(int import_id)
 		{
-			study_editor.DeleteRecords("studies");
-			study_editor.DeleteRecords("study_identifiers");
-			study_editor.DeleteRecords("study_titles");
-			study_editor.DeleteRecords("study_hashes"); ;
+			study_editor.DeleteStudyRecords("studies");
+			study_editor.DeleteStudyRecords("study_identifiers");
+			study_editor.DeleteStudyRecords("study_titles");
+			study_editor.DeleteStudyRecords("study_hashes"); ;
 
 			// these are database dependent
-			if (source.has_study_references) study_editor.DeleteRecords("study_references");
-			if (source.has_study_contributors) study_editor.DeleteRecords("study_contributors");
-			if (source.has_study_topics) study_editor.DeleteRecords("study_topics");
-			if (source.has_study_features) study_editor.DeleteRecords("study_features"); ;
-			if (source.has_study_relationships) study_editor.DeleteRecords("study_relationships");
-			if (source.has_study_links) study_editor.DeleteRecords("study_links");
-			if (source.has_study_ipd_available) study_editor.DeleteRecords("study_ipd_available");
+			if (source.has_study_references) study_editor.DeleteStudyRecords("study_references");
+			if (source.has_study_contributors) study_editor.DeleteStudyRecords("study_contributors");
+			if (source.has_study_topics) study_editor.DeleteStudyRecords("study_topics");
+			if (source.has_study_features) study_editor.DeleteStudyRecords("study_features"); ;
+			if (source.has_study_relationships) study_editor.DeleteStudyRecords("study_relationships");
+			if (source.has_study_links) study_editor.DeleteStudyRecords("study_links");
+			if (source.has_study_ipd_available) study_editor.DeleteStudyRecords("study_ipd_available");
 
 			study_editor.UpdateStudiesDeletedDate(import_id, source.id);
 
@@ -234,24 +203,24 @@ namespace DataImporter
 
 		public void RemoveDeletedDataObjectData(int import_id)
 		{
-			object_editor.DeleteRecords("data_objects");
-			object_editor.DeleteRecords("object_instances");
-			object_editor.DeleteRecords("object_titles");
-			object_editor.DeleteRecords("object_hashes");
+			object_editor.DeleteObjectRecords("data_objects");
+			object_editor.DeleteObjectRecords("object_instances");
+			object_editor.DeleteObjectRecords("object_titles");
+			object_editor.DeleteObjectRecords("object_hashes");
 
 			// these are database dependent		
 
-			if (source.has_dataset_properties) object_editor.DeleteRecords("dataset_properties"); 
-			if (source.has_object_dates) object_editor.DeleteRecords("object_dates");
+			if (source.has_dataset_properties) object_editor.DeleteObjectRecords("dataset_properties"); 
+			if (source.has_object_dates) object_editor.DeleteObjectRecords("object_dates");
 			if (source.has_object_pubmed_set)
 			{
-				object_editor.DeleteRecords("object_contributors");;
-				object_editor.DeleteRecords("object_topics");
-				object_editor.DeleteRecords("object_comments");
-				object_editor.DeleteRecords("object_descriptions");
-				object_editor.DeleteRecords("object_identifiers");
-				object_editor.DeleteRecords("object_db_links");
-				object_editor.DeleteRecords("object_publication_types"); ;
+				object_editor.DeleteObjectRecords("object_contributors");;
+				object_editor.DeleteObjectRecords("object_topics");
+				object_editor.DeleteObjectRecords("object_comments");
+				object_editor.DeleteObjectRecords("object_descriptions");
+				object_editor.DeleteObjectRecords("object_identifiers");
+				object_editor.DeleteObjectRecords("object_db_links");
+				object_editor.DeleteObjectRecords("object_publication_types"); ;
 			}
 
 			if (!source.has_study_tables)
@@ -263,40 +232,15 @@ namespace DataImporter
 		}
 
 
-		public void UpdateFullStudyHash()
+		public void UpdateFullStudyHashes()
 		{
-			// Ensure study_full_hash is updated to reflect new value
-			// The study record itself may not have changed, so the study
-			// record update above cannot be used to make the edit 
-
-			string sql_string = @"UPDATE ad.studies a
-			  set study_full_hash = s.study_full_hash
-              FROM sd.studies s
-			  WHERE s.sd_sid = a.sd_sid;";
-
-			using (var conn = new NpgsqlConnection(connString))
+			if (source.has_study_tables)
 			{
-				conn.Execute(sql_string);
+				study_editor.UpdateFullStudyHash();
 			}
+			object_editor.UpdateFullObjectHash();
 		}
 
-
-		public void UpdateFullObjectHash()
-		{
-			// Ensure object_full_hash is updated to reflect new value
-			// The object record itself may not have changed, so the object
-			// record update above cannot be used to make the edit 
-
-			string sql_string = @"UPDATE ad.data_objects a
-			  set object_full_hash = s.object_full_hash
-              FROM sd.data_objects s
-			  WHERE s.sd_oid = a.sd_oid;";
-
-			using (var conn = new NpgsqlConnection(connString))
-			{
-				conn.Execute(sql_string);
-			}
-		}
 
 	}
 }

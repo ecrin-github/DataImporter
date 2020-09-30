@@ -8,15 +8,15 @@ namespace DataImporter
 	{
 		private string connString;
 		private Source source;
-		StudyTableBuildersAD study_builder;
-		ObjectTableBuildersAD object_builder;
+		StudyTableBuilders study_builder;
+		ObjectTableBuilders object_builder;
 
 		public ADBuilder(string _connString, Source _source)
 		{
 			connString = _connString;
 			source = _source;
-			study_builder = new StudyTableBuildersAD(connString);
-			object_builder = new ObjectTableBuildersAD(connString);
+			study_builder = new StudyTableBuilders(connString);
+			object_builder = new ObjectTableBuilders(connString);
 		}
 
 		public void DeleteADStudyTables()
