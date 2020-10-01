@@ -30,28 +30,22 @@ namespace DataImporter
 		public void EstablishForeignMonTables(string user_name, string password)
         {
 			FTM.EstablishMonForeignTables(user_name, password);
+			StringHelpers.SendFeedback("Monitor tables established as foreign tables");
 		}
 
 		public void DropForeignMonTables()
 		{
 			FTM.DropMonForeignTables();
+			StringHelpers.SendFeedback("Monitor tables dropped as foreign tables");
 		}
 
 		public void AddNewStudies(int import_id)
         {
 			study_adder.TransferStudies();
-			StringHelpers.SendFeedback("Added new studies");
-
 			study_adder.TransferStudyIdentifiers();
-			StringHelpers.SendFeedback("Added new study identifiers");
-
 			study_adder.TransferStudyTitles();
-			StringHelpers.SendFeedback("Added new study titles");
 
-			study_adder.TransferStudyHashes();
-			StringHelpers.SendFeedback("Added new study hashes");
-
-			// these are database dependent
+			// These are database dependent
 
 			if (source.has_study_references) study_adder.TransferStudyReferences();
 			if (source.has_study_contributors) study_adder.TransferStudyContributors();
@@ -63,26 +57,21 @@ namespace DataImporter
 			StringHelpers.SendFeedback("Added new source specific study data");
 
 			study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
+			
+			study_adder.TransferStudyHashes();
+			StringHelpers.SendFeedback("Added new study hashes");
 		}
 
 
 		public void AddNewDataObjects(int import_id)
 		{
 			object_adder.TransferDataObjects();
-			StringHelpers.SendFeedback("Added new data objects");
-
+			if (source.has_dataset_properties) object_adder.TransferDataSetProperties();
 			object_adder.TransferObjectInstances();
-			StringHelpers.SendFeedback("Added new object instances");
-
 			object_adder.TransferObjectTitles();
-			StringHelpers.SendFeedback("Added new object titles");
-
-			object_adder.TransferObjectHashes();
-			StringHelpers.SendFeedback("Added new object hashes");
 
 			// these are database dependent		
 
-			if (source.has_dataset_properties) object_adder.TransferDataSetProperties();
 			if (source.has_object_dates) object_adder.TransferObjectDates();
 			if (source.has_object_rights) object_adder.TransferObjectRights();
 			if (source.has_object_relationships) object_adder.TransferObjectRelationships();
@@ -105,6 +94,9 @@ namespace DataImporter
 
 				object_adder.UpdateObjectsLastImportedDate(import_id, source.id);
 			}
+			
+			object_adder.TransferObjectHashes();
+			StringHelpers.SendFeedback("Added new object hashes");
 		}
 
 		public void UpdateDatesOfData()
@@ -144,12 +136,12 @@ namespace DataImporter
 		public void UpdateEditedDataObjectData(int import_id)
 		{
 			object_editor.EditDataObjects();
+			if (source.has_dataset_properties) object_editor.EditDataSetProperties();
 			object_editor.EditObjectInstances();
 			object_editor.EditObjectTitles();
 
 			// these are database dependent		
 
-			if (source.has_dataset_properties) object_editor.EditDataSetProperties();
 			if (source.has_object_dates) object_editor.EditObjectDates();
 			if (source.has_object_rights) object_editor.EditObjectRights();
 			if (source.has_object_relationships) object_editor.EditObjectRelationships();
@@ -239,6 +231,7 @@ namespace DataImporter
 				study_editor.UpdateFullStudyHash();
 			}
 			object_editor.UpdateFullObjectHash();
+			StringHelpers.SendFeedback("Full hash values updated");
 		}
 
 

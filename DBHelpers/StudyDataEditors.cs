@@ -270,10 +270,10 @@ namespace DataImporter
                              INNER JOIN ad.import_study_recs ts
                              ON so.sd_sid = ts.sd_sid
                              ";
-			string base_string = @" where s.sd_oid = src.sd_id and
+			string base_string = @" where s.sd_sid = src.sd_id and
                               src.source_id = " + source_id.ToString();
 
-			dbu.UpdateLastImportedDate("studies", top_string, base_string, "editing");
+			dbu.UpdateLastImportedDate("studies", top_string, base_string, "Editing");
 		}
 
 

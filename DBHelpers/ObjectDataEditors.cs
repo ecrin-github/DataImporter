@@ -101,13 +101,13 @@ namespace DataImporter
             instance_type_id, repository_org_id, repository_org,
             url, url_accessible, url_last_checked, resource_type_id,
             resource_size, resource_size_units, resource_comments, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             instance_type_id, repository_org_id, repository_org,
             url, url_accessible, url_last_checked, resource_type_id,
             resource_size, resource_size_units, resource_comments, record_hash
-            FROM sd.object_instances d
+            FROM sd.object_instances s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_instances");
         }
@@ -120,12 +120,12 @@ namespace DataImporter
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_titles(sd_oid, 
             title_type_id, title_text, lang_code,
             lang_usage_id, is_default, comments, comparison_text, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             title_type_id, title_text, lang_code,
             lang_usage_id, is_default, comments, comparison_text, record_hash
-            FROM sd.object_titles d
+            FROM sd.object_titles s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_titles");
         }
@@ -139,12 +139,12 @@ namespace DataImporter
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash
-            FROM sd.object_dates d
+            FROM sd.object_dates s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_dates");
         }
@@ -159,14 +159,14 @@ namespace DataImporter
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
             affil_org_id_type, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
             affil_org_id_type, record_hash
-            FROM sd.object_contributors d
+            FROM sd.object_contributors s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_contributors");
         }
@@ -180,13 +180,13 @@ namespace DataImporter
             topic_type_id, mesh_coded, topic_code, topic_value, 
             topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
             original_value, comments, record_hash)
-            SELECT d.sd_oid,  
+            SELECT s.sd_oid,  
             topic_type_id, mesh_coded, topic_code, topic_value, 
             topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
             original_value, comments, record_hash
-            FROM sd.object_topics d
+            FROM sd.object_topics s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_topics");
         }
@@ -199,11 +199,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_comments(sd_oid, 
             ref_type, ref_source, pmid, pmid_version, notes, record_hash)
-            SELECT d.sd_oid,  
+            SELECT s.sd_oid,  
             ref_type, ref_source, pmid, pmid_version, notes, record_hash
-            FROM sd.object_comments d
+            FROM sd.object_comments s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_comments");
         }
@@ -217,12 +217,12 @@ namespace DataImporter
 			string sql_stringI = sql_string + @"INSERT INTO ad.object_descriptions(sd_oid, 
             description_type_id, label, description_text, lang_code, 
             contains_html, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             description_type_id, label, description_text, lang_code, 
             contains_html, record_hash
-            FROM sd.object_descriptions d
+            FROM sd.object_descriptions s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_descriptions");
         }
@@ -236,12 +236,12 @@ namespace DataImporter
             string sql_stringI = sql_string + @"INSERT INTO ad.object_identifiers(sd_oid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
             identifier_date, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             identifier_value, identifier_type_id, identifier_org_id, identifier_org,
             identifier_date, record_hash
-            FROM sd.object_identifiers d
+            FROM sd.object_identifiers s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_identifiers");
         }
@@ -254,11 +254,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_db_links(sd_oid, 
             db_sequence, db_name, id_in_db, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             db_sequence, db_name, id_in_db, record_hash
-            FROM sd.object_db_links d
+            FROM sd.object_db_links s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_db_links");
         }
@@ -271,11 +271,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_publication_types(sd_oid, 
             type_name, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             type_name, record_hash
-            FROM sd.object_publication_types d
+            FROM sd.object_publication_types s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_publication_types");
         }
@@ -288,11 +288,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_rights(sd_oid, 
             rights_name, rights_uri, comments, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             rights_name, rights_uri, comments, record_hash
-            FROM sd.object_rights d
+            FROM sd.object_rights s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_rights");
         }
@@ -305,11 +305,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_relationships(sd_oid, 
             relationship_type_id, target_sd_oid, record_hash)
-            SELECT d.sd_oid, 
+            SELECT s.sd_oid, 
             relationship_type_id, target_sd_oid, record_hash
-            FROM sd.object_relationships d
+            FROM sd.object_relationships s
             INNER JOIN t
-            on d.sd_oid = t.sd_oid";
+            on s.sd_oid = t.sd_oid";
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_relationships");
         }
@@ -328,10 +328,10 @@ namespace DataImporter
                               INNER JOIN ad.import_object_recs ts
                               ON so.sd_oid = ts.sd_oid
                              ";
-            string base_string = @" where s.sd_sid = src.sd_id and
+            string base_string = @" where s.sd_oid = src.sd_id and
                               src.source_id = " + source_id.ToString();
 
-            dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "editing");
+            dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "Editing");
         }
 
 

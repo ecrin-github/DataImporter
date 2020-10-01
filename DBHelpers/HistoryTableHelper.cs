@@ -223,20 +223,32 @@ namespace DataImporter
 			if (!master_list_has_entries)
 			{
 				// simply transfer the records
-				sql_string = @"INSERT INTO ad.history_study_changed_atts (sd_sid, hash_type_id)
-                select sd_sid, hash_type_id from ad.import_study_changed_atts;";
+				sql_string = @"INSERT INTO ad.history_study_changed_atts (sd_sid, hash_type_id, status, composite_hash)
+                select sd_sid, hash_type_id, status, composite_hash from ad.import_study_changed_atts;";
 				ExecuteSQL(sql_string);
 			}
 			else
 			{
-				// previous imports recorded - accumulate the att changes by adding the 
-				// additional ones in the new import
-				sql_string = @"INSERT INTO ad.history_study_changed_atts (sd_sid, hash_type_id)
-                select i.sd_sid, i.hash_type_id from ad.import_study_changed_atts i
+				// status = 4, = dropped id / hash type combo - added as new record to table where it 
+				// does not exist unless was earlier put in as 1 or 2 - then these need to change to 4
+				sql_string = @"UPDATE ad.history_study_changed_atts h
+                SET status = 4
+                FROM ad.import_study_changed_atts i
+                WHERE h.sd_sid = i.sd_sid
+      			and h.hash_type_id = i.hash_type_id
+                and i.status = 4;";
+				ExecuteSQL(sql_string);
+
+				// status = 1 or 2 - also add to the table as new records assuming that they do not already exist
+				// So add all new records...  Record status is therfore always of the first addition to the table
+				// apart from the rare 4 situation
+
+				sql_string = @"INSERT INTO ad.history_study_changed_atts (sd_sid, hash_type_id, status, composite_hash)
+                select i.sd_sid, i.hash_type_id, i.status, i.composite_hash from ad.import_study_changed_atts i
                 left join ad.history_study_changed_atts h
                 on i.sd_sid = h.sd_sid 
                 and i.hash_type_id = h.hash_type_id
-                where h.sd_sid is null;"; 
+                where h.sd_sid is null; ";
 				ExecuteSQL(sql_string);
 			}
 		}
@@ -353,21 +365,32 @@ namespace DataImporter
 			if (!master_list_has_entries)
 			{
 				// simply transfer the records
-				sql_string = @"INSERT INTO ad.history_object_changed_atts (sd_oid, hash_type_id)
-                select sd_oid, hash_type_id from ad.import_object_changed_atts;";
+				sql_string = @"INSERT INTO ad.history_object_changed_atts (sd_oid, hash_type_id, status, composite_hash)
+                select sd_oid, hash_type_id, status, composite_hash from ad.import_object_changed_atts;";
 				ExecuteSQL(sql_string);
 			}
 			else
 			{
-				// previous imports recorded - accumulate the att changes by adding the 
-				// additional ones in the new import
-				sql_string = @"INSERT INTO ad.history_object_changed_atts (sd_oid, hash_type_id)
-                select i.sd_oid, i.hash_type_id from ad.import_object_changed_atts i
+				// status = 4, = dropped id / hash type combo - added as new record to table where it 
+				// does not exist unless was earlier put in as 1 or 2 - then these need to change to 4
+				sql_string = @"UPDATE ad.history_object_changed_atts h
+                SET status = 4
+                FROM ad.import_object_changed_atts i
+                WHERE h.sd_oid = i.sd_oid
+      			and h.hash_type_id = i.hash_type_id
+                and i.status = 4;";
+				ExecuteSQL(sql_string);
+
+				// status = 1 or 2 - also add to the table as new records assuming that they do not already exist
+				// So add all new records...  Record status is therfore always of the first addition to the table
+				// apart from the rare 4 situation
+                sql_string = @"INSERT INTO ad.history_object_changed_atts (sd_oid, hash_type_id, status, composite_hash)
+                select i.sd_oid, i.hash_type_id, i.status, i.composite_hash from ad.import_object_changed_atts i
                 left join ad.history_object_changed_atts h
                 on i.sd_oid = h.sd_oid 
                 and i.hash_type_id = h.hash_type_id
                 where h.sd_oid is null;";
-				ExecuteSQL(sql_string);
+    			ExecuteSQL(sql_string);
 			}
 		}
 

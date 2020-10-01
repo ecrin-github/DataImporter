@@ -79,7 +79,7 @@ namespace DataImporter
 			if (source.has_study_relationships) study_builder.create_table_study_relationships();
 			if (source.has_study_links) study_builder.create_table_study_links();
 			if (source.has_study_ipd_available) study_builder.create_table_ipd_available();
-
+			StringHelpers.SendFeedback("Rebuilt AD study tables");
 		}
 
 
@@ -108,6 +108,7 @@ namespace DataImporter
 				object_builder.create_table_object_db_links();
 				object_builder.create_table_object_publication_types();
 			}
+			StringHelpers.SendFeedback("Rebuilt AD Object tables");
 		}
 	}
 }

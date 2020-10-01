@@ -24,6 +24,7 @@ namespace DataImporter
 
 		public void CreateHistoryTables()
 		{
+			htc.CreateHistoryMasterTable();
 			if (source.has_study_tables)
 			{
 				htc.CreateStudyRecsHistoryTable();

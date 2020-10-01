@@ -13,6 +13,7 @@ namespace DataImporter
 			ImportBuilder ib = new ImportBuilder(connstring, source);
 			DataTransferrer transferrer = new DataTransferrer(connstring, source);
 
+			StringHelpers.SendFeedback("***** Setup *****");
 			if (build_tables)
 			{
 				ADBuilder adb = new ADBuilder(connstring, source);
@@ -23,8 +24,6 @@ namespace DataImporter
 				}
 				adb.DeleteADObjectTables();
 				adb.BuildNewADObjectTables();
-				StringHelpers.SendFeedback("Rebuilt AD tables");
-
 				hb.CreateHistoryTables();
 			}
 
@@ -42,6 +41,8 @@ namespace DataImporter
 			// set up sf monitor tables as foreign tables, temporarily
 			transferrer.EstablishForeignMonTables(repo.User_Name, repo.Password);
 
+			StringHelpers.SendFeedback("");
+			StringHelpers.SendFeedback("***** Adding new data *****");
 			// for studies with status 1, (= new) add these, their attributes,
 			// their data objects, and their object attributes
 
@@ -55,9 +56,13 @@ namespace DataImporter
 			// downloaded data that previously existed (= status of 2 and 3 
 			// for both studies and data objects)
 
+			StringHelpers.SendFeedback("");
+			StringHelpers.SendFeedback("***** Update dates of data *****");
 			transferrer.UpdateDatesOfData();
 
 			// then a need to examine the edited data (status = 2)
+			StringHelpers.SendFeedback("");
+			StringHelpers.SendFeedback("***** Editing existing data *****");
 			if (source.has_study_tables)
 			{
 				transferrer.UpdateEditedStudyData(import_id);
@@ -66,7 +71,8 @@ namespace DataImporter
 
 
 			// Finally, remove any deleted studies / objects from the ad tables
-
+			StringHelpers.SendFeedback("");
+			StringHelpers.SendFeedback("***** Removing any deleted data *****");
 			if (source.has_study_tables)
 			{
 				transferrer.RemoveDeletedStudyData(import_id);
@@ -76,11 +82,12 @@ namespace DataImporter
 
 			// Ensure that the full hash records have been updated
 			// may not have been if change was only in attribute(s).
-            // Remove foreign tables and store import event details
+			// Remove foreign tables and store import event details
 			// Transfer the import record data to the history tables.
 
+			StringHelpers.SendFeedback("");
+			StringHelpers.SendFeedback("***** Tidy up and finish *****");
 			transferrer.UpdateFullStudyHashes();
-			StringHelpers.SendFeedback("Full hash values updated");
 			transferrer.DropForeignMonTables();
 			logging_repo.StoreImportEvent(import);
 			hb.RecordImportHistory(import);

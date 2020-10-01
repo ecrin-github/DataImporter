@@ -40,7 +40,7 @@ namespace DataImporter
             using (var conn = new NpgsqlConnection(connstring))
             {
                 conn.Execute(sql_string1);
-                ExecuteTransferSQL(sql_string2, table_name, "editing");
+                ExecuteTransferSQL(sql_string2, table_name, "Editing");
             }
         }
 
@@ -110,7 +110,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in data transfer (" + table_name + ") to ad table: " + res);
+                StringHelpers.SendFeedback("***ERROR*** in data transfer (" + table_name + ") to ad table: " + res);
             }
         }
 
@@ -121,16 +121,17 @@ namespace DataImporter
             {
                 string sql_string = top_sql;
                 string param_string = "";
-                if (context == "adding")
+                if (context == "Adding")
                 {
                     param_string = " and ts.status = 1) s ";
                 }
 
-                if (context == "editing")
+                if (context == "Editing")
                 {
                     param_string = " and ts.status = 2) s ";
                 }
-
+                string feedbackA = "Updating last imported dates and import ids, (" + context.ToLower()
+                                   + " " + table_name + "), ";
                 int rec_count = GetRecordCount(table_name);
                 int rec_batch = 100000;
                 if (rec_count > rec_batch)
@@ -140,7 +141,7 @@ namespace DataImporter
                         sql_string += " and so.id >= " + r.ToString() + " and so.id < " + (r + rec_batch).ToString();
                         ExecuteSQL(sql_string + param_string + base_sql);
                         
-                        string feedback = "Updating last imported dates and import ids table_name, " + r.ToString() + " to ";
+                        string feedback = feedbackA + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
                         StringHelpers.SendFeedback(feedback);
                     }
@@ -148,13 +149,13 @@ namespace DataImporter
                 else
                 { 
                     ExecuteSQL(sql_string + param_string + base_sql);
-                    StringHelpers.SendFeedback("Updating last imported dates and import ids for added " + table_name + ", as a single batch");
+                    StringHelpers.SendFeedback(feedbackA + " as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in update last imported date (added " + table_name + "): " + res);
+                StringHelpers.SendFeedback("***ERROR*** in update last imported date (" + context.ToLower() + " " + table_name + "): " + res);
             }
         }
 
@@ -174,7 +175,7 @@ namespace DataImporter
                                                   (r + rec_batch).ToString() + base_sql;
                         ExecuteSQL(batch_sql_string);
 
-                        string feedback = "updating date of data for " + table_name + ", " + r.ToString() + " to ";
+                        string feedback = "Updating date of data for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
                         StringHelpers.SendFeedback(feedback);
                     }
@@ -182,13 +183,13 @@ namespace DataImporter
                 else
                 {
                     ExecuteSQL(top_sql + base_sql);
-                    StringHelpers.SendFeedback("updating date of data for " + table_name + ", as a single batch");
+                    StringHelpers.SendFeedback("Updating date of data for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in " + table_name + " date of data update: " + res);
+                StringHelpers.SendFeedback("***ERROR*** in " + table_name + " date of data update: " + res);
             }
         }
 
@@ -199,7 +200,7 @@ namespace DataImporter
             
             try
             {
-                int rec_count = GetRecordCount("studies");
+                int rec_count = GetRecordCount(table_name);
                 int rec_batch = 100000;
 
                 if (rec_count > rec_batch)
@@ -210,7 +211,7 @@ namespace DataImporter
                                                 + (r + rec_batch).ToString() + basestring;
                         ExecuteSQL(batch_sql_string);
 
-                        string feedback = "updating entity records for " + table_name + ", " + r.ToString() + " to ";
+                        string feedback = "Updating entity records for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
                         StringHelpers.SendFeedback(feedback);
                     }
@@ -218,13 +219,13 @@ namespace DataImporter
                 else
                 {
                     ExecuteSQL(topstring + basestring);
-                    StringHelpers.SendFeedback("updating entity records for " + table_name + ", as a single batch");
+                    StringHelpers.SendFeedback("Updating entity records for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in updating entity records for " + table_name + ", sd to ad table: " + res);
+                StringHelpers.SendFeedback("***ERROR*** in updating entity records for " + table_name + ", sd to ad table: " + res);
             }
         }
 
@@ -245,7 +246,7 @@ namespace DataImporter
                 {
                     for (int r = 1; r <= rec_count; r += rec_batch)
                     {
-                        string batch_sql_string = top_sql + " and s.id >= " + r.ToString() + " and s.id < " + (r + rec_batch).ToString();
+                        string batch_sql_string = top_sql + " and so.id >= " + r.ToString() + " and so.id < " + (r + rec_batch).ToString();
                         ExecuteSQL(batch_sql_string);
 
                         string feedback = "Updating changed composite hashes for " + table_name + ", " + r.ToString() + " to ";
@@ -262,7 +263,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in " + table_name + " data edits (composite hashes), sd to ad table: " + res);
+                StringHelpers.SendFeedback("***ERROR*** in " + table_name + " data edits (composite hashes), sd to ad table: " + res);
             }
         }
 
@@ -299,7 +300,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("Error in  " + table_name + " full hash updates: " + res);
+                StringHelpers.SendFeedback("ERROR in  " + table_name + " full hash updates: " + res);
             }
         }
     }

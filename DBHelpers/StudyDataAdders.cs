@@ -40,7 +40,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "studies", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "studies", "Adding");
 		}
 
 		public void TransferStudyIdentifiers()
@@ -56,7 +56,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_identifiers", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_identifiers", "Adding");
         }
 
 		public void TransferStudyTitles()
@@ -72,7 +72,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_titles", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_titles", "Adding");
         }
 
 		public void TransferStudyReferences()
@@ -86,7 +86,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_references", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_references", "Adding");
         }
 
 		public void TransferStudyContributors()
@@ -106,7 +106,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_contributors", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_contributors", "Adding");
         }
 
 		public void TransferStudyTopics()
@@ -124,7 +124,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_topics", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_topics", "Adding");
         }
 
 
@@ -139,7 +139,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_relationships", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_relationships", "Adding");
         }
 
 
@@ -154,7 +154,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_features", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_features", "Adding");
         }
 
 
@@ -169,7 +169,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_links", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_links", "Adding");
         }
 
 
@@ -184,7 +184,7 @@ namespace DataImporter
             ON s.sd_sid = ts.sd_sid
             where ts.status = 1";
 
-            dbu.ExecuteTransferSQL(sql_string, "study_ipd_available", "adding");
+            dbu.ExecuteTransferSQL(sql_string, "study_ipd_available", "Adding");
         }
 
         #endregion
@@ -201,10 +201,10 @@ namespace DataImporter
                              INNER JOIN ad.import_study_recs ts
                              ON so.sd_sid = ts.sd_sid
                              ";
-           string base_string = @" where s.sd_oid = src.sd_id and
+           string base_string = @" where s.sd_sid = src.sd_id and
                               src.source_id = " + source_id.ToString();
 
-            dbu.UpdateLastImportedDate("studies", top_string, base_string, "adding");
+            dbu.UpdateLastImportedDate("studies", top_string, base_string, "Adding");
         }
 
 
