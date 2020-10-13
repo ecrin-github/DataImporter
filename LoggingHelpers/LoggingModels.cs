@@ -25,7 +25,7 @@ namespace DataImporter
 		public bool has_study_relationships { get; set; }
 		public bool has_study_links { get; set; }
 		public bool has_study_ipd_available { get; set; }
-		public bool has_dataset_properties { get; set; }
+		public bool has_object_datasets { get; set; }
 		public bool has_object_dates { get; set; }
 		public bool has_object_relationships { get; set; }
 		public bool has_object_rights { get; set; }
@@ -58,7 +58,7 @@ namespace DataImporter
 		}
 	}
 
-	[Table("ad.history_master_list")]
+	[Table("ad.to_agg_imports")]
 	public class HistoryRecord
 	{
 		[ExplicitKey]

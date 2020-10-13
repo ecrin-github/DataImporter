@@ -43,7 +43,7 @@ namespace DataImporter
 			// therefore can attempt to drop all of them
 
 			object_builder.drop_table("data_objects");
-			object_builder.drop_table("dataset_properties");
+			object_builder.drop_table("object_datasets");
 			object_builder.drop_table("object_dates");
 			object_builder.drop_table("object_instances");
 			object_builder.drop_table("object_titles");
@@ -94,7 +94,7 @@ namespace DataImporter
 
 			// these are database dependent		
 
-			if (source.has_dataset_properties) object_builder.create_table_dataset_properties();
+			if (source.has_object_datasets) object_builder.create_table_object_datasets();
 			if (source.has_object_dates) object_builder.create_table_object_dates();
 			if (source.has_object_relationships) object_builder.create_table_object_relationships();
 			if (source.has_object_rights) object_builder.create_table_object_rights();

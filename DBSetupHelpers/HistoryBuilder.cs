@@ -24,16 +24,16 @@ namespace DataImporter
 
 		public void CreateHistoryTables()
 		{
-			htc.CreateHistoryMasterTable();
+			htc.CreateToAggImportTable();
 			if (source.has_study_tables)
 			{
-				htc.CreateStudyRecsHistoryTable();
-				htc.CreateStudyAttsHistoryTable();
-				StringHelpers.SendFeedback("Created studies history tables");
+				htc.CreateToAggStudyRecsTable();
+				htc.CreateToAggStudyAttsTable();
+				StringHelpers.SendFeedback("Created studies to_agg tables");
 			}
-			htc.CreateObjectRecsHistoryTable();
-			htc.CreateObjectAttsHistoryTable();
-			StringHelpers.SendFeedback("Created data object history tables");
+			htc.CreateToAggObjectRecsTable();
+			htc.CreateToAggObjectAttsTable();
+			StringHelpers.SendFeedback("Created data object to_agg tables");
 		}
 
 
@@ -46,7 +46,7 @@ namespace DataImporter
 				htm.AddStudyRecsDeleted();
 				htm.ProcessEditedStudyRecs();
 				htm.ProcessEditedStudyAtts();
-				StringHelpers.SendFeedback("Study history tables updated");
+				StringHelpers.SendFeedback("Study history to_agg updated");
 			}
 			htm.AddObjectRecsAdded();
 			htm.AddObjectRecsDeleted();
@@ -54,7 +54,12 @@ namespace DataImporter
 			htm.ProcessEditedObjectAtts();
 
 			htm.CreateAndStoreHistoryRecord(import);
-			StringHelpers.SendFeedback("Object history tables updated");
+			StringHelpers.SendFeedback("Object to_agg tables updated");
+		}
+
+		public ImportEvent CreateImportEvent(int import_id)
+		{
+			return htm.CreateImportEvent(import_id, source);
 		}
 
 	}

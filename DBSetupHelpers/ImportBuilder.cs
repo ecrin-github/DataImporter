@@ -25,50 +25,57 @@ namespace DataImporter
 		{
 			if (source.has_study_tables)
 			{
-				itc.CreateStudyRecsImportTable();
-				itc.CreateStudyAttsImportTable();
-				StringHelpers.SendFeedback("Created studies import tables");
+				itc.CreateStudyRecsToADTable();
+				itc.CreateStudyAttsToADTable();
+				StringHelpers.SendFeedback("Created studies to_ad tables");
 			}
-			itc.CreateObjectRecsImportTable();
-			itc.CreateObjectAttsImportTable();
-			StringHelpers.SendFeedback("Created data objects import tables");
+			itc.CreateObjectRecsToADTable();
+			itc.CreateObjectAttsToADTable();
+			StringHelpers.SendFeedback("Created data objects to_ad tables");
 		}
 
 
-		public void FillImportTables()
+		public void FillImportTables(bool count_deleted)
 		{
 			if (source.has_study_tables)
 			{
 				itm.IdentifyNewStudies();
 				itm.IdentifyIdenticalStudies();
 				itm.IdentifyEditedStudies();
-				itm.IdentifyDeletedStudies();
+				if (count_deleted) itm.IdentifyDeletedStudies();
 				itm.IdentifyChangedStudyRecs();
-				itm.IdentifyChangedStudyAtts();
-				itm.IdentifyNewStudyAtts();
-				itm.IdentifyDeletedStudyAtts();
-				StringHelpers.SendFeedback("Filled studies import tables");
 			}
+
+			StringHelpers.SendFeedback("Filled studies to_ad table");
 
 			itm.IdentifyNewDataObjects();
 			itm.IdentifyIdenticalDataObjects();
 			itm.IdentifyEditedDataObjects();
-			itm.IdentifyDeletedDataObjects();
+			if (count_deleted) itm.IdentifyDeletedDataObjects();
 			itm.IdentifyChangedObjectRecs();
-			if (source.has_dataset_properties)
+			if (source.has_object_datasets) itm.IdentifyChangedDatasetRecs();
+			StringHelpers.SendFeedback("Filled data objects to_ad table");
+
+			if (source.has_study_tables)
 			{
-				itm.IdentifyChangedDatasetRecs();
+				itm.SetUpTempStudyAttSets();
+				itm.IdentifyChangedStudyAtts();
+				itm.IdentifyNewStudyAtts();
+				if (count_deleted) itm.IdentifyDeletedStudyAtts();
 			}
+			StringHelpers.SendFeedback("Filled study atts table");
+
+			itm.SetUpTempObjectAttSets();
 			itm.IdentifyChangedObjectAtts();
 			itm.IdentifyNewObjectAtts();
-			itm.IdentifyDeletedObjectAtts();
-			StringHelpers.SendFeedback("Filled data objects import tables");
+			if (count_deleted) itm.IdentifyDeletedObjectAtts();
+			itm.DropTempAttSets();
+			StringHelpers.SendFeedback("Filled data objects atts table");
 		}
 
-		public ImportEvent CreateImportEvent(int import_id, bool count_deleted)
+		public ImportEvent CreateImportEvent(int import_id)
 		{
-			return itm.CreateImportEvent(import_id, source, count_deleted);
+			return itm.CreateImportEvent(import_id, source);
 		}
-
 	}
 }

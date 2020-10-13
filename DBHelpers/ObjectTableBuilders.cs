@@ -64,9 +64,9 @@ namespace DataImporter
 		}
 
 
-		public void create_table_dataset_properties()
+		public void create_table_object_datasets()
 		{
-			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.dataset_properties(
+			string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_datasets(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
 			  , sd_oid                 CHAR(24)        NULL
 			  , record_keys_type_id    INT             NULL 
@@ -91,7 +91,7 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
 			);
 
-            CREATE INDEX dataset_properties_sd_oid ON ad.dataset_properties(sd_oid);";
+            CREATE INDEX object_datasets_sd_oid ON ad.object_datasets(sd_oid);";
 
 			using (var conn = new NpgsqlConnection(connstring))
 			{

@@ -42,13 +42,14 @@ namespace DataImporter
 				  datetime_of_data_fetch = t.datetime_of_data_fetch,
 				  record_hash = t.record_hash,
 				  last_edited_on = current_timestamp
-			  from (select * from sd.studies so
-			        INNER JOIN ad.import_study_recs ts
+			  from (select so.* from sd.studies so
+			        INNER JOIN sd.to_ad_study_recs ts
                     ON so.sd_sid = ts.sd_sid ";
 
-			dbu.EditEntityRecords(sql_string,
-				                  " where ts.study_rec_status = 2) t", 
-				                  "studies");
+			string base_string = @" where ts.study_rec_status = 2) t
+				          where a.sd_sid = t.sd_sid";
+
+			dbu.EditEntityRecords(sql_string, base_string, "studies");
 		}
 
 	
@@ -267,7 +268,7 @@ namespace DataImporter
                           from 
                              (select so.id, so.sd_sid 
                              FROM sd.studies so
-                             INNER JOIN ad.import_study_recs ts
+                             INNER JOIN sd.to_ad_study_recs ts
                              ON so.sd_sid = ts.sd_sid
                              ";
 			string base_string = @" where s.sd_sid = src.sd_id and
@@ -283,7 +284,7 @@ namespace DataImporter
             (   
                 select so.sd_sid, so.datetime_of_data_fetch 
                 from sd.studies so
-                inner join ad.import_study_recs ts
+                inner join sd.to_ad_study_recs ts
                 on so.sd_sid  = ts.sd_sid
                 where ts.status in (2,3)";
 
@@ -310,7 +311,7 @@ namespace DataImporter
                     set composite_hash = so.composite_hash
                     FROM 
                         (SELECT st.id, ia.sd_sid, ia.hash_type_id, ia.composite_hash
-                         FROM ad.import_study_changed_atts ia
+                         FROM sd.to_ad_study_atts ia
                          INNER JOIN sd.studies st
                          on ia.sd_sid = st.sd_sid
                          where ia.status = 2) so
@@ -328,7 +329,7 @@ namespace DataImporter
 			string sql_string = @"INSERT INTO ad.study_hashes(sd_sid, 
                  hash_type_id, composite_hash)
                  SELECT ia.sd_sid, ia.hash_type_id, ia.composite_hash
-                 FROM ad.import_study_changed_atts ia
+                 FROM sd.to_ad_study_atts ia
 			     WHERE ia.status = 1";
 
 				dbu.ExecuteSQL(sql_string);
@@ -339,7 +340,7 @@ namespace DataImporter
 		public void DropNewlyDeletedStudyHashTypes()
 		{
 			string sql_string = @"DELETE FROM ad.study_hashes sh
-                 USING ad.import_study_changed_atts ia
+                 USING sd.to_ad_study_atts ia
                  WHERE sh.sd_sid = ia.sd_sid   
                  and sh.hash_type_id = ia.hash_type_id 
 			     and ia.status = 4";
@@ -352,7 +353,7 @@ namespace DataImporter
 		public void DeleteStudyRecords(string table_name)
 		{
 			string sql_string = @"with t as (
-			      select sd_sid from ad.import_study_recs
+			      select sd_sid from sd.to_ad_study_recs
 			      where status = 4)
 			  delete from ad." + table_name + @" a
               using t
@@ -367,7 +368,7 @@ namespace DataImporter
 			string sql_string = @"Update mon_sf.source_data_studies s
             set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
-            from ad.import_study_recs ts
+            from sd.to_ad_study_recs ts
             where s.sd_id = ts.sd_sid and
             s.source_id = " + source_id.ToString() + @"
 			and ts.status = 4";

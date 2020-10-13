@@ -30,13 +30,13 @@ namespace DataImporter
 		public void EstablishForeignMonTables(string user_name, string password)
         {
 			FTM.EstablishMonForeignTables(user_name, password);
-			StringHelpers.SendFeedback("Monitor tables established as foreign tables");
+			StringHelpers.SendFeedback("Established mon tables as foreign tables");
 		}
 
 		public void DropForeignMonTables()
 		{
 			FTM.DropMonForeignTables();
-			StringHelpers.SendFeedback("Monitor tables dropped as foreign tables");
+			StringHelpers.SendFeedback("Dropped mon tables as foreign tables");
 		}
 
 		public void AddNewStudies(int import_id)
@@ -66,7 +66,7 @@ namespace DataImporter
 		public void AddNewDataObjects(int import_id)
 		{
 			object_adder.TransferDataObjects();
-			if (source.has_dataset_properties) object_adder.TransferDataSetProperties();
+			if (source.has_object_datasets) object_adder.TransferDataSetProperties();
 			object_adder.TransferObjectInstances();
 			object_adder.TransferObjectTitles();
 
@@ -136,7 +136,7 @@ namespace DataImporter
 		public void UpdateEditedDataObjectData(int import_id)
 		{
 			object_editor.EditDataObjects();
-			if (source.has_dataset_properties) object_editor.EditDataSetProperties();
+			if (source.has_object_datasets) object_editor.EditDataSetProperties();
 			object_editor.EditObjectInstances();
 			object_editor.EditObjectTitles();
 
@@ -202,7 +202,7 @@ namespace DataImporter
 
 			// these are database dependent		
 
-			if (source.has_dataset_properties) object_editor.DeleteObjectRecords("dataset_properties"); 
+			if (source.has_object_datasets) object_editor.DeleteObjectRecords("object_datasets"); 
 			if (source.has_object_dates) object_editor.DeleteObjectRecords("object_dates");
 			if (source.has_object_pubmed_set)
 			{

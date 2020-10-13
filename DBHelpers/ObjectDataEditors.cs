@@ -45,14 +45,15 @@ namespace DataImporter
              datetime_of_data_fetch = t.datetime_of_data_fetch,  
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
-             from (select * from sd.data_objects so
-			   INNER JOIN ad.import_object_recs ts
+             from (select so.* from sd.data_objects so
+			   INNER JOIN sd.to_ad_object_recs ts
                ON so.sd_oid = ts.sd_oid ";
 
-            dbu.EditEntityRecords(sql_string, 
-                                  " where ts.object_rec_status = 2) t",
-                                  "data_objects");
-		}
+            string base_string = @" where ts.object_rec_status = 2) t
+				          where a.sd_oid = t.sd_oid";
+
+            dbu.EditEntityRecords(sql_string, base_string, "data_objects");
+        }
 
 
         public void EditDataSetProperties()
@@ -60,7 +61,7 @@ namespace DataImporter
             // if the record hash for the dataset properties has changed, then 
             // the data should be changed
 
-            string sql_string = @"UPDATE ad.dataset_properties a
+            string sql_string = @"UPDATE ad.object_datasets a
 			 set 
              record_keys_type_id = t.record_keys_type_id, 
              record_keys_details = t.record_keys_details, 
@@ -80,13 +81,14 @@ namespace DataImporter
              consent_details = t.consent_details,  
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
-    		   from (select * from sd.dataset_properties so
-			   INNER JOIN ad.import_object_recs ts
+    		   from (select so.* from sd.object_datasets so
+			   INNER JOIN sd.to_ad_object_recs ts
                ON so.sd_oid = ts.sd_oid ";
 
-            dbu.EditEntityRecords(sql_string,
-                                  " where object_dataset_status = 4) t",
-                                  "dataset_properties");
+            string base_string = @" where ts.object_dataset_status = 4) t
+				          where a.sd_oid = t.sd_oid";
+
+            dbu.EditEntityRecords(sql_string, base_string, "object_datasets");
 		}
 
 
@@ -325,7 +327,7 @@ namespace DataImporter
                           from 
                              (select so.id, so.sd_oid 
                               FROM sd.data_objects so
-                              INNER JOIN ad.import_object_recs ts
+                              INNER JOIN sd.to_ad_object_recs ts
                               ON so.sd_oid = ts.sd_oid
                              ";
             string base_string = @" where s.sd_oid = src.sd_id and
@@ -341,7 +343,7 @@ namespace DataImporter
             (
                 select so.sd_oid, so.datetime_of_data_fetch
                 from sd.data_objects so
-                inner join ad.import_object_recs td
+                inner join sd.to_ad_object_recs td
                 on so.sd_oid = td.sd_oid
                 where td.status in (2, 3)";
 
@@ -366,7 +368,7 @@ namespace DataImporter
                     set composite_hash = so.composite_hash
                     FROM 
                         (SELECT st.id, ia.sd_oid, ia.hash_type_id, ia.composite_hash
-                         FROM ad.import_object_changed_atts ia
+                         FROM sd.to_ad_object_atts ia
                          INNER JOIN sd.data_objects st
                          on ia.sd_oid = st.sd_oid
                          where ia.status = 2) so
@@ -383,7 +385,7 @@ namespace DataImporter
             string sql_string = @"INSERT INTO ad.object_hashes(sd_oid, 
                  hash_type_id, composite_hash)
                  SELECT ia.sd_oid, ia.hash_type_id, ia.composite_hash
-                 FROM ad.import_object_changed_atts ia
+                 FROM sd.to_ad_object_atts ia
 			     WHERE ia.status = 1";
 
             dbu.ExecuteSQL(sql_string);
@@ -394,7 +396,7 @@ namespace DataImporter
         public void DropNewlyDeletedObjectHashTypes()
         {
             string sql_string = @"DELETE FROM ad.object_hashes sh
-                 USING ad.import_object_changed_atts ia
+                 USING sd.to_ad_object_atts ia
                  WHERE sh.sd_oid = ia.sd_oid   
                  and sh.hash_type_id = ia.hash_type_id 
 			     and ia.status = 4";
@@ -407,7 +409,7 @@ namespace DataImporter
         public void DeleteObjectRecords(string table_name)
         {
             string sql_string = @"with t as (
-			      select sd_oid from ad.import_object_recs
+			      select sd_oid from sd.to_ad_object_recs
 			      where status = 4)
 			  delete from ad." + table_name + @" a
               using t
@@ -422,7 +424,7 @@ namespace DataImporter
             string sql_string = @"Update mon_sf.source_data_objects s
             set last_import_id = " + (-1 * import_id).ToString() + @", 
             last_imported = current_timestamp
-            from ad.import_object_recs ts
+            from sd.to_ad_object_recs ts
             where s.sd_id = ts.sd_oid and
             s.source_id = " + source_id.ToString() + @"
             and ts.status = 4;";

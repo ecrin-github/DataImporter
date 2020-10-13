@@ -46,13 +46,17 @@ namespace DataImporter
 
         // The T String identifies study / hash type combinations where ANY
         // type of change has occured. This allows all attributes of that 
-        // type to be deleted and then added back in revised form.
+        // type to be updated - i.e. deleted and then added back in revised form.
+        // The status of the att (composite hash) record does not affect the process
+        // if atts of a certain type are deleted (status = 4) they are not added back,
+        // if atts are new (status = 1) they are simply added. More often, with  change
+        // of some form in an att type, (status = 2) a new set of atts replaces the old.
 
         public string GetStudyTString(int type_id)
         {
             return @"with t as (
                SELECT sd_sid from 
-               ad.import_study_changed_atts 
+               sd.to_ad_study_atts 
                WHERE hash_type_id = " + type_id.ToString() + ") ";
         }
 
@@ -69,7 +73,7 @@ namespace DataImporter
         {
             return @"with t as (
                SELECT sd_oid from 
-               ad.import_object_changed_atts 
+               sd.to_ad_object_atts 
                WHERE hash_type_id = " + type_id.ToString() + ") ";
         }
 
@@ -110,7 +114,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("***ERROR*** in data transfer (" + table_name + ") to ad table: " + res);
+                StringHelpers.SendError("In data transfer (" + table_name + ") to ad table: " + res);
             }
         }
 
@@ -155,7 +159,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("***ERROR*** in update last imported date (" + context.ToLower() + " " + table_name + "): " + res);
+                StringHelpers.SendError("In update last imported date (" + context.ToLower() + " " + table_name + "): " + res);
             }
         }
 
@@ -189,7 +193,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("***ERROR*** in " + table_name + " date of data update: " + res);
+                StringHelpers.SendError("In " + table_name + " date of data update: " + res);
             }
         }
 
@@ -225,7 +229,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("***ERROR*** in updating entity records for " + table_name + ", sd to ad table: " + res);
+                StringHelpers.SendError("In updating entity records for " + table_name + ", sd to ad table: " + res);
             }
         }
 
@@ -263,7 +267,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("***ERROR*** in " + table_name + " data edits (composite hashes), sd to ad table: " + res);
+                StringHelpers.SendError("In " + table_name + " data edits (composite hashes), sd to ad table: " + res);
             }
         }
 
@@ -300,7 +304,7 @@ namespace DataImporter
             catch (Exception e)
             {
                 string res = e.Message;
-                StringHelpers.SendFeedback("ERROR in  " + table_name + " full hash updates: " + res);
+                StringHelpers.SendError("In  " + table_name + " full hash updates: " + res);
             }
         }
     }
