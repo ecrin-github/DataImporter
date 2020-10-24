@@ -206,7 +206,6 @@ namespace DataImporter
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
               , exported_on            TIMESTAMPTZ     NULL
-              , record_status_id       INT             NOT NULL default 1
 			);
             CREATE INDEX object_contributors_sd_oid ON ad.object_contributors(sd_oid);";
 
