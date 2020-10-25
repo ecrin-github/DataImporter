@@ -33,7 +33,7 @@ The sytem then works through the various categories of data that have been ident
 All 4 steps are then repeated for the data object data.<br/> 
 
 ### Logging
-For each source an 'import event' record is constructed and stored in the monitor database. This details the numbers of new, edited and deleted study and data object records found during the import, as well as its start and end times.<br/> Each individual study record, if classified as new or edited durting the import, (or data object record, for sources that contain no studies, such as PubMed) is also updated to indicate exactly when it was last imported into the ad tables. The system therfore knows the 'last import date time' of each source record.<br/>Each individual record in the ad tables also contains a record of when it was created and last edited.<br/>
+For each source an 'import event' record is constructed and stored in the monitor database. This details the numbers of new, edited and deleted study and data object records found during the import, as well as its start and end times.<br/> Each individual study record in the monitor database, if classified as new or edited during the import, (or data object record, for sources that contain no studies, such as PubMed) is also updated to indicate exactly when it was last imported into the ad tables. The system therfore knows the 'last import date time' of each source record.<br/>Each individual record in the ad tables also contains a record of when it was created and last edited.<br/>
 
 ### Provenance
 * Author: Steve Canham
