@@ -1,30 +1,24 @@
-﻿using Dapper;
-using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DataImporter
+﻿namespace DataImporter
 {
-	class DataObjectDataEditor
-	{
-		string connstring;
+    class DataObjectDataEditor
+    {
+        string connstring;
         DBUtilities dbu;
 
         public DataObjectDataEditor(string _connstring)
-		{
+        {
             connstring = _connstring;
             dbu = new DBUtilities(connstring);
         }
 
 
         public void EditDataObjects()
-		{
+        {
             // if the record hash for the data object has changed, then 
             // the data in the data objects records should be changed
 
             string sql_string = @"UPDATE ad.data_objects a
-			 set 
+             set 
              display_title = t.display_title, 
              version = t.version,
              doi = t.doi,  
@@ -46,23 +40,23 @@ namespace DataImporter
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
              from (select so.* from sd.data_objects so
-			   INNER JOIN sd.to_ad_object_recs ts
+               INNER JOIN sd.to_ad_object_recs ts
                ON so.sd_oid = ts.sd_oid ";
 
             string base_string = @" where ts.object_rec_status = 2) t
-				          where a.sd_oid = t.sd_oid";
+                          where a.sd_oid = t.sd_oid";
 
             dbu.EditEntityRecords(sql_string, base_string, "data_objects");
         }
 
 
         public void EditDataSetProperties()
-		{
+        {
             // if the record hash for the dataset properties has changed, then 
             // the data should be changed
 
             string sql_string = @"UPDATE ad.object_datasets a
-			 set 
+             set 
              record_keys_type_id = t.record_keys_type_id, 
              record_keys_details = t.record_keys_details, 
              deident_type_id = t.deident_type_id, 
@@ -72,34 +66,34 @@ namespace DataImporter
              deident_nonarr = t.deident_nonarr, 
              deident_kanon = t.deident_kanon, 
              deident_details = t.deident_details,
-			 consent_type_id = t.consent_type_id, 
+             consent_type_id = t.consent_type_id, 
              consent_noncommercial = t.consent_noncommercial, 
              consent_geog_restrict = t.consent_geog_restrict,
-			 consent_research_type = t.consent_research_type, 
+             consent_research_type = t.consent_research_type, 
              consent_genetic_only = t.consent_genetic_only, 
              consent_no_methods = t.consent_no_methods, 
              consent_details = t.consent_details,  
              record_hash = t.record_hash, 
              last_edited_on = current_timestamp
-    		   from (select so.* from sd.object_datasets so
-			   INNER JOIN sd.to_ad_object_recs ts
+               from (select so.* from sd.object_datasets so
+               INNER JOIN sd.to_ad_object_recs ts
                ON so.sd_oid = ts.sd_oid ";
 
             string base_string = @" where ts.object_dataset_status = 4) t
-				          where a.sd_oid = t.sd_oid";
+                          where a.sd_oid = t.sd_oid";
 
             dbu.EditEntityRecords(sql_string, base_string, "object_datasets");
-		}
+        }
 
 
         #region Table data edits
 
         public void EditObjectInstances()
-		{
+        {
             string sql_string = dbu.GetObjectTString(51);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_instances"); 
 
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_instances(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_instances(sd_oid, 
             instance_type_id, repository_org_id, repository_org,
             url, url_accessible, url_last_checked, resource_type_id,
             resource_size, resource_size_units, resource_comments, record_hash)
@@ -114,12 +108,12 @@ namespace DataImporter
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_instances");
         }
 
-		public void EditObjectTitles()
-		{
+        public void EditObjectTitles()
+        {
             string sql_string = dbu.GetObjectTString(52);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_titles"); 
 
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_titles(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_titles(sd_oid, 
             title_type_id, title_text, lang_code,
             lang_usage_id, is_default, comments, comparison_text, record_hash)
             SELECT s.sd_oid, 
@@ -131,14 +125,14 @@ namespace DataImporter
 
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_titles");
         }
-		
+        
 
-		public void EditObjectDates()
-		{
+        public void EditObjectDates()
+        {
             string sql_string = dbu.GetObjectTString(53);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_dates");
  
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
             date_type_id, is_date_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash)
             SELECT s.sd_oid, 
@@ -152,11 +146,11 @@ namespace DataImporter
         }
 
         public void EditObjectContributors()
-		{
+        {
             string sql_string = dbu.GetObjectTString(55);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_contributors");
 
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_contributors(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_contributors(sd_oid, 
             contrib_type_id, is_individual, organisation_id, organisation_name,
             person_id, person_given_name, person_family_name, person_full_name,
             person_identifier, identifier_type, person_affiliation, affil_org_id,
@@ -173,8 +167,8 @@ namespace DataImporter
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_contributors");
         }
 
-		public void EditObjectTopics()
-		{
+        public void EditObjectTopics()
+        {
             string sql_string = dbu.GetObjectTString(54);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_topics");
 
@@ -195,7 +189,7 @@ namespace DataImporter
 
 
         public void EditObjectComments()
-		{
+        {
             string sql_string = dbu.GetObjectTString(61);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_comments");
 
@@ -212,11 +206,11 @@ namespace DataImporter
 
 
         public void EditObjectDescriptions()
-		{
+        {
             string sql_string = dbu.GetObjectTString(57);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_descriptions");
 
-			string sql_stringI = sql_string + @"INSERT INTO ad.object_descriptions(sd_oid, 
+            string sql_stringI = sql_string + @"INSERT INTO ad.object_descriptions(sd_oid, 
             description_type_id, label, description_text, lang_code, 
             contains_html, record_hash)
             SELECT s.sd_oid, 
@@ -230,8 +224,8 @@ namespace DataImporter
         }
 
 
-		public void EditObjectIdentifiers()
-		{
+        public void EditObjectIdentifiers()
+        {
             string sql_string = dbu.GetObjectTString(63);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_identifiers");
 
@@ -250,7 +244,7 @@ namespace DataImporter
 
 
         public void EditObjectDBLinks()
-		{
+        {
             string sql_string = dbu.GetObjectTString(60);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_db_links");
 
@@ -267,7 +261,7 @@ namespace DataImporter
 
 
         public void EditObjectPublicationTypes()
-		{
+        {
             string sql_string = dbu.GetObjectTString(62);
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_publication_types");
 
@@ -358,7 +352,7 @@ namespace DataImporter
 
 
         public void UpdateObjectCompositeHashes()
-		{
+        {
             // Need to ensure that the hashes themselves are all up to date (for the next comparison)
             // Change the ones that have been changed in sd
             // if a very large studies (and therefore hash) table may need to chunk using a link to the 
@@ -376,7 +370,7 @@ namespace DataImporter
                     and ah.hash_type_id = so.hash_type_id ";
 
             dbu.EditStudyHashes("data_objects", sql_string);
-		}
+        }
 
         public void AddNewlyCreatedObjectHashTypes()
         {
@@ -386,7 +380,7 @@ namespace DataImporter
                  hash_type_id, composite_hash)
                  SELECT ia.sd_oid, ia.hash_type_id, ia.composite_hash
                  FROM sd.to_ad_object_atts ia
-			     WHERE ia.status = 1";
+                 WHERE ia.status = 1";
 
             dbu.ExecuteSQL(sql_string);
             StringHelpers.SendFeedback("Inserting new object hashtype combinations in object hash records");
@@ -399,7 +393,7 @@ namespace DataImporter
                  USING sd.to_ad_object_atts ia
                  WHERE sh.sd_oid = ia.sd_oid   
                  and sh.hash_type_id = ia.hash_type_id 
-			     and ia.status = 4";
+                 and ia.status = 4";
 
             dbu.ExecuteSQL(sql_string);
             StringHelpers.SendFeedback("Dropping deleted object hashtype combinations from object hash records");
@@ -409,11 +403,11 @@ namespace DataImporter
         public void DeleteObjectRecords(string table_name)
         {
             string sql_string = @"with t as (
-			      select sd_oid from sd.to_ad_object_recs
-			      where status = 4)
-			  delete from ad." + table_name + @" a
+                  select sd_oid from sd.to_ad_object_recs
+                  where status = 4)
+              delete from ad." + table_name + @" a
               using t
-			  where a.sd_oid = t.sd_oid;";
+              where a.sd_oid = t.sd_oid;";
 
             dbu.ExecuteSQL(sql_string);
         }
@@ -440,9 +434,9 @@ namespace DataImporter
             // record update above cannot be used to make the edit.
             
             string sql_string = @"UPDATE ad.data_objects a
-			        set object_full_hash = so.object_full_hash
+                    set object_full_hash = so.object_full_hash
                     FROM sd.data_objects so
-			        WHERE so.sd_oid = a.sd_oid ";
+                    WHERE so.sd_oid = a.sd_oid ";
 
             // Chunked by the dbu routine to 100,000 records at a time
 

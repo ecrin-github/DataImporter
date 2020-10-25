@@ -1,19 +1,17 @@
 ﻿using Dapper;
 using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataImporter
 {
-	class DBUtilities
-	{
-		string connstring;
+    class DBUtilities
+    {
+        string connstring;
 
-		public DBUtilities(string _connstring)
-		{
-			connstring = _connstring;
-		}
+        public DBUtilities(string _connstring)
+        {
+            connstring = _connstring;
+        }
 
         public int GetRecordCount(string table_name)
         {
@@ -64,8 +62,8 @@ namespace DataImporter
         public string GetStudyDeleteString(string table_name)
         {
             return @" DELETE FROM ad." + table_name + @" a
-			USING t
-			WHERE a.sd_sid = t.sd_sid; ";
+            USING t
+            WHERE a.sd_sid = t.sd_sid; ";
         }
 
 
@@ -81,8 +79,8 @@ namespace DataImporter
         public string GetObjectDeleteString(string table_name)
         {
             return @" DELETE from ad." + table_name + @" a
-			USING t
-			WHERE a.sd_oid = t.sd_oid; ";
+            USING t
+            WHERE a.sd_oid = t.sd_oid; ";
         }
 
 
