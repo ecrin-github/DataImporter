@@ -32,7 +32,7 @@ The sytem then works through the various categories of data that has been identi
 * For deleted studies, if it has been possible to idsentify these, tghe entire study and all attributees are removed from the ad tables.<br/> 
 All 4 steps are then repeated for the data object data.<br/> 
 <br/> 
-### Provenance
+### Provenance ###
 * Author: Steve Canham
 * Organisation: ECRIN (https://ecrin.org)
 * System: Clinical Research Metadata Repository (MDR)
