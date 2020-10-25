@@ -1,7 +1,7 @@
 # DataImporter
 Transfers session data into accumulated data tables.
 
-The program takes the data in the session data or sd tables in each source database (the 'session data' being created by the most recent harvest operation), and compares it with the accumulated data for each source, which is stored in the accumulated data (ad) tables. New and revised data is both transferred to the ad tables.<br/>
+The program takes the data in the session data or sd tables in each source database (the 'session data' being created by the most recent harvest operation), and compares it with the accumulated data for each source, which is stored in the accumulated data (ad) tables. New and revised data are then transferred to the ad tables.<br/>
 The program represents the third stage in the 4 stage MDR extraction process:<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download => Harvest => **Import** => Aggregation<br/><br/>
 For a much more detailed explanation of the extraction process,and the MDR system as a whole, please see the project wiki (landing page at https://ecrin-mdr.online/index.php/Project_Overview).<br/>
@@ -31,6 +31,8 @@ The sytem then works through the various categories of data that has been identi
 * For unchanged studies the 'date of data fetch' is updated to match that in the sd data but no other changes are applied. This indicates the last date the data was examined, even if no other change has occurred. The same edit, of 'date of data fetch' is also made to edited records and is contained automatically within new records. 
 * For deleted studies, if it has been possible to idsentify these, the entire study and all attributees are removed from the ad tables.<br/>  
 All 4 steps are then repeated for the data object data.<br/> 
+<br/> 
+For each source an 'import event' record is constructed and stored in the monitor database. This details the numbers of new, edited and deleted study and data object records found during the import. Each individual study record (or data object record, for sources that contain no studies, such as PubMed) is also updated tro indicate exactly when it was last imported into the ad tables, if it was new or identified as edited. The system therfore knows the 'last import date time' of each source record.
 
 ### Provenance
 * Author: Steve Canham
