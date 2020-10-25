@@ -9,7 +9,7 @@ For a much more detailed explanation of the extraction process,and the MDR syste
 ### Parameters
 The system is a console app, (to more easily support being scheduled) and can take takes 2 parameters: <br/>
 a) -s followed by a comma separated list of integer ids, each representing a data source within the system. The program takes each of these ids in turn, and carries out the sd to ad import process for each of them.<br/>
-b) -T, as a flag. If present, it forces the recreation of a new set of accumulated data tables. This parameter should therefore only be used when creating the ad tables for the first time, or when the entire ad schema is recreated from harvested data that represents the totality of the data available from the source. In other words when carrying out a full rebuild of the source's data from a full harvest.<br/><br/>
+b) -T, as a flag. If present, forces the recreation of a new set of accumulated data tables. This parameter should therefore only be used when creating the ad tables for the first time, or when the entire ad schema is recreated from harvested data that represents the totality of the data available from the source. In other words when carrying out a full rebuild of the source's data from a full harvest.<br/><br/>
 Thus, the parameter string<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-s "100116, 100124, 100132" <br/>
 will cause data to be imported from the session data tables for each of the Australian, German and Dutch trial registries, in that order.<br/>
