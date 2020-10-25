@@ -19,17 +19,17 @@ will cause, for the BioLinncc and Yoda repositories respectively, the current ad
 Note there is no parameter to allow using only part of the harvested data in the sd tables - all of that data is used. The way in which different data is uploaded, e.g. data that has been revised or added after a certain date, is by controlling the data download and harvest processed that precede the import step.<br/>
 
 ### Overview
-The Import process is the same for all sources, because session and accumulated data tables are structured in a standard way in each source database (thougnh the exact tables that are present may vary between soureces).<br/>
+The Import process is the same for all sources, because session and accumulated data tables are structured in a standard way in each source database (though the exact tables that are present may vary between sources).<br/>
 The system compares the study data ids and content in the session and accumulated data and identifies a) those studies in the sd tables that are new, b) those studies that have been edited in any way, including any change in a study attribute, c) those studies that are unchanged, and d) those studies that have disappeared from the sd data. The last is relatively rare and can only be estimated if the previous harvest was of 100% of the source.<br/>
 The same 4 categories are then constructed for the data objects.<br/> 
-For studies that have been edited in any way (this is discovered by comparing composite hash values are constructed from all of each study's data) the nature of the edit is then identified - i.e. whether or not it involves changes to the main study record, and / or if it involves an addition, edit, or deletion of any study attribute record. Again this process is reperated for the data object data.<br/> 
-At the end of this process the system has - within the ad schema of the source database - 4 temporary tables that hold this informnation, in effect providing a record of the differences between the session data and accumulated data sets.<br/> 
+For studies that have been edited in any way (this is discovered by comparing composite hash values are constructed from all of each study's data) the nature of the edit is then identified - i.e. whether or not it involves changes to the main study record, and / or if it involves an addition, edit, or deletion of any study attribute record. Again this process is repeated for the data object data.<br/> 
+At the end of this process the system has - within the ad schema of the source database - 4 temporary tables that hold this information, in effect providing a complete record of the differences between the session data and accumulated data sets.<br/> 
 <br/>
-The sytem then works through the various categories of data that has been identified.
+The sytem then works through the various categories of data that has been identified:
 * Any new studies are directly imported into the ad tables along with all their attributes.
 * For edited studies, the nature of the edit is examined. If a change has occured in the main (singleton) study record, that record is replaced with the new version from the sd data. If a change has occured in a study attribute, *all* the attribute records of that type are replaced by *all* the attribute records of that type in the sd data. There is no attempt to try and match individual attribute records to see which specifically have been changed / added / deleted - partly because of the lack of persistent identifiers for these records. Instead the whole set of attributes is replaced. If a completely new type of attribute appears for a study all the records of that attribvute type are added. If an attribute type completely disapears from a study all the corresponding attribute records are removed.<br/>
 * For unchanged studies the 'date of data fetch' is updated to match that in the sd data but no other changes are applied. This indicates the last date the data was examined, even if no other change has occurred. The same edit, of 'date of data fetch' is also made to edited records and is contained automatically within new records. 
-* For deleted studies, if it has been possible to idsentify these, tghe entire study and all attributees are removed from the ad tables.<br/><br/>  
+* For deleted studies, if it has been possible to idsentify these, tghe entire study and all attributees are removed from the ad tables.<br/>  
 All 4 steps are then repeated for the data object data.<br/> 
 
 ### Provenance
