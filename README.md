@@ -1,27 +1,37 @@
 # DataImporter
-Transfers session data into the accumulated data tables.
+Transfers session data into accumulated data tables.
 
-The program takes the data in the sd tables in each source database (the 'session data' created by the most recent harvest operation), and compares it with the accumulated data for each source, which is stored in the ad tables. New and revised data is both transferred to the ad tables, and marked as such so that it will be used in the later aggregation phase. 
-
+The program takes the data in the session data or sd tables in each source database (the 'session data' being created by the most recent harvest operation), and compares it with the accumulated data for each source, which is stored in the accumulated data (ad) tables. New and revised data is both transferred to the ad tables.<br/>
+The program represents the third stage in the 4 stage MDR extraction process:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download => Harvest => **Import** => Aggregation<br/><br/>
+For a much more detailed explanation of the extraction process,and the MDR system as a whole, please see the project wiki (landing page at https://ecrin-mdr.online/index.php/Project_Overview).<br/>
+<br/>
 ### Parameters
-The system is currently a console app, and takes a single parameter. This is a 6 digit integer representing the source (e.g. 100120 is Clinical Trials.gov). Each source system needs to be imnported in turn before aggregation begins, though the exact ordering is not important. The plan is to wrap the app in a UI at some later point.
-
-### Data Status codes
-Data in the accumulated data (ad) tables carries audit and status fields tro inidcate if it is new or has been revised. The codes are:<br/><br/>
-0: No change (assumed)<br/>
-*Applies to all record types. Indicates a) that the record was not present in the sd data and is assumed to be unchanged, and b) has already been transferred to the central mdr in an earlier aggregation. Any record with status 0 can be ignored in any later aggregation phase.*
-
-1: New data<br/>
-*Applies to all record types. Indicates that the record has been newly added from the session data, and that it must therefore be further added to the central systems in any later aggregation process. The provenance data of the parent Study or Data Object, relating to the download when the data was captured, is also included.*
-
-2: Revised data<br/>
-*Applies to all record types. Indicates that the record has been revised in some way, and that the version in the ad tables has therefore replaced the version that was there previously. That revision needs to be passed onto the central mdr tables. Hashes are used extensively in the system to more easily identify the changed components. The provenance data of the parent Study or Data Object, relating to the download when the revised data was captured, also needs to be updated.*
-
-3: Data confirmed as unchanged<br/>
-*Applies only to Study and Data Object records - i.e. the 'main' record for each and not their associated attribute records. Indicates that a) that the record **was** present in the sd data but b) that the study (including all of its attributes) or the data object (including all of its attributes) was unchanged. The only thing that needs to be changed is therefore the 'data of data download' field in the Study or Data Object record. This date needs to be revised, which will then trigger a revision of the record's provenance data.*
-
-Once any data in the ad tables is 'consumed' by the aggregation process the status of the records revert to 0. The status is then reset during the next import process.
-
+The system is a console app, (to more easily support being scheduled) and can take takes 2 parameters: <br/>
+a) -s followed by a comma separated list of integer ids, each representing a data source within the system. The program takes each of these ids in turn, and carries out the sd to ad import process for each of them.<br/>
+b) -T, as a flag. If present, it forces the recreation of a new set of accumulated data tables. This parameter should therefore only be used when creating the ad tables for the first time, or when the entire ad schema is recreated from harvested data that represents the totality of the data available from the source. In other words when carrying out a full rebuild of the source's data from a full harvest.<br/><br/>
+Thus, the parameter string<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-s "100116, 100124, 100132" <br/>
+will cause data to be imported from the session data tables for each of the Australian, German and Dutch trial registries, in that order.<br/>
+The parameter string<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-s "101900, 101901" -T<br/>
+will cause, for the BioLinncc and Yoda repositories respectively, the current ad tables to be dropped and then rebuilt, before being filled with the most recent session data harvested from those repositories.<br/>  
+Note there is no parameter to allow using only part of the harvested data in the sd tables - all of that data is used. The way in which different data is uploaded, e.g. data that has been revised or added after a certain date, is by controlling the data download and harvest processed that precede the import step.<br/>
+<br/>
+### Overview
+The Import process is the same for all sources, because session and accumulated data tables are structured in a standard way in each source database (thougnh the exact tables that are present may vary between soureces).<br/>
+The system compares the study data ids and content in the session and accumulated data and identifies a) those studies in the sd tables that are new, b) those studies that have been edited in any way, including any change in a study attribute, c) those studies that are unchanged, and d) those studies that have disappeared from the sd data. The last is relatively rare and can only be estimated if the previous harvest was of 100% of the source.<br/>
+The same 4 categories are then constructed for the data objects.<br/> 
+For studies that have been edited in any way (this is discovered by comparing composite hash values are constructed from all of each study's data) the nature of the edit is then identified - i.e. whether or not it involves changes to the main study record, and / or if it involves an addition, edit, or deletion of any study attribute record. Again this process is reperated for the data object data.<br/> 
+At the end of this process the system has - within the ad schema of the source database - 4 temporary tables that hold this informnation, in effect providing a record of the differences between the session data and accumulated data sets.<br/> 
+<br/>
+The sytem then works through the various categories of data that has been identified.
+* Any new studies are directly imported into the ad tables along with all their attributes.
+* For edited studies, the nature of the edit is examined. If a change has occured in the main (singleton) study record, that record is replaced with the new version from the sd data. If a change has occured in a study attribute, *all* the attribute records of that type are replaced by *all* the attribute records of that type in the sd data. There is no attempt to try and match individual attribute records to see which specifically have been changed / added / deleted - partly because of the lack of persistent identifiers for these records. Instead the whole set of attributes is replaced. If a completely new type of attribute appears for a study all the records of that attribvute type are added. If an attribute type completely disapears from a study all the corresponding attribute records are removed.<br/>
+* For unchanged studies the 'date of data fetch' is updated to match that in the sd data but no other changes are applied. This indicates the last date the data was examined, even if no other change has occurred. The same edit, of 'date of data fetch' is also made to edited records and is contained automatically within new records. 
+* For deleted studies, if it has been possible to idsentify these, tghe entire study and all attributees are removed from the ad tables.<br/> 
+All 4 steps are then repeated for the data object data.<br/> 
+<br/> 
 ### Provenance
 * Author: Steve Canham
 * Organisation: ECRIN (https://ecrin.org)
