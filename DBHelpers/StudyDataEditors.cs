@@ -4,11 +4,13 @@
     {
         string connstring;
         DBUtilities dbu;
+        LoggingDataLayer logging_repo;
 
-        public StudyDataEditor(string _connstring)
+        public StudyDataEditor(string _connstring, LoggingDataLayer _logging_repo)
         {
             connstring = _connstring;
-            dbu = new DBUtilities(connstring);
+            logging_repo = _logging_repo;
+            dbu = new DBUtilities(connstring, logging_repo);
         }
         
         public void EditStudies()
@@ -327,7 +329,7 @@
                  WHERE ia.status = 1";
 
                 dbu.ExecuteSQL(sql_string);
-                StringHelpers.SendFeedback("Inserting new study hashtype combinations in study hash records");
+                logging_repo.LogLine("Inserting new study hashtype combinations in study hash records");
         }
 
 
@@ -340,7 +342,7 @@
                  and ia.status = 4";
 
             dbu.ExecuteSQL(sql_string);
-            StringHelpers.SendFeedback("Dropping deleted study hashtype combinations from study hash records");
+            logging_repo.LogLine("Dropping deleted study hashtype combinations from study hash records");
         }
 
 

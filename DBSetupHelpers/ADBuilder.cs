@@ -6,13 +6,15 @@
         private Source source;
         StudyTableBuilders study_builder;
         ObjectTableBuilders object_builder;
+        LoggingDataLayer logging_repo;
 
-        public ADBuilder(string _connString, Source _source)
+        public ADBuilder(string _connString, Source _source, LoggingDataLayer _logging_repo)
         {
             connString = _connString;
             source = _source;
             study_builder = new StudyTableBuilders(connString);
             object_builder = new ObjectTableBuilders(connString);
+            logging_repo = _logging_repo;
         }
 
         public void DeleteADStudyTables()
@@ -75,7 +77,7 @@
             if (source.has_study_relationships) study_builder.create_table_study_relationships();
             if (source.has_study_links) study_builder.create_table_study_links();
             if (source.has_study_ipd_available) study_builder.create_table_ipd_available();
-            StringHelpers.SendFeedback("Rebuilt AD study tables");
+            logging_repo.LogLine("Rebuilt AD study tables");
         }
 
 
@@ -104,7 +106,7 @@
                 object_builder.create_table_object_db_links();
                 object_builder.create_table_object_publication_types();
             }
-            StringHelpers.SendFeedback("Rebuilt AD Object tables");
+            logging_repo.LogLine("Rebuilt AD Object tables");
         }
     }
 }

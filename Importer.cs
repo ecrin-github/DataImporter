@@ -6,14 +6,15 @@
         {
             string connstring = repo.ConnString;
             Source source = repo.Source;
-            //HistoryBuilder hb = new HistoryBuilder(connstring, source);
-            ImportBuilder ib = new ImportBuilder(connstring, source);
-            DataTransferrer transferrer = new DataTransferrer(connstring, source);
+            logging_repo.OpenLogFile(source.database_name);
 
-            StringHelpers.SendHeader("Setup");
+            ImportBuilder ib = new ImportBuilder(connstring, source, logging_repo);
+            DataTransferrer transferrer = new DataTransferrer(connstring, source, logging_repo);
+
+            logging_repo.LogHeader("Setup");
             if (build_tables)
             {
-                ADBuilder adb = new ADBuilder(connstring, source);
+                ADBuilder adb = new ADBuilder(connstring, source, logging_repo);
                 if (source.has_study_tables)
                 {
                     adb.DeleteADStudyTables();
@@ -23,7 +24,7 @@
                 adb.BuildNewADObjectTables();
             }
 
-            StringHelpers.SendHeader("Create and fill diff tables");
+            logging_repo.LogHeader("Create and fill diff tables");
             // create and fill temporary tables to hold ids and edit statuses  
             // of new, edited, deleted tudies and data objects
             ib.CreateImportTables();
@@ -38,7 +39,7 @@
             // set up sf monitor tables as foreign tables, temporarily
             transferrer.EstablishForeignMonTables(repo.User_Name, repo.Password);
 
-            StringHelpers.SendHeader("Adding new data");
+            logging_repo.LogHeader("Adding new data");
             // for studies with status 1, (= new) add these, their attributes,
             // their data objects, and their object attributes
 
@@ -52,11 +53,11 @@
             // downloaded data that previously existed (= status of 2 and 3 
             // for both studies and data objects)
 
-            StringHelpers.SendHeader("Update dates of data");
+            logging_repo.LogHeader("Update dates of data");
             transferrer.UpdateDatesOfData();
 
             // then a need to examine the edited data (status = 2)
-            StringHelpers.SendHeader("Editing existing data");
+            logging_repo.LogHeader("Editing existing data");
             if (source.has_study_tables)
             {
                 transferrer.UpdateEditedStudyData(import_id);
@@ -65,7 +66,7 @@
 
 
             // Finally, remove any deleted studies / objects from the ad tables
-            StringHelpers.SendHeader("Removing any deleted data");
+            logging_repo.LogHeader("Removing any deleted data");
             if (source.has_study_tables)
             {
                 transferrer.RemoveDeletedStudyData(import_id);
@@ -78,11 +79,11 @@
             // Remove foreign tables and store import event details
             // No - Move to aggregation process - Transfer the import record data to the history tables.
 
-            StringHelpers.SendHeader("Tidy up and finish");
+            logging_repo.LogHeader("Tidy up and finish");
             transferrer.UpdateFullStudyHashes();
             transferrer.DropForeignMonTables();
             logging_repo.StoreImportEvent(import);
-    
+            logging_repo.CloseLog();
         }
     }
 }

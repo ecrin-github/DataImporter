@@ -9,28 +9,30 @@
         DataObjectDataAdder object_adder;
         StudyDataEditor study_editor;
         DataObjectDataEditor object_editor;
+        LoggingDataLayer logging_repo;
 
-        public DataTransferrer(string _connString, Source _source)
+        public DataTransferrer(string _connString, Source _source, LoggingDataLayer _logging_repo)
         {
             connString = _connString;
             source = _source;
+            logging_repo = _logging_repo;
             FTM = new ForeignTableManager(connString);
-            study_adder = new StudyDataAdder(connString);
-            object_adder = new DataObjectDataAdder(connString);
-            study_editor = new StudyDataEditor(connString);
-            object_editor = new DataObjectDataEditor(connString);
+            study_adder = new StudyDataAdder(connString, logging_repo);
+            object_adder = new DataObjectDataAdder(connString, logging_repo);
+            study_editor = new StudyDataEditor(connString, logging_repo);
+            object_editor = new DataObjectDataEditor(connString, logging_repo);
         }
 
         public void EstablishForeignMonTables(string user_name, string password)
         {
             FTM.EstablishMonForeignTables(user_name, password);
-            StringHelpers.SendFeedback("Established mon tables as foreign tables");
+            logging_repo.LogLine("Established mon tables as foreign tables");
         }
 
         public void DropForeignMonTables()
         {
             FTM.DropMonForeignTables();
-            StringHelpers.SendFeedback("Dropped mon tables as foreign tables");
+            logging_repo.LogLine("Dropped mon tables as foreign tables");
         }
 
         public void AddNewStudies(int import_id)
@@ -48,12 +50,12 @@
             if (source.has_study_relationships) study_adder.TransferStudyRelationships();
             if (source.has_study_links) study_adder.TransferStudyLinks();
             if (source.has_study_ipd_available) study_adder.TransferStudyIpdAvailable();
-            StringHelpers.SendFeedback("Added new source specific study data");
+            logging_repo.LogLine("Added new source specific study data");
 
             study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
             
             study_adder.TransferStudyHashes();
-            StringHelpers.SendFeedback("Added new study hashes");
+            logging_repo.LogLine("Added new study hashes");
         }
 
 
@@ -79,7 +81,7 @@
                 object_adder.TransferObjectDBLinks();
                 object_adder.TransferObjectPublicationTypes();
             }
-            StringHelpers.SendFeedback("Added new source specific object data");
+            logging_repo.LogLine("Added new source specific object data");
 
             if (!source.has_study_tables)
             {
@@ -90,7 +92,7 @@
             }
             
             object_adder.TransferObjectHashes();
-            StringHelpers.SendFeedback("Added new object hashes");
+            logging_repo.LogLine("Added new object hashes");
         }
 
         public void UpdateDatesOfData()
@@ -119,7 +121,7 @@
             if (source.has_study_ipd_available) study_editor.EditStudyIpdAvailable();
 
             study_editor.UpdateStudiesLastImportedDate(import_id, source.id);
-            StringHelpers.SendFeedback("Edited study data");
+            logging_repo.LogLine("Edited study data");
 
             study_editor.UpdateStudyCompositeHashes();
             study_editor.AddNewlyCreatedStudyHashTypes();
@@ -161,7 +163,7 @@
 
                 object_editor.UpdateObjectsLastImportedDate(import_id, source.id);
             }
-            StringHelpers.SendFeedback("Edited data object data");
+            logging_repo.LogLine("Edited data object data");
         }
 
 
@@ -183,7 +185,7 @@
 
             study_editor.UpdateStudiesDeletedDate(import_id, source.id);
 
-            StringHelpers.SendFeedback("Deleted now missing study data");
+            logging_repo.LogLine("Deleted now missing study data");
         }
 
 
@@ -214,7 +216,7 @@
                 object_editor.UpdateObjectsDeletedDate(import_id, source.id);
             }
 
-            StringHelpers.SendFeedback("Deleted now missing data object data");
+            logging_repo.LogLine("Deleted now missing data object data");
         }
 
 
@@ -225,7 +227,7 @@
                 study_editor.UpdateFullStudyHash();
             }
             object_editor.UpdateFullObjectHash();
-            StringHelpers.SendFeedback("Full hash values updated");
+            logging_repo.LogLine("Full hash values updated");
         }
 
 

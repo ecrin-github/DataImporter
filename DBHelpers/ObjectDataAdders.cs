@@ -4,11 +4,13 @@
     {
         string connstring;
         DBUtilities dbu;
+        LoggingDataLayer logging_repo;
 
-        public DataObjectDataAdder(string _connstring)
+        public DataObjectDataAdder(string _connstring, LoggingDataLayer _logging_repo)
         {
             connstring = _connstring;
-            dbu = new DBUtilities(connstring);
+            logging_repo = _logging_repo;
+            dbu = new DBUtilities(connstring, logging_repo);
         }
 
 
@@ -291,7 +293,7 @@
                  and d.hash_type_id = " + n.ToString();
 
                 dbu.ExecuteSQL(sql_string);
-                StringHelpers.SendFeedback("Inserting new object hashes - type " + n.ToString());
+                logging_repo.LogLine("Inserting new object hashes - type " + n.ToString());
             }
         }
 

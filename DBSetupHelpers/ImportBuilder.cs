@@ -6,13 +6,15 @@
         Source source;
         ImportTableCreator itc;
         ImportTableManager itm;
+        LoggingDataLayer logging_repo;
 
-        public ImportBuilder(string _connstring, Source _source)
+        public ImportBuilder(string _connstring, Source _source, LoggingDataLayer _logging_repo)
         {
             connstring = _connstring;
             source = _source;
             itc = new ImportTableCreator(connstring);
             itm = new ImportTableManager(connstring);
+            logging_repo = _logging_repo;
         }
 
         public void CreateImportTables()
@@ -21,11 +23,11 @@
             {
                 itc.CreateStudyRecsToADTable();
                 itc.CreateStudyAttsToADTable();
-                StringHelpers.SendFeedback("Created studies to_ad tables");
+                logging_repo.LogLine("Created studies to_ad tables");
             }
             itc.CreateObjectRecsToADTable();
             itc.CreateObjectAttsToADTable();
-            StringHelpers.SendFeedback("Created data objects to_ad tables");
+            logging_repo.LogLine("Created data objects to_ad tables");
         }
 
 
@@ -40,7 +42,7 @@
                 itm.IdentifyChangedStudyRecs();
             }
 
-            StringHelpers.SendFeedback("Filled studies to_ad table");
+            logging_repo.LogLine("Filled studies to_ad table");
 
             itm.IdentifyNewDataObjects();
             itm.IdentifyIdenticalDataObjects();
@@ -48,7 +50,7 @@
             if (count_deleted) itm.IdentifyDeletedDataObjects();
             itm.IdentifyChangedObjectRecs();
             if (source.has_object_datasets) itm.IdentifyChangedDatasetRecs();
-            StringHelpers.SendFeedback("Filled data objects to_ad table");
+            logging_repo.LogLine("Filled data objects to_ad table");
 
             if (source.has_study_tables)
             {
@@ -57,14 +59,14 @@
                 itm.IdentifyNewStudyAtts();
                 if (count_deleted) itm.IdentifyDeletedStudyAtts();
             }
-            StringHelpers.SendFeedback("Filled study atts table");
+            logging_repo.LogLine("Filled study atts table");
 
             itm.SetUpTempObjectAttSets();
             itm.IdentifyChangedObjectAtts();
             itm.IdentifyNewObjectAtts();
             if (count_deleted) itm.IdentifyDeletedObjectAtts();
             itm.DropTempAttSets();
-            StringHelpers.SendFeedback("Filled data objects atts table");
+            logging_repo.LogLine("Filled data objects atts table");
         }
 
         public ImportEvent CreateImportEvent(int import_id)

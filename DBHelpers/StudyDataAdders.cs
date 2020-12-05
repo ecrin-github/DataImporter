@@ -4,12 +4,13 @@
     {
         string connstring;
         DBUtilities dbu;
+        LoggingDataLayer logging_repo;
 
-
-        public StudyDataAdder(string _connstring)
+        public StudyDataAdder(string _connstring, LoggingDataLayer _logging_repo)
         {
             connstring = _connstring;
-            dbu = new DBUtilities(connstring);
+            logging_repo = _logging_repo;
+            dbu = new DBUtilities(connstring, logging_repo);
         }
 
 
@@ -217,7 +218,7 @@
                   and s.hash_type_id = " + n.ToString();
 
                 dbu.ExecuteSQL(sql_string);
-                StringHelpers.SendFeedback("Inserting new study hashes - type " + n.ToString());
+                logging_repo.LogLine("Inserting new study hashes - type " + n.ToString());
             }
         }
 
