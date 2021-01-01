@@ -13,8 +13,12 @@ namespace DataImporter
     {
         private string connString;
         private Source source;
+        private string host;
+        private string user;
+        private string password;
         private string sql_file_select_string;
-        private string logfilepath;
+        private string logfile_startofpath;
+        private string logfile_path;
         private StreamWriter sw;
 
         /// <summary>
@@ -31,17 +35,22 @@ namespace DataImporter
                 .Build();
 
             NpgsqlConnectionStringBuilder builder = new NpgsqlConnectionStringBuilder();
-            builder.Host = settings["host"];
-            builder.Username = settings["user"];
-            builder.Password = settings["password"];
+            host = settings["host"];
+            user = settings["user"];
+            password = settings["password"];
+
+            builder.Host = host;
+            builder.Username = user;
+            builder.Password = password;
 
             builder.Database = "mon";
             connString = builder.ConnectionString;
 
+            logfile_startofpath = settings["logfilepath"];
+
             sql_file_select_string = "select id, source_id, sd_id, remote_url, last_revised, ";
             sql_file_select_string += " assume_complete, download_status, local_path, last_saf_id, last_downloaded, ";
             sql_file_select_string += " last_harvest_id, last_harvested, last_import_id, last_imported ";
-
         }
 
         public Source SourceParameters => source;
@@ -51,39 +60,145 @@ namespace DataImporter
         {
             string dt_string = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture)
                               .Replace("-", "").Replace(":", "").Replace("T", " ");
-            logfilepath += "IM " + database_name + " " + dt_string + ".log";
-            sw = new StreamWriter(logfilepath, true, System.Text.Encoding.UTF8);
+            logfile_path = logfile_startofpath + "IM " + database_name + " " + dt_string + ".log";
+            sw = new StreamWriter(logfile_path, true, System.Text.Encoding.UTF8);
         }
 
         public void LogLine(string message, string identifier = "")
         {
             string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            sw.WriteLine(dt_string + message + identifier);
+            string feedback = dt_string + message + identifier;
+            Transmit(feedback);
         }
 
         public void LogHeader(string message)
         {
             string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            sw.WriteLine("");
-            sw.WriteLine(dt_string + "**** " + message + " ****");
+            string header = dt_string + "**** " + message + " ****";
+            Transmit("");
+            Transmit(header);
         }
 
         public void LogError(string message)
         {
             string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            sw.WriteLine("");
-            sw.WriteLine("+++++++++++++++++++++++++++++++++++++++");
-            sw.WriteLine(dt_string + "***ERROR*** " + message);
-            sw.WriteLine("+++++++++++++++++++++++++++++++++++++++");
-            sw.WriteLine("");
+            string error_message = dt_string + "***ERROR*** " + message;
+            Transmit("");
+            Transmit("+++++++++++++++++++++++++++++++++++++++");
+            Transmit(error_message);
+            Transmit("+++++++++++++++++++++++++++++++++++++++");
+            Transmit("");
+        }
+
+        public void LogDiffs(Source s)
+        {
+            // Gets and logs record count for each table in the sd schema of the database
+            // Start by obtaining conection string, then construct log line for each by 
+            // calling db interrogation for each applicable table
+            NpgsqlConnectionStringBuilder builder = new NpgsqlConnectionStringBuilder();
+            builder.Host = host;
+            builder.Username = user;
+            builder.Password = password;
+            builder.Database = s.database_name;
+            string db_conn = builder.ConnectionString;
+
+            LogHeader("SD - AD Differences");
+            if (s.has_study_tables)
+            {
+                LogLine(GetTableRecordCount(db_conn, "to_ad_study_recs"));
+                LogLine(GetEntityRecDiffs(db_conn, "study"));
+                GetStudyStats(db_conn, "recs");
+                LogLine(GetTableRecordCount(db_conn, "to_ad_study_atts"));
+                GetStudyStats(db_conn, "atts");
+            }
+            LogLine(GetTableRecordCount(db_conn, "to_ad_object_recs"));
+            LogLine(GetEntityRecDiffs(db_conn, "object"));
+            LogLine(GetDatasetRecDiffs(db_conn));
+            GetObjectStats(db_conn, "recs");
+            LogLine(GetTableRecordCount(db_conn, "to_ad_object_atts"));
+            GetObjectStats(db_conn, "atts");
         }
 
         public void CloseLog()
         {
             LogHeader("Closing Log");
+            sw.Flush();
             sw.Close();
         }
 
+
+        private string GetTableRecordCount(string db_conn, string table_name)
+        {
+            string sql_string = "select count(*) from sd." + table_name;
+
+            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
+            {
+                int res = conn.ExecuteScalar<int>(sql_string);
+                return res.ToString() + " records found in sd." + table_name;
+            }
+        }
+
+
+        private void GetStudyStats(string db_conn, string table_type)
+        {
+            string sql_string = "select status, count(sd_sid) as num from sd.to_ad_study_" + table_type;
+            sql_string += " group by status order by status;";
+            GetAndWriteStats(db_conn, sql_string);
+        }
+
+        private void GetObjectStats(string db_conn, string table_type)
+        {
+            string sql_string = "select status, count(sd_oid) as num from sd.to_ad_object_" + table_type;
+            sql_string += " group by status order by status;";
+            GetAndWriteStats(db_conn, sql_string);
+        }
+
+        private void GetAndWriteStats(string db_conn, string sql_string)
+        {
+            IEnumerable<att_stat> status_stats;
+            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
+            {
+                status_stats = conn.Query<att_stat>(sql_string);
+            }
+            if (status_stats.Count() > 0)
+            {
+                foreach (att_stat hs in status_stats)
+                {
+                    LogLine("Status " + hs.status.ToString() + ": " + hs.num.ToString());
+                }
+            }
+            LogLine("");
+        }
+
+        private string GetEntityRecDiffs(string db_conn, string entity_type)
+        {
+            string table_name = (entity_type == "study") ? "to_ad_study_recs" : "to_ad_object_recs";
+            string sql_string = "select count(*) from sd." + table_name + 
+                                " where " + entity_type + "_rec_status = 2;";
+
+            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
+            {
+                int res = conn.ExecuteScalar<int>(sql_string);
+                return res.ToString() + " records found with edits to the " + entity_type + " record itself;";
+            }
+        }
+
+        private string GetDatasetRecDiffs(string db_conn)
+        {
+            string sql_string = @"select count(*) from sd.to_ad_object_recs
+                                 where object_dataset_status = 4;";
+            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
+            {
+                int res = conn.ExecuteScalar<int>(sql_string);
+                return res.ToString() + " records found with edits to the dataset data;";
+            }
+        }
+
+        private void Transmit(string message)
+        {
+            sw.WriteLine(message);
+            Console.WriteLine(message);
+        }
 
         public Source FetchSourceParameters(int source_id)
         {

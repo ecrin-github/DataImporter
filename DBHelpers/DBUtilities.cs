@@ -26,11 +26,11 @@ namespace DataImporter
             return res;
         }
 
-        public void ExecuteSQL(string sql_string)
+        public int ExecuteSQL(string sql_string)
         {
             using (var conn = new NpgsqlConnection(connstring))
             {
-                conn.Execute(sql_string);
+                return conn.Execute(sql_string);
             }
         }
 
@@ -119,23 +119,12 @@ namespace DataImporter
         }
 
 
-        public void UpdateLastImportedDate(string table_name, string top_sql, string base_sql, string context)
+        public void UpdateLastImportedDate(string table_name, string top_sql, string base_sql)
         {
             try
             {
                 string sql_string = top_sql;
-                string param_string = "";
-                if (context == "Adding")
-                {
-                    param_string = " and ts.status = 1) s ";
-                }
-
-                if (context == "Editing")
-                {
-                    param_string = " and ts.status = 2) s ";
-                }
-                string feedbackA = "Updating last imported dates and import ids, (" + context.ToLower()
-                                   + " " + table_name + "), ";
+                string feedbackA = "Updating last imported dates and import ids, (" + table_name + "), ";
                 int rec_count = GetRecordCount(table_name);
                 int rec_batch = 100000;
                 if (rec_count > rec_batch)
@@ -143,7 +132,7 @@ namespace DataImporter
                     for (int r = 1; r <= rec_count; r += rec_batch)
                     {
                         sql_string += " and so.id >= " + r.ToString() + " and so.id < " + (r + rec_batch).ToString();
-                        ExecuteSQL(sql_string + param_string + base_sql);
+                        ExecuteSQL(sql_string + base_sql);
                         
                         string feedback = feedbackA + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
@@ -152,14 +141,14 @@ namespace DataImporter
                 }
                 else
                 { 
-                    ExecuteSQL(sql_string + param_string + base_sql);
+                    ExecuteSQL(sql_string + base_sql);
                     logging_repo.LogLine(feedbackA + " as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In update last imported date (" + context.ToLower() + " " + table_name + "): " + res);
+                logging_repo.LogError("In update last imported date (" + table_name + "): " + res);
             }
         }
 

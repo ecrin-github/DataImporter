@@ -266,11 +266,13 @@
                              FROM sd.studies so
                              INNER JOIN sd.to_ad_study_recs ts
                              ON so.sd_sid = ts.sd_sid
+                             where ts.status in (1, 2, 3) 
                              ";
-            string base_string = @" where s.sd_sid = src.sd_id and
+            string base_string = @" ) s
+                              where s.sd_sid = src.sd_id and
                               src.source_id = " + source_id.ToString();
 
-            dbu.UpdateLastImportedDate("studies", top_string, base_string, "Editing");
+            dbu.UpdateLastImportedDate("studies", top_string, base_string);
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static System.Console;
@@ -16,23 +17,32 @@ namespace DataImporter
 
         private static void RunOptions(Options opts)
         {
-            LoggingDataLayer logging_repo = new LoggingDataLayer(); 
-            Importer imp = new Importer();			
-            
-            if (opts.source_ids.Count() > 0)
+            LoggingDataLayer logging_repo = new LoggingDataLayer();
+            Importer imp = new Importer();
+            try
             {
-                foreach (int source_id in opts.source_ids)
+                if (opts.source_ids.Count() > 0)
                 {
-                    DataLayer repo = new DataLayer(source_id);
-                    if (repo.Source == null)
+                    foreach (int source_id in opts.source_ids)
                     {
-                        WriteLine("Sorry - the first argument does not correspond to a known source");
-                    }
-                    else
-                    {
-                        imp.Import(source_id, repo, logging_repo, opts.build_tables);
+                        DataLayer repo = new DataLayer(source_id);
+                        if (repo.Source == null)
+                        {
+                            WriteLine("Sorry - the first argument does not correspond to a known source");
+                        }
+                        else
+                        {
+                            imp.Import(repo, logging_repo, opts.build_tables);
+                        }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                logging_repo.LogError("Unhandled exception: " + e.Message);
+                logging_repo.LogLine(e.StackTrace);
+                logging_repo.LogLine(e.TargetSite.Name);
+                logging_repo.CloseLog();
             }
         }
 
@@ -50,9 +60,8 @@ namespace DataImporter
     [Option('s', "source_ids", Required = true, Separator = ',', HelpText = "Comma separated list of Integer ids of data sources.")]
     public IEnumerable<int> source_ids { get; set; }
 
-    
     [Option('T', "build tables", Required = false, HelpText = "If present, forces the (re)creation of a new set of ad tables")]
     public bool build_tables { get; set; }
 
-   }
+    }
 }

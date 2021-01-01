@@ -52,8 +52,8 @@
             if (source.has_study_ipd_available) study_adder.TransferStudyIpdAvailable();
             logging_repo.LogLine("Added new source specific study data");
 
-            study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
-            
+           // study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
+
             study_adder.TransferStudyHashes();
             logging_repo.LogLine("Added new study hashes");
         }
@@ -83,14 +83,6 @@
             }
             logging_repo.LogLine("Added new source specific object data");
 
-            if (!source.has_study_tables)
-            {
-                // only update the object source data that come without 
-                // associated studies (chiefly PubMed)
-
-                object_adder.UpdateObjectsLastImportedDate(import_id, source.id);
-            }
-            
             object_adder.TransferObjectHashes();
             logging_repo.LogLine("Added new object hashes");
         }
@@ -156,13 +148,6 @@
             object_editor.AddNewlyCreatedObjectHashTypes();
             object_editor.DropNewlyDeletedObjectHashTypes();
 
-            if (!source.has_study_tables)
-            {
-                // only update the object source data that come without 
-                // associated studies (chiefly PubMed)
-
-                object_editor.UpdateObjectsLastImportedDate(import_id, source.id);
-            }
             logging_repo.LogLine("Edited data object data");
         }
 
@@ -198,11 +183,11 @@
 
             // these are database dependent		
 
-            if (source.has_object_datasets) object_editor.DeleteObjectRecords("object_datasets"); 
+            if (source.has_object_datasets) object_editor.DeleteObjectRecords("object_datasets");
             if (source.has_object_dates) object_editor.DeleteObjectRecords("object_dates");
             if (source.has_object_pubmed_set)
             {
-                object_editor.DeleteObjectRecords("object_contributors");;
+                object_editor.DeleteObjectRecords("object_contributors"); ;
                 object_editor.DeleteObjectRecords("object_topics");
                 object_editor.DeleteObjectRecords("object_comments");
                 object_editor.DeleteObjectRecords("object_descriptions");
@@ -231,5 +216,15 @@
         }
 
 
+        public void UpdateStudiesLastImportedDate(int import_id)
+        {
+            study_editor.UpdateStudiesLastImportedDate(import_id, source.id);
+        }
+
+
+        public void UpdateObjectsLastImportedDate(int import_id)
+        {
+            object_editor.UpdateObjectsLastImportedDate(import_id, source.id);
+        }
     }
 }

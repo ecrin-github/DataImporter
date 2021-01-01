@@ -184,25 +184,6 @@
 
         #endregion
 
-
-        public void UpdateStudiesLastImportedDate(int import_id, int source_id)
-        {
-            string top_string = @"Update mon_sf.source_data_studies src
-                          set last_import_id = " + import_id.ToString() + @", 
-                          last_imported = current_timestamp
-                          from 
-                             (select so.id, so.sd_sid 
-                             FROM sd.studies so
-                             INNER JOIN sd.to_ad_study_recs ts
-                             ON so.sd_sid = ts.sd_sid
-                             ";
-           string base_string = @" where s.sd_sid = src.sd_id and
-                              src.source_id = " + source_id.ToString();
-
-            dbu.UpdateLastImportedDate("studies", top_string, base_string, "Adding");
-        }
-
-
         public void TransferStudyHashes()
         {
             for (int n = 11; n < 21; n++)
@@ -217,8 +198,8 @@
                   where ts.status = 1
                   and s.hash_type_id = " + n.ToString();
 
-                dbu.ExecuteSQL(sql_string);
-                logging_repo.LogLine("Inserting new study hashes - type " + n.ToString());
+                int res = dbu.ExecuteSQL(sql_string);
+                if (res > 0) logging_repo.LogLine("Inserting " + res.ToString() + " new study hashes - type " + n.ToString());
             }
         }
 

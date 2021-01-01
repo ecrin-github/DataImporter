@@ -190,4 +190,11 @@ namespace DataImporter
         { }
 
     }
+
+    public class att_stat
+    {
+        public int status { get; set; }
+        public int num { get; set; }
+    }
+
 }

@@ -325,11 +325,13 @@
                               FROM sd.data_objects so
                               INNER JOIN sd.to_ad_object_recs ts
                               ON so.sd_oid = ts.sd_oid
+                              where ts.status in (1, 2, 3) 
                              ";
-            string base_string = @" where s.sd_oid = src.sd_id and
+            string base_string = @" ) s
+                              where s.sd_oid = src.sd_id and
                               src.source_id = " + source_id.ToString();
 
-            dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "Editing");
+            dbu.UpdateLastImportedDate("data_objects", top_string, base_string);
         }
 
 

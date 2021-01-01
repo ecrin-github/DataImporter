@@ -259,25 +259,6 @@
 
         #endregion
 
-
-        public void UpdateObjectsLastImportedDate(int import_id, int source_id)
-        {
-            string top_string = @"UPDATE mon_sf.source_data_objects src
-                          set last_import_id = " + import_id.ToString() + @", 
-                          last_imported = current_timestamp
-                          from 
-                             (select so.id, so.sd_oid 
-                              FROM sd.data_objects so
-                              INNER JOIN sd.to_ad_object_recs ts
-                              ON so.sd_oid = ts.sd_oid
-                             ";
-            string base_string = @" where s.sd_oid = src.sd_id and
-                              src.source_id = " + source_id.ToString();
-
-            dbu.UpdateLastImportedDate("data_objects", top_string, base_string, "Adding");
-        }
-
-
         public void TransferObjectHashes()
         {
             for (int n = 50; n < 64; n++)
@@ -292,10 +273,9 @@
                  WHERE nd.status = 1
                  and d.hash_type_id = " + n.ToString();
 
-                dbu.ExecuteSQL(sql_string);
-                logging_repo.LogLine("Inserting new object hashes - type " + n.ToString());
+                int res = dbu.ExecuteSQL(sql_string);
+                if (res > 0) logging_repo.LogLine("Inserting " + res.ToString() + " new object hashes - type " + n.ToString());
             }
         }
-
     }
 }

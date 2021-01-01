@@ -2,7 +2,7 @@
 {
     public class Importer
     {
-        public void Import(int source_id, DataLayer repo, LoggingDataLayer logging_repo, bool build_tables)
+        public void Import(DataLayer repo, LoggingDataLayer logging_repo, bool build_tables)
         {
             string connstring = repo.ConnString;
             Source source = repo.Source;
@@ -30,6 +30,7 @@
             ib.CreateImportTables();
             bool count_deleted = logging_repo.CheckIfFullHarvest(source.id);
             ib.FillImportTables(count_deleted);
+            logging_repo.LogDiffs(source);
 
             // Create import event log record
             int import_id = logging_repo.GetNextImportEventId();
@@ -37,6 +38,7 @@
 
             // Start the data transfer proper...
             // set up sf monitor tables as foreign tables, temporarily
+            logging_repo.LogHeader("Start Import Process");
             transferrer.EstablishForeignMonTables(repo.User_Name, repo.Password);
 
             logging_repo.LogHeader("Adding new data");
@@ -74,10 +76,22 @@
             transferrer.RemoveDeletedDataObjectData(import_id);
 
 
+            // Update the 'date imported' record in the mon.source data tables
+            // Affects all records with status 1, 2 or 3
+            if (source.has_study_tables)
+            {
+                transferrer.UpdateStudiesLastImportedDate(import_id);
+            }
+            else
+            {
+                // only do the objects table if there are no studies (e.g. PubMed)
+                transferrer.UpdateObjectsLastImportedDate(import_id);
+            }
+
+
             // Ensure that the full hash records have been updated
             // may not have been if change was only in attribute(s).
             // Remove foreign tables and store import event details
-            // No - Move to aggregation process - Transfer the import record data to the history tables.
 
             logging_repo.LogHeader("Tidy up and finish");
             transferrer.UpdateFullStudyHashes();
