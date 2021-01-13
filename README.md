@@ -6,7 +6,8 @@ The program represents the third stage in the 4 stage MDR extraction process:<br
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download => Harvest => **Import** => Aggregation<br/><br/>
 For a much more detailed explanation of the extraction process,and the MDR system as a whole, please see the project wiki (landing page at https://ecrin-mdr.online/index.php/Project_Overview).<br/>
 In particular, for the Import process, please see:<br/>
-https://ecrin-mdr.online/index.php/Importing_Data<br/>
+https://ecrin-mdr.online/index.php/Importing_Data and <br/>
+http://ecrin-mdr.online/index.php/Missing_PIDs_and_Hashing<br/>
 and linked pages.
 
 ### Provenance
