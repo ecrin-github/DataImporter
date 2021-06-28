@@ -5,17 +5,17 @@ namespace DataImporter
 {
     public class ObjectTableBuilders
     { 
-        string connstring;
+        string _db_conn;
 
-        public ObjectTableBuilders(string _connstring)
+        public ObjectTableBuilders(string db_conn)
         {
-            connstring = _connstring;
+            _db_conn = db_conn;
         }
 
-        public void drop_table(string table_name)
+
+        public void Execute_SQL(string sql_string)
         {
-            string sql_string = @"DROP TABLE IF EXISTS ad." + table_name;
-            using (var conn = new NpgsqlConnection(connstring))
+            using (var conn = new NpgsqlConnection(_db_conn))
             {
                 conn.Execute(sql_string);
             }
@@ -24,7 +24,8 @@ namespace DataImporter
 
         public void create_table_data_objects()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.data_objects(
+            string sql_string = @"DROP TABLE IF EXISTS ad.data_objects;
+            CREATE TABLE ad.data_objects(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NOT NULL
               , sd_sid                 VARCHAR         NULL
@@ -57,16 +58,14 @@ namespace DataImporter
             CREATE INDEX data_objects_hash ON ad.data_objects(record_hash);
             CREATE INDEX data_objects_full_hash ON ad.data_objects(object_full_hash);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_datasets()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_datasets(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_datasets;
+            CREATE TABLE ad.object_datasets(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , record_keys_type_id    INT             NULL 
@@ -93,16 +92,14 @@ namespace DataImporter
 
             CREATE INDEX object_datasets_sd_oid ON ad.object_datasets(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_dates()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_dates(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_dates;
+            CREATE TABLE ad.object_dates(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , date_type_id           INT             NULL
@@ -122,16 +119,14 @@ namespace DataImporter
             );
             CREATE INDEX object_dates_sd_oid ON ad.object_dates(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_instances()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_instances(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_instances;
+            CREATE TABLE ad.object_instances(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , instance_type_id       INT             NOT NULL  default 1
@@ -151,16 +146,14 @@ namespace DataImporter
             );
             CREATE INDEX object_instances_sd_oid ON ad.object_instances(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_titles()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_titles(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_titles;
+            CREATE TABLE ad.object_titles(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , title_type_id          INT             NULL
@@ -177,16 +170,14 @@ namespace DataImporter
             );
             CREATE INDEX object_titles_sd_oid ON ad.object_titles(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_contributors()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_contributors(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_contributors;
+            CREATE TABLE ad.object_contributors(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , contrib_type_id        INT             NULL
@@ -209,16 +200,14 @@ namespace DataImporter
             );
             CREATE INDEX object_contributors_sd_oid ON ad.object_contributors(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_topics()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_topics(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_topics;
+            CREATE TABLE ad.object_topics(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , topic_type_id          INT             NULL
@@ -238,16 +227,14 @@ namespace DataImporter
             );
             CREATE INDEX object_topics_sd_oid ON ad.object_topics(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_comments()
         {
-            string sql_string = @"CREATE TABLE ad.object_comments(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_comments;
+            CREATE TABLE ad.object_comments(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , ref_type               VARCHAR         NULL 
@@ -262,16 +249,14 @@ namespace DataImporter
             );
             CREATE INDEX object_comments_sd_oid ON ad.object_comments(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string); 
         }
 
 
         public void create_table_object_descriptions()
         {
-            string sql_string = @"CREATE TABLE ad.object_descriptions(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_descriptions;
+            CREATE TABLE ad.object_descriptions(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , description_type_id    INT             NULL
@@ -286,15 +271,13 @@ namespace DataImporter
             );
             CREATE INDEX object_descriptions_sd_oid ON ad.object_descriptions(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
         public void create_table_object_identifiers()
         {
-            string sql_string = @"CREATE TABLE ad.object_identifiers(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_identifiers;
+CREATE TABLE ad.object_identifiers(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , identifier_value       VARCHAR         NULL
@@ -309,16 +292,14 @@ namespace DataImporter
             );
             CREATE INDEX object_identifiers_sd_oid ON ad.object_identifiers(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_db_links()
         {
-            string sql_string = @"CREATE TABLE ad.object_db_links(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_db_links;
+            CREATE TABLE ad.object_db_links(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , db_sequence            INT             NULL
@@ -331,16 +312,14 @@ namespace DataImporter
             );
             CREATE INDEX object_db_links_sd_oid ON ad.object_db_links(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_publication_types()
         {
-            string sql_string = @"CREATE TABLE ad.object_publication_types(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_publication_types;
+            CREATE TABLE ad.object_publication_types(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , type_name              VARCHAR         NULL
@@ -351,17 +330,15 @@ namespace DataImporter
             );
             CREATE INDEX object_publication_types_sd_oid ON ad.object_publication_types(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         // object rights
         public void create_table_object_rights()
         {
-            string sql_string = @"CREATE TABLE ad.object_rights(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_rights;
+            CREATE TABLE ad.object_rights(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , rights_name            VARCHAR         NULL
@@ -374,17 +351,15 @@ namespace DataImporter
             );
             CREATE INDEX object_rights_sd_oid ON ad.object_rights(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         // object relationships
         public void create_table_object_relationships()
         {
-            string sql_string = @"CREATE TABLE ad.object_relationships(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_relationships;
+            CREATE TABLE ad.object_relationships(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , relationship_type_id   INT             NULL
@@ -396,16 +371,14 @@ namespace DataImporter
             );
             CREATE INDEX object_relationships_sd_oid ON ad.object_relationships(sd_oid);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
 
 
         public void create_table_object_hashes()
         {
-            string sql_string = @"CREATE TABLE IF NOT EXISTS ad.object_hashes(
+            string sql_string = @"DROP TABLE IF EXISTS ad.object_hashes;
+            CREATE TABLE ad.object_hashes(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 CHAR(24)        NULL
               , hash_type_id           INT             NULL
@@ -415,12 +388,9 @@ namespace DataImporter
               , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_hashes_sd_oid ON ad.object_hashes(sd_oid);
-            CREATE INDEX object_hashes_composite_hash ON ad.object_hashes(composite_hash);"; 
+            CREATE INDEX object_hashes_composite_hash ON ad.object_hashes(composite_hash);";
 
-            using (var conn = new NpgsqlConnection(connstring))
-            {
-                conn.Execute(sql_string);
-            }
+            Execute_SQL(sql_string);
         }
     }
 }

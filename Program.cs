@@ -25,7 +25,7 @@ namespace DataImporter
                 {
                     foreach (int source_id in opts.source_ids)
                     {
-                        DataLayer repo = new DataLayer(source_id);
+                        DataLayer repo = new DataLayer(source_id, opts.is_test);
                         if (repo.Source == null)
                         {
                             WriteLine("Sorry - the first argument does not correspond to a known source");
@@ -62,6 +62,9 @@ namespace DataImporter
 
     [Option('T', "build tables", Required = false, HelpText = "If present, forces the (re)creation of a new set of ad tables")]
     public bool build_tables { get; set; }
+
+    [Option('X', "is a test", Required = false, HelpText = "If present, operates on the sd / ad tables in the test database")]
+    public bool is_test { get; set; }
 
     }
 }

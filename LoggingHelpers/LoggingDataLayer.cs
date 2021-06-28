@@ -90,18 +90,10 @@ namespace DataImporter
             Transmit("");
         }
 
-        public void LogDiffs(Source s)
+        public void LogDiffs(string db_conn, Source s)
         {
             // Gets and logs record count for each table in the sd schema of the database
-            // Start by obtaining conection string, then construct log line for each by 
-            // calling db interrogation for each applicable table
-            NpgsqlConnectionStringBuilder builder = new NpgsqlConnectionStringBuilder();
-            builder.Host = host;
-            builder.Username = user;
-            builder.Password = password;
-            builder.Database = s.database_name;
-            string db_conn = builder.ConnectionString;
-
+            
             LogHeader("SD - AD Differences");
             if (s.has_study_tables)
             {

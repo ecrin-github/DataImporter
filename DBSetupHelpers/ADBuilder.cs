@@ -2,111 +2,71 @@
 {
     class ADBuilder
     {
-        private string connString;
-        private Source source;
-        StudyTableBuilders study_builder;
-        ObjectTableBuilders object_builder;
-        LoggingDataLayer logging_repo;
+        private string _db_conn;
+        private Source _source;
+        StudyTableBuilders _study_builder;
+        ObjectTableBuilders _object_builder;
+        LoggingDataLayer _logging_repo;
 
-        public ADBuilder(string _connString, Source _source, LoggingDataLayer _logging_repo)
+        public ADBuilder(string db_conn, Source source, LoggingDataLayer logging_repo)
         {
-            connString = _connString;
-            source = _source;
-            study_builder = new StudyTableBuilders(connString);
-            object_builder = new ObjectTableBuilders(connString);
-            logging_repo = _logging_repo;
-        }
-
-        public void DeleteADStudyTables()
-        {
-            // dropping routines include 'if exists'
-            // therefore can attempt to drop all of them
-
-            study_builder.drop_table("studies");
-            study_builder.drop_table("study_identifiers");
-            study_builder.drop_table("study_titles");
-            study_builder.drop_table("study_contributors");
-            study_builder.drop_table("study_topics");
-            study_builder.drop_table("study_features");
-            study_builder.drop_table("study_relationships");
-            study_builder.drop_table("study_references");
-            study_builder.drop_table("study_hashes");
-            study_builder.drop_table("study_links");
-            study_builder.drop_table("study_ipd_available");
-        }
-
-        public void DeleteADObjectTables()
-        {
-            // dropping routines include 'if exists'
-            // therefore can attempt to drop all of them
-
-            object_builder.drop_table("data_objects");
-            object_builder.drop_table("object_datasets");
-            object_builder.drop_table("object_dates");
-            object_builder.drop_table("object_instances");
-            object_builder.drop_table("object_titles");
-            object_builder.drop_table("object_languages");
-            object_builder.drop_table("object_hashes");
-            object_builder.drop_table("object_contributors");
-            object_builder.drop_table("object_topics");
-            object_builder.drop_table("object_comments");
-            object_builder.drop_table("object_descriptions");
-            object_builder.drop_table("object_identifiers");
-            object_builder.drop_table("object_db_links");
-            object_builder.drop_table("object_publication_types");
-            object_builder.drop_table("object_relationships");
-            object_builder.drop_table("object_rights");
+            _db_conn = db_conn;
+            _source = source;
+            _study_builder = new StudyTableBuilders(_db_conn);
+            _object_builder = new ObjectTableBuilders(_db_conn);
+            _logging_repo = logging_repo;
         }
 
 
-        public void BuildNewADStudyTables()
+        public void BuildNewADTables()
         {
-            // these common to all databases
+            if (_source.has_study_tables)
+            {
+                // these common to all databases
 
-            study_builder.create_ad_schema();
-            study_builder.create_table_studies();
-            study_builder.create_table_study_identifiers();
-            study_builder.create_table_study_titles();
-            study_builder.create_table_study_hashes();
+                _study_builder.create_ad_schema();
+                _study_builder.create_table_studies();
+                _study_builder.create_table_study_identifiers();
+                _study_builder.create_table_study_titles();
+                _study_builder.create_table_study_hashes();
 
-            // these are database dependent
-            if (source.has_study_topics) study_builder.create_table_study_topics();
-            if (source.has_study_features) study_builder.create_table_study_features();
-            if (source.has_study_contributors) study_builder.create_table_study_contributors();
-            if (source.has_study_references) study_builder.create_table_study_references();
-            if (source.has_study_relationships) study_builder.create_table_study_relationships();
-            if (source.has_study_links) study_builder.create_table_study_links();
-            if (source.has_study_ipd_available) study_builder.create_table_ipd_available();
-            logging_repo.LogLine("Rebuilt AD study tables");
-        }
+                // these are database dependent
+                if (_source.has_study_topics) _study_builder.create_table_study_topics();
+                if (_source.has_study_features) _study_builder.create_table_study_features();
+                if (_source.has_study_contributors) _study_builder.create_table_study_contributors();
+                if (_source.has_study_references) _study_builder.create_table_study_references();
+                if (_source.has_study_relationships) _study_builder.create_table_study_relationships();
+                if (_source.has_study_links) _study_builder.create_table_study_links();
+                if (_source.has_study_ipd_available) _study_builder.create_table_ipd_available();
 
+                _logging_repo.LogLine("Rebuilt AD study tables");
+            }
 
-        public void BuildNewADObjectTables()
-        {
-            // these common to all databases
+            // object tables - these common to all databases
 
-            object_builder.create_table_data_objects();
-            object_builder.create_table_object_instances();
-            object_builder.create_table_object_titles();
-            object_builder.create_table_object_hashes();
+            _object_builder.create_table_data_objects();
+            _object_builder.create_table_object_instances();
+            _object_builder.create_table_object_titles();
+            _object_builder.create_table_object_hashes();
 
             // these are database dependent		
 
-            if (source.has_object_datasets) object_builder.create_table_object_datasets();
-            if (source.has_object_dates) object_builder.create_table_object_dates();
-            if (source.has_object_relationships) object_builder.create_table_object_relationships();
-            if (source.has_object_rights) object_builder.create_table_object_rights();
-            if (source.has_object_pubmed_set)
+            if (_source.has_object_datasets) _object_builder.create_table_object_datasets();
+            if (_source.has_object_dates) _object_builder.create_table_object_dates();
+            if (_source.has_object_relationships) _object_builder.create_table_object_relationships();
+            if (_source.has_object_rights) _object_builder.create_table_object_rights();
+            if (_source.has_object_pubmed_set)
             {
-                object_builder.create_table_object_contributors();
-                object_builder.create_table_object_topics();
-                object_builder.create_table_object_comments();
-                object_builder.create_table_object_descriptions();
-                object_builder.create_table_object_identifiers();
-                object_builder.create_table_object_db_links();
-                object_builder.create_table_object_publication_types();
+                _object_builder.create_table_object_contributors();
+                _object_builder.create_table_object_topics();
+                _object_builder.create_table_object_comments();
+                _object_builder.create_table_object_descriptions();
+                _object_builder.create_table_object_identifiers();
+                _object_builder.create_table_object_db_links();
+                _object_builder.create_table_object_publication_types();
             }
-            logging_repo.LogLine("Rebuilt AD Object tables");
+
+            _logging_repo.LogLine("Rebuilt AD Object tables");
         }
     }
 }

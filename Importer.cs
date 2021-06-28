@@ -15,13 +15,7 @@
             if (build_tables)
             {
                 ADBuilder adb = new ADBuilder(connstring, source, logging_repo);
-                if (source.has_study_tables)
-                {
-                    adb.DeleteADStudyTables();
-                    adb.BuildNewADStudyTables();
-                }
-                adb.DeleteADObjectTables();
-                adb.BuildNewADObjectTables();
+                adb.BuildNewADTables();
             }
 
             logging_repo.LogHeader("Create and fill diff tables");
@@ -30,7 +24,7 @@
             ib.CreateImportTables();
             bool count_deleted = logging_repo.CheckIfFullHarvest(source.id);
             ib.FillImportTables(count_deleted);
-            logging_repo.LogDiffs(source);
+            logging_repo.LogDiffs(connstring, source);
 
             // Create import event log record
             int import_id = logging_repo.GetNextImportEventId();

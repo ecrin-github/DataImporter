@@ -13,7 +13,7 @@ namespace DataImporter
         private string user_name;
         private string password;
 
-        public DataLayer(int source_id)
+        public DataLayer(int source_id, bool is_test)
         {
             IConfigurationRoot settings = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
@@ -38,7 +38,14 @@ namespace DataImporter
                 source = Conn.Get<Source>(source_id);
                 if (source != null)
                 {
-                    builder.Database = source.database_name;
+                    if (!is_test)
+                    {
+                        builder.Database = source.database_name;
+                    }
+                    else
+                    {
+                        builder.Database = "test";
+                    }
                     connString = builder.ConnectionString;
                 }
                 else
