@@ -1,16 +1,16 @@
-﻿namespace DataImporter
+﻿using Serilog;
+
+namespace DataImporter
 {
     class DataObjectDataAdder
     {
-        string connstring;
+        ILogger _logger;
         DBUtilities dbu;
-        LoggingDataLayer logging_repo;
 
-        public DataObjectDataAdder(string _connstring, LoggingDataLayer _logging_repo)
+        public DataObjectDataAdder(string connstring, ILogger logger)
         {
-            connstring = _connstring;
-            logging_repo = _logging_repo;
-            dbu = new DBUtilities(connstring, logging_repo);
+            _logger = logger;
+            dbu = new DBUtilities(connstring, _logger);
         }
 
 
@@ -84,10 +84,10 @@
         {
             string sql_string = @"INSERT INTO ad.object_titles(sd_oid, 
             title_type_id, title_text, lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash)
+            lang_usage_id, is_default, comments, record_hash)
             SELECT s.sd_oid, 
             title_type_id, title_text, lang_code,
-            lang_usage_id, is_default, comments, comparison_text, record_hash
+            lang_usage_id, is_default, comments, record_hash
             FROM sd.object_titles s
             INNER JOIN sd.to_ad_object_recs nd
             ON s.sd_oid = nd.sd_oid
@@ -171,10 +171,10 @@
         {
             string sql_string = @"INSERT INTO ad.object_descriptions(sd_oid, 
             description_type_id, label, description_text, lang_code, 
-            contains_html, record_hash)
+            record_hash)
             SELECT s.sd_oid, 
             description_type_id, label, description_text, lang_code, 
-            contains_html, record_hash
+            record_hash
             FROM sd.object_descriptions s
             INNER JOIN sd.to_ad_object_recs nd
             ON s.sd_oid = nd.sd_oid
@@ -274,7 +274,7 @@
                  and d.hash_type_id = " + n.ToString();
 
                 int res = dbu.ExecuteSQL(sql_string);
-                if (res > 0) logging_repo.LogLine("Inserting " + res.ToString() + " new object hashes - type " + n.ToString());
+                if (res > 0) _logger.Information("Inserting " + res.ToString() + " new object hashes - type " + n.ToString());
             }
         }
     }

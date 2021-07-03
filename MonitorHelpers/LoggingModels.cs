@@ -4,14 +4,17 @@ using System;
 namespace DataImporter
 {
     [Table("sf.source_parameters")]
-    public class Source
+    public class Source : ISource
     {
         public int id { get; set; }
+        public string source_type { get; }
         public int? preference_rating { get; set; }
         public string database_name { get; set; }
+        public string db_conn { get; set; }
         public int default_harvest_type_id { get; set; }
         public bool requires_file_name { get; set; }
         public bool uses_who_harvest { get; set; }
+        public int harvest_chunk { get; }
         public string local_folder { get; set; }
         public bool? local_files_grouped { get; set; }
         public int? grouping_range_by_id { get; set; }
@@ -30,6 +33,8 @@ namespace DataImporter
         public bool has_object_rights { get; set; }
         public bool has_object_pubmed_set { get; set; }
     }
+
+
 
     [Table("sf.import_events")]
     public class ImportEvent
@@ -194,6 +199,14 @@ namespace DataImporter
     public class att_stat
     {
         public int status { get; set; }
+        public int num { get; set; }
+    }
+
+
+    public class hash_stat
+    {
+        public int hash_type_id { get; set; }
+        public string hash_type { get; set; }
         public int num { get; set; }
     }
 

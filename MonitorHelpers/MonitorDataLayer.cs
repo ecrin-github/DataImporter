@@ -2,6 +2,7 @@
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,44 +10,29 @@ using System.Linq;
 
 namespace DataImporter
 {
-    public class LoggingDataLayer
+    public class MonitorDataLayer : IMonitorDataLayer
     {
-        private string connString;
+        private ILogger _logger;
+        ICredentials _credentials;
         private Source source;
-        private string host;
-        private string user;
-        private string password;
         private string sql_file_select_string;
-        private string logfile_startofpath;
-        private string logfile_path;
-        private StreamWriter sw;
+        private string connString;
+        NpgsqlConnectionStringBuilder builder;
 
-        /// <summary>
-        /// Parameterless constructor is used to automatically build
-        /// the connection string, using an appsettings.json file that 
-        /// has the relevant credentials (but which is not stored in GitHub).
-        /// </summary>
-        /// 
-        public LoggingDataLayer()
+
+        public MonitorDataLayer(ILogger logger, ICredentials credentials)
         {
-            IConfigurationRoot settings = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
+            _logger = logger;
 
-            NpgsqlConnectionStringBuilder builder = new NpgsqlConnectionStringBuilder();
-            host = settings["host"];
-            user = settings["user"];
-            password = settings["password"];
-
-            builder.Host = host;
-            builder.Username = user;
-            builder.Password = password;
+            builder = new NpgsqlConnectionStringBuilder();
+            builder.Host = credentials.Host;
+            builder.Username = credentials.Username;
+            builder.Password = credentials.Password;
 
             builder.Database = "mon";
             connString = builder.ConnectionString;
 
-            logfile_startofpath = settings["logfilepath"];
+            _credentials = credentials;
 
             sql_file_select_string = "select id, source_id, sd_id, remote_url, last_revised, ";
             sql_file_select_string += " assume_complete, download_status, local_path, last_saf_id, last_downloaded, ";
@@ -54,68 +40,32 @@ namespace DataImporter
         }
 
         public Source SourceParameters => source;
+        public Credentials Credentials => (Credentials)_credentials;
 
 
-        public void OpenLogFile(string database_name)
+        public void LogDiffs(ISource s)
         {
-            string dt_string = DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture)
-                              .Replace("-", "").Replace(":", "").Replace("T", " ");
-            logfile_path = logfile_startofpath + "IM " + database_name + " " + dt_string + ".log";
-            sw = new StreamWriter(logfile_path, true, System.Text.Encoding.UTF8);
-        }
+            string db_conn = s.db_conn;
 
-        public void LogLine(string message, string identifier = "")
-        {
-            string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            string feedback = dt_string + message + identifier;
-            Transmit(feedback);
-        }
-
-        public void LogHeader(string message)
-        {
-            string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            string header = dt_string + "**** " + message + " ****";
-            Transmit("");
-            Transmit(header);
-        }
-
-        public void LogError(string message)
-        {
-            string dt_string = DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString() + " :   ";
-            string error_message = dt_string + "***ERROR*** " + message;
-            Transmit("");
-            Transmit("+++++++++++++++++++++++++++++++++++++++");
-            Transmit(error_message);
-            Transmit("+++++++++++++++++++++++++++++++++++++++");
-            Transmit("");
-        }
-
-        public void LogDiffs(string db_conn, Source s)
-        {
             // Gets and logs record count for each table in the sd schema of the database
-            
-            LogHeader("SD - AD Differences");
+
+            _logger.Information("");
+            _logger.Information("SD - AD Differences");
+            _logger.Information("");
             if (s.has_study_tables)
             {
-                LogLine(GetTableRecordCount(db_conn, "to_ad_study_recs"));
-                LogLine(GetEntityRecDiffs(db_conn, "study"));
+                _logger.Information(GetTableRecordCount(db_conn, "to_ad_study_recs"));
+                _logger.Information(GetEntityRecDiffs(db_conn, "study"));
                 GetStudyStats(db_conn, "recs");
-                LogLine(GetTableRecordCount(db_conn, "to_ad_study_atts"));
+                _logger.Information(GetTableRecordCount(db_conn, "to_ad_study_atts"));
                 GetStudyStats(db_conn, "atts");
             }
-            LogLine(GetTableRecordCount(db_conn, "to_ad_object_recs"));
-            LogLine(GetEntityRecDiffs(db_conn, "object"));
-            LogLine(GetDatasetRecDiffs(db_conn));
+            _logger.Information(GetTableRecordCount(db_conn, "to_ad_object_recs"));
+            _logger.Information(GetEntityRecDiffs(db_conn, "object"));
+            _logger.Information(GetDatasetRecDiffs(db_conn));
             GetObjectStats(db_conn, "recs");
-            LogLine(GetTableRecordCount(db_conn, "to_ad_object_atts"));
+            _logger.Information(GetTableRecordCount(db_conn, "to_ad_object_atts"));
             GetObjectStats(db_conn, "atts");
-        }
-
-        public void CloseLog()
-        {
-            LogHeader("Closing Log");
-            sw.Flush();
-            sw.Close();
         }
 
 
@@ -156,10 +106,10 @@ namespace DataImporter
             {
                 foreach (att_stat hs in status_stats)
                 {
-                    LogLine("Status " + hs.status.ToString() + ": " + hs.num.ToString());
+                    _logger.Information("Status " + hs.status.ToString() + ": " + hs.num.ToString());
                 }
             }
-            LogLine("");
+            _logger.Information("");
         }
 
         private string GetEntityRecDiffs(string db_conn, string entity_type)
@@ -186,10 +136,15 @@ namespace DataImporter
             }
         }
 
-        private void Transmit(string message)
+
+        public bool SourceIdPresent(int source_id)
         {
-            sw.WriteLine(message);
-            Console.WriteLine(message);
+            string sql_string = "Select id from sf.source_parameters where id = " + source_id.ToString();
+            using (NpgsqlConnection Conn = new NpgsqlConnection(connString))
+            {
+                int res = Conn.QueryFirstOrDefault<int>(sql_string);
+                return (res == 0) ? false : true;
+            }
         }
 
         public Source FetchSourceParameters(int source_id)
@@ -212,6 +167,8 @@ namespace DataImporter
 
 
         }
+
+        
         public IEnumerable<StudyFileRecord> FetchStudyFileRecords(int source_id, int harvest_type_id = 1, DateTime? cutoff_date = null)
         {
             string sql_string = sql_file_select_string;
@@ -223,6 +180,7 @@ namespace DataImporter
                 return Conn.Query<StudyFileRecord>(sql_string);
             }
         }
+
 
         public IEnumerable<ObjectFileRecord> FetchObjectFileRecords(int source_id, int harvest_type_id = 1, DateTime? cutoff_date = null)
         {
@@ -329,6 +287,7 @@ namespace DataImporter
             }
         }
 
+
         public void UpdateFileRecLastImported(int id, string source_type)
         {
             using (var conn = new NpgsqlConnection(connString))
@@ -340,6 +299,7 @@ namespace DataImporter
                 conn.Execute(sql_string);
             }
         }
+
 
         public int StoreImportEvent(ImportEvent import)
         {

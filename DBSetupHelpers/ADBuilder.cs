@@ -1,20 +1,27 @@
-﻿namespace DataImporter
+﻿using Serilog;
+
+namespace DataImporter
 {
     class ADBuilder
     {
-        private string _db_conn;
-        private Source _source;
+        ISource _source;
+        IMonitorDataLayer _logging_repo;
+        ILogger _logger;
+        string _connstring;
+
         StudyTableBuilders _study_builder;
         ObjectTableBuilders _object_builder;
-        LoggingDataLayer _logging_repo;
 
-        public ADBuilder(string db_conn, Source source, LoggingDataLayer logging_repo)
+        public ADBuilder(ISource source, IMonitorDataLayer logging_repo, ILogger logger)
         {
-            _db_conn = db_conn;
             _source = source;
-            _study_builder = new StudyTableBuilders(_db_conn);
-            _object_builder = new ObjectTableBuilders(_db_conn);
+            _connstring = _source.db_conn;
             _logging_repo = logging_repo;
+            _logger = logger;
+
+            _study_builder = new StudyTableBuilders(_connstring);
+            _object_builder = new ObjectTableBuilders(_connstring);
+
         }
 
 
@@ -39,7 +46,7 @@
                 if (_source.has_study_links) _study_builder.create_table_study_links();
                 if (_source.has_study_ipd_available) _study_builder.create_table_ipd_available();
 
-                _logging_repo.LogLine("Rebuilt AD study tables");
+                _logger.Information("Rebuilt AD study tables");
             }
 
             // object tables - these common to all databases
@@ -66,7 +73,7 @@
                 _object_builder.create_table_object_publication_types();
             }
 
-            _logging_repo.LogLine("Rebuilt AD Object tables");
+            _logger.Information("Rebuilt AD Object tables");
         }
     }
 }

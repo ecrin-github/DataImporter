@@ -1,39 +1,44 @@
-﻿namespace DataImporter
+﻿using Serilog;
+
+namespace DataImporter
 {
     class ImportBuilder
     {
-        string connstring;
-        Source source;
+        ISource _source;
+        IMonitorDataLayer _logging_repo;
+        ILogger _logger;
         ImportTableCreator itc;
         ImportTableManager itm;
-        LoggingDataLayer logging_repo;
+        string _connstring;
 
-        public ImportBuilder(string _connstring, Source _source, LoggingDataLayer _logging_repo)
+        public ImportBuilder(ISource source, IMonitorDataLayer logging_repo, ILogger logger)
         {
-            connstring = _connstring;
-            source = _source;
-            itc = new ImportTableCreator(connstring);
-            itm = new ImportTableManager(connstring);
-            logging_repo = _logging_repo;
+            _source = source;
+            _connstring = _source.db_conn;
+            _logging_repo = logging_repo;
+            _logger = logger;
+
+            itc = new ImportTableCreator(_connstring);
+            itm = new ImportTableManager(_connstring);
         }
 
         public void CreateImportTables()
         {
-            if (source.has_study_tables)
+            if (_source.has_study_tables)
             {
                 itc.CreateStudyRecsToADTable();
                 itc.CreateStudyAttsToADTable();
-                logging_repo.LogLine("Created studies to_ad tables");
+                _logger.Information("Created studies to_ad tables");
             }
             itc.CreateObjectRecsToADTable();
             itc.CreateObjectAttsToADTable();
-            logging_repo.LogLine("Created data objects to_ad tables");
+            _logger.Information("Created data objects to_ad tables");
         }
 
 
         public void FillImportTables(bool count_deleted)
         {
-            if (source.has_study_tables)
+            if (_source.has_study_tables)
             {
                 itm.IdentifyNewStudies();
                 itm.IdentifyIdenticalStudies();
@@ -42,36 +47,36 @@
                 itm.IdentifyChangedStudyRecs();
             }
 
-            logging_repo.LogLine("Filled studies to_ad table");
+            _logger.Information("Filled studies to_ad table");
 
             itm.IdentifyNewDataObjects();
             itm.IdentifyIdenticalDataObjects();
             itm.IdentifyEditedDataObjects();
             if (count_deleted) itm.IdentifyDeletedDataObjects();
             itm.IdentifyChangedObjectRecs();
-            if (source.has_object_datasets) itm.IdentifyChangedDatasetRecs();
-            logging_repo.LogLine("Filled data objects to_ad table");
+            if (_source.has_object_datasets) itm.IdentifyChangedDatasetRecs();
+            _logger.Information("Filled data objects to_ad table");
 
-            if (source.has_study_tables)
+            if (_source.has_study_tables)
             {
                 itm.SetUpTempStudyAttSets();
                 itm.IdentifyChangedStudyAtts();
                 itm.IdentifyNewStudyAtts();
                 if (count_deleted) itm.IdentifyDeletedStudyAtts();
             }
-            logging_repo.LogLine("Filled study atts table");
+            _logger.Information("Filled study atts table");
 
             itm.SetUpTempObjectAttSets();
             itm.IdentifyChangedObjectAtts();
             itm.IdentifyNewObjectAtts();
             if (count_deleted) itm.IdentifyDeletedObjectAtts();
             itm.DropTempAttSets();
-            logging_repo.LogLine("Filled data objects atts table");
+            _logger.Information("Filled data objects atts table");
         }
 
         public ImportEvent CreateImportEvent(int import_id)
         {
-            return itm.CreateImportEvent(import_id, source);
+            return itm.CreateImportEvent(import_id, _source);
         }
     }
 }

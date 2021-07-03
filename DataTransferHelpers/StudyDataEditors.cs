@@ -1,16 +1,17 @@
-﻿namespace DataImporter
+﻿
+using Serilog;
+
+namespace DataImporter
 {
     class StudyDataEditor
     {
-        string connstring;
+        ILogger _logger;
         DBUtilities dbu;
-        LoggingDataLayer logging_repo;
 
-        public StudyDataEditor(string _connstring, LoggingDataLayer _logging_repo)
+        public StudyDataEditor(string connstring, ILogger logger)
         {
-            connstring = _connstring;
-            logging_repo = _logging_repo;
-            dbu = new DBUtilities(connstring, logging_repo);
+            _logger = logger;
+            dbu = new DBUtilities(connstring, _logger);
         }
         
         public void EditStudies()
@@ -22,9 +23,7 @@
                   display_title = t.display_title,
                   title_lang_code = t.title_lang_code, 
                   brief_description = t.brief_description, 
-                  bd_contains_html = t.bd_contains_html, 
                   data_sharing_statement = t.data_sharing_statement,
-                  dss_contains_html = t.dss_contains_html, 
                   study_start_year = t.study_start_year,
                   study_start_month = t.study_start_month,
                   study_type_id = t.study_type_id, 
@@ -86,10 +85,10 @@
 
             string sql_stringI = sql_string + @"INSERT INTO ad.study_titles(sd_sid,
             title_text, title_type_id, lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash)
+            is_default, comments, record_hash)
             SELECT s.sd_sid, 
             title_text, title_type_id, lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash
+            is_default, comments, record_hash
             FROM sd.study_titles s
             INNER JOIN t
             on s.sd_sid = t.sd_sid";
@@ -331,7 +330,7 @@
                  WHERE ia.status = 1";
 
                 dbu.ExecuteSQL(sql_string);
-                logging_repo.LogLine("Inserting new study hashtype combinations in study hash records");
+                _logger.Information("Inserting new study hashtype combinations in study hash records");
         }
 
 
@@ -344,7 +343,7 @@
                  and ia.status = 4";
 
             dbu.ExecuteSQL(sql_string);
-            logging_repo.LogLine("Dropping deleted study hashtype combinations from study hash records");
+            _logger.Information("Dropping deleted study hashtype combinations from study hash records");
         }
 
 

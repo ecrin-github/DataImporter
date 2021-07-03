@@ -141,7 +141,6 @@ namespace DataImporter
               , lang_usage_id          INT             NOT NULL default 11
               , is_default             BOOLEAN         NULL
               , comments               VARCHAR         NULL
-              , comparison_text        VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()

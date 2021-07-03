@@ -1,25 +1,27 @@
 ﻿using Dapper;
 using Npgsql;
+using Serilog;
 using System;
 
 namespace DataImporter
 {
     class DBUtilities
     {
-        string connstring;
-        LoggingDataLayer logging_repo;
+        string _connstring;
+        ILogger _logger;
 
-        public DBUtilities(string _connstring, LoggingDataLayer _logging_repo)
+        public DBUtilities(string connstring, ILogger logger)
         {
-            connstring = _connstring;
-            logging_repo = _logging_repo;
+            _connstring = connstring;
+            _logger = logger;
+
         }
 
         public int GetRecordCount(string table_name)
         {
             int res = 0;
             string sql_string = @"select count(*) from sd." + table_name;
-            using (var conn = new NpgsqlConnection(connstring))
+            using (var conn = new NpgsqlConnection(_connstring))
             {
                 res = conn.ExecuteScalar<int>(sql_string);
             }
@@ -28,7 +30,7 @@ namespace DataImporter
 
         public int ExecuteSQL(string sql_string)
         {
-            using (var conn = new NpgsqlConnection(connstring))
+            using (var conn = new NpgsqlConnection(_connstring))
             {
                 return conn.Execute(sql_string);
             }
@@ -37,7 +39,7 @@ namespace DataImporter
 
         public void ExecuteDandI(string sql_string1, string sql_string2, string table_name)
         {
-            using (var conn = new NpgsqlConnection(connstring))
+            using (var conn = new NpgsqlConnection(_connstring))
             {
                 conn.Execute(sql_string1);
                 ExecuteTransferSQL(sql_string2, table_name, "Editing");
@@ -102,19 +104,19 @@ namespace DataImporter
 
                         string feedback = context + " " + table_name + " data, " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 {
                     ExecuteSQL(sql_string);
-                    logging_repo.LogLine(context + " " + table_name + " data, as a single batch");
+                    _logger.Information(context + " " + table_name + " data, as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In data transfer (" + table_name + ") to ad table: " + res);
+                _logger.Error("In data transfer (" + table_name + ") to ad table: " + res);
             }
         }
 
@@ -136,19 +138,19 @@ namespace DataImporter
                         
                         string feedback = feedbackA + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 { 
                     ExecuteSQL(sql_string + base_sql);
-                    logging_repo.LogLine(feedbackA + " as a single batch");
+                    _logger.Information(feedbackA + " as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In update last imported date (" + table_name + "): " + res);
+                _logger.Error("In update last imported date (" + table_name + "): " + res);
             }
         }
 
@@ -170,19 +172,19 @@ namespace DataImporter
 
                         string feedback = "Updating date of data for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 {
                     ExecuteSQL(top_sql + base_sql);
-                    logging_repo.LogLine("Updating date of data for " + table_name + ", as a single batch");
+                    _logger.Information("Updating date of data for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In " + table_name + " date of data update: " + res);
+                _logger.Error("In " + table_name + " date of data update: " + res);
             }
         }
 
@@ -204,19 +206,19 @@ namespace DataImporter
 
                         string feedback = "Updating entity records for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 {
                     ExecuteSQL(topstring + basestring);
-                    logging_repo.LogLine("Updating entity records for " + table_name + ", as a single batch");
+                    _logger.Information("Updating entity records for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In updating entity records for " + table_name + ", sd to ad table: " + res);
+                _logger.Error("In updating entity records for " + table_name + ", sd to ad table: " + res);
             }
         }
 
@@ -242,19 +244,19 @@ namespace DataImporter
 
                         string feedback = "Updating changed composite hashes for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 {
                     ExecuteSQL(top_sql);
-                    logging_repo.LogLine("Updating changed composite hashes for " + table_name + ", as a single batch");
+                    _logger.Information("Updating changed composite hashes for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In " + table_name + " data edits (composite hashes), sd to ad table: " + res);
+                _logger.Error("In " + table_name + " data edits (composite hashes), sd to ad table: " + res);
             }
         }
 
@@ -279,19 +281,19 @@ namespace DataImporter
 
                         string feedback = "Updating full hashes for " + table_name + ", " + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
-                        logging_repo.LogLine(feedback);
+                        _logger.Information(feedback);
                     }
                 }
                 else
                 {
                     ExecuteSQL(sql_string);
-                    logging_repo.LogLine("Updating full hashes for " + table_name + ", as a single batch");
+                    _logger.Information("Updating full hashes for " + table_name + ", as a single batch");
                 }
             }
             catch (Exception e)
             {
                 string res = e.Message;
-                logging_repo.LogError("In  " + table_name + " full hash updates: " + res);
+                _logger.Error("In  " + table_name + " full hash updates: " + res);
             }
         }
     }

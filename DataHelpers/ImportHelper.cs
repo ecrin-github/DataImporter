@@ -389,7 +389,7 @@ namespace DataImporter
         }
 
 
-        public ImportEvent CreateImportEvent(int import_id, Source source)
+        public ImportEvent CreateImportEvent(int import_id, ISource source)
         {
             ImportEvent import = new ImportEvent(import_id, source.id);
             if (source.has_study_tables)

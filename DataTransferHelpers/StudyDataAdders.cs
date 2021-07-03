@@ -1,16 +1,16 @@
-﻿namespace DataImporter
+﻿using Serilog;
+
+namespace DataImporter
 {
     class StudyDataAdder
     {
-        string connstring;
+        ILogger _logger;
         DBUtilities dbu;
-        LoggingDataLayer logging_repo;
 
-        public StudyDataAdder(string _connstring, LoggingDataLayer _logging_repo)
+        public StudyDataAdder(string connstring, ILogger logger)
         {
-            connstring = _connstring;
-            logging_repo = _logging_repo;
-            dbu = new DBUtilities(connstring, logging_repo);
+            _logger = logger;
+            dbu = new DBUtilities(connstring, _logger);
         }
 
 
@@ -19,14 +19,14 @@
         public void TransferStudies()
         {
             string sql_string = @"INSERT INTO ad.studies (sd_sid, display_title,
-            title_lang_code, brief_description, bd_contains_html, data_sharing_statement,
-            dss_contains_html, study_start_year, study_start_month, study_type_id, 
+            title_lang_code, brief_description, data_sharing_statement,
+            study_start_year, study_start_month, study_type_id, 
             study_status_id, study_enrolment, study_gender_elig_id, min_age, 
             min_age_units_id, max_age, max_age_units_id, datetime_of_data_fetch,
             record_hash, study_full_hash)
             SELECT s.sd_sid, display_title,
-            title_lang_code, brief_description, bd_contains_html, data_sharing_statement,
-            dss_contains_html, study_start_year, study_start_month, study_type_id, 
+            title_lang_code, brief_description, data_sharing_statement,
+            study_start_year, study_start_month, study_type_id, 
             study_status_id, study_enrolment, study_gender_elig_id, min_age, 
             min_age_units_id, max_age, max_age_units_id, datetime_of_data_fetch,
             record_hash, study_full_hash 
@@ -58,10 +58,10 @@
         {
             string sql_string = @"INSERT INTO ad.study_titles(sd_sid,
             title_type_id, title_text, lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash)
+            is_default, comments, record_hash)
             SELECT s.sd_sid, 
             title_type_id, title_text, lang_code, lang_usage_id,
-            is_default, comments, comparison_text, record_hash
+            is_default, comments, record_hash
             FROM sd.study_titles s
             INNER JOIN sd.to_ad_study_recs ts
             ON s.sd_sid = ts.sd_sid
@@ -199,7 +199,7 @@
                   and s.hash_type_id = " + n.ToString();
 
                 int res = dbu.ExecuteSQL(sql_string);
-                if (res > 0) logging_repo.LogLine("Inserting " + res.ToString() + " new study hashes - type " + n.ToString());
+                if (res > 0) _logger.Information("Inserting " + res.ToString() + " new study hashes - type " + n.ToString());
             }
         }
 

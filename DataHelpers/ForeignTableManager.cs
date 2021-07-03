@@ -5,16 +5,16 @@ namespace DataImporter
 {
     public class ForeignTableManager
     {
-        string connString;
+        string _connString;
 
-        public ForeignTableManager(string _connString)
+        public ForeignTableManager(string connString)
         {
-            connString = _connString;
+            _connString = connString;
         }
 
         public void EstablishMonForeignTables(string user_name, string password)
         {
-            using (var conn = new NpgsqlConnection(connString))
+            using (var conn = new NpgsqlConnection(_connString))
             {
                 string sql_string = @"CREATE EXTENSION IF NOT EXISTS postgres_fdw
                                      schema sd;";
@@ -42,7 +42,7 @@ namespace DataImporter
 
         public void DropMonForeignTables()
         {
-            using (var conn = new NpgsqlConnection(connString))
+            using (var conn = new NpgsqlConnection(_connString))
             {
                 string sql_string = @"DROP USER MAPPING IF EXISTS FOR CURRENT_USER
                      SERVER mon;";
