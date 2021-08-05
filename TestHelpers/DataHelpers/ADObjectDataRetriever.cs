@@ -30,13 +30,13 @@ namespace DataImporter
             string sql_string = @"INSERT INTO ad.data_objects(sd_oid, sd_sid, 
             display_title, version, doi, doi_status_id, publication_year,
             object_class_id, object_type_id,  
-            managing_org_id, managing_org, lang_code, access_type_id,
+            managing_org_id, managing_org, managing_org_ror_id, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash)
             SELECT sd_oid, sd_sid, 
             display_title, version, doi, doi_status_id, publication_year,
             object_class_id, object_type_id, 
-            managing_org_id, managing_org, lang_code, access_type_id,
+            managing_org_id, managing_org, managing_org_ror_id, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash
             FROM adcomp.data_objects
@@ -104,10 +104,10 @@ namespace DataImporter
         public void TransferObjectDates()
         {
             string sql_string = @"INSERT INTO ad.object_dates(sd_oid, 
-            date_type_id, is_date_range, date_as_string, start_year, 
+            date_type_id, date_is_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash)
             SELECT sd_oid,
-            date_type_id, is_date_range, date_as_string, start_year, 
+            date_type_id, date_is_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash
             FROM adcomp.object_dates
             where source_id = " + _source_id;
@@ -119,15 +119,15 @@ namespace DataImporter
         public void TransferObjectContributors()
         {
             string sql_string = @"INSERT INTO ad.object_contributors(sd_oid,
-            contrib_type_id, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash)
             SELECT sd_oid,
-            contrib_type_id, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash
             FROM adcomp.object_contributors
             where source_id = " + _source_id;
 
@@ -138,13 +138,13 @@ namespace DataImporter
         public void TransferObjectTopics()
         {
             string sql_string = @"INSERT INTO ad.object_topics(sd_oid, 
-            topic_type_id, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash)
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash)
             SELECT sd_oid,
-            topic_type_id, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash
             FROM adcomp.object_topics
             where source_id = " + _source_id;
 
@@ -183,10 +183,12 @@ namespace DataImporter
         public void TransferObjectidentifiers()
         {
             string sql_string = @"INSERT INTO ad.object_identifiers(sd_oid, 
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
+            identifier_value, identifier_type_id, 
+            identifier_org_id, identifier_org, identifier_org_ror_id,
             identifier_date, record_hash)
             SELECT sd_oid, 
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
+            identifier_value, identifier_type_id, 
+            identifier_org_id, identifier_org, identifier_org_ror_id,
             identifier_date, record_hash
             FROM adcomp.object_identifiers
             where source_id = " + _source_id;

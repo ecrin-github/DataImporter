@@ -15,10 +15,22 @@ namespace DataImporter
             _logger = logger;
         }
 
-        public void Logheader(string header_text)
+
+        public void LogHeader(string header_text)
         {
             _logger.Information("");
             _logger.Information(header_text.ToUpper());
+            _logger.Information("");
+        }
+
+
+        public void LogStudyHeader(bool using_test_data, string dbline)
+        {
+            string dividerline = using_test_data ? new string('-', 70) : new string('=', 70);
+            _logger.Information("");
+            _logger.Information(dividerline);
+            _logger.Information(dbline);
+            _logger.Information(dividerline);
             _logger.Information("");
         }
 
@@ -27,12 +39,12 @@ namespace DataImporter
         {
             if (opts.rebuild_ad_tables)
             {
-                Logheader("REBUILDING AD TABLES");
+                LogHeader("REBUILDING AD TABLES");
             }
 
             if (opts.using_test_data)
             {
-                Logheader("IMPORTING TEST DATAA");
+                LogHeader("IMPORTING TEST DATAA");
             }
 
             int[] source_ids = opts.source_ids.ToArray();

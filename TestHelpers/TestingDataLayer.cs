@@ -108,28 +108,27 @@ namespace DataImporter
 
         public void ConstructDiffReport()
         {
-            TestReportBuilder tdb = new TestReportBuilder(_db_conn, _logger, _logger_helper);
+            TestReportBuilder tdb = new TestReportBuilder(_db_conn);
 
-            tdb.CompareRecordCounts();
+            if (tdb.CompareStudyRecordCounts())
+            {
+                tdb.CompareStudyRecords();
+                tdb.CompareStudyAttributes();
+                tdb.CompareStudyHashes();
+            }
+
+            if (tdb.CompareObjectRecordCounts())
+            {
+                tdb.CompareObjectRecords();
+                tdb.CompareObjectAttributes();
+                tdb.CompareObjectHashes();
+            }
 
             tdb.CompareFullHashes();
 
-            tdb.CompareCompositeHashes();
 
-            tdb.CompareRecordHashes();
+            tdb.Close();
 
-            tdb.CompareFields();
-
-
-            /*
-            tdb.DeleteExistingStudyData();
-            tdb.DeleteExistingObjectData();
-            _logger.Information("Any existing SD test data for source " + source.id + " removed from CompSD");
-
-            tdb.TransferStudyData();
-            tdb.TransferObjectData();
-            _logger.Information("New SD test data for source " + source.id + " added to CompSD");
-            */
         }
 
     }

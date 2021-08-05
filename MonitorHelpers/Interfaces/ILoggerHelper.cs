@@ -7,7 +7,8 @@ namespace DataImporter
     public interface ILoggerHelper
     {
         void LogCommandLineParameters(Options opts);
-        void Logheader(string header_text);
+        void LogHeader(string header_text);
+        void LogStudyHeader(bool using_test_data, string dbline);
 
         void LogTableStatistics(ISource s, string schema);
 

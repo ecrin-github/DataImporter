@@ -51,11 +51,13 @@ namespace DataImporter
         public void TransferStudyIdentifiers()
         {
             string sql_string = @"INSERT INTO sd.study_identifiers(sd_sid,
-            identifier_value, identifier_type_id, identifier_type, identifier_org_id, 
-            identifier_org, identifier_date, identifier_link, record_hash)
+            identifier_value, identifier_type_id, identifier_type, 
+            identifier_org_id, identifier_org, identifier_org_ror_id, 
+            identifier_date, identifier_link, record_hash)
             SELECT sd_sid,
-            identifier_value, identifier_type_id, identifier_type, identifier_org_id, 
-            identifier_org, identifier_date, identifier_link, record_hash
+            identifier_value, identifier_type_id, identifier_type, 
+            identifier_org_id, identifier_org, identifier_org_ror_id, 
+            identifier_date, identifier_link, record_hash
             FROM sdcomp.study_identifiers
             where source_id = " + _source_id;
 
@@ -112,15 +114,15 @@ namespace DataImporter
         public void TransferStudyContributors()
         {
             string sql_string = @"INSERT INTO sd.study_contributors(sd_sid, 
-            contrib_type_id, contrib_type, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash)
             SELECT sd_sid,
-            contrib_type_id, contrib_type, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash
             FROM sdcomp.study_contributors
             where source_id = " + _source_id;
 
@@ -132,13 +134,13 @@ namespace DataImporter
         public void TransferStudyTopics()
         {
             string sql_string = @"INSERT INTO sd.study_topics(sd_sid,
-            topic_type_id, topic_type, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash)
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash)
             SELECT sd_sid,
-            topic_type_id, topic_type, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash
             FROM sdcomp.study_topics
             where source_id = " + _source_id;
 

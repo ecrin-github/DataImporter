@@ -57,6 +57,10 @@ namespace DataImporter
                     opts.source_ids = _test_repo.ObtainTestSourceIDs();
                     return true;     // Should always be able to run
                 }
+                else if (opts.create_test_report_only)
+                {
+                    return true;     // Should always be able to run
+                }
                 else
                 { 
                     if (opts.source_ids.Count() == 0)
@@ -81,7 +85,7 @@ namespace DataImporter
                 _logger.Error(e.Message);
                 _logger.Error(e.StackTrace);
                 _logger.Information("Harvester application aborted");
-                _logger_helper.Logheader("Closing Log");
+                _logger_helper.LogHeader("Closing Log");
                 return false;
             }
 
@@ -111,9 +115,8 @@ namespace DataImporter
                 }
             }
             _logger.Information("Harvester application aborted");
-            _logger_helper.Logheader("Closing Log");
+            _logger_helper.LogHeader("Closing Log");
         }
-
     }
 
 
@@ -130,5 +133,7 @@ namespace DataImporter
         [Option('F', "is a test", Required = false, HelpText = "If present, operates on the sd / ad tables in the test database")]
         public bool using_test_data { get; set; }
 
+        [Option('G', "test report only", Required = false, HelpText = "If present, compares and reports on adcomp and expected tables but does nmot recreate those tables")]
+        public bool create_test_report_only { get; set; }
     }
 }

@@ -27,7 +27,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.data_objects;
             CREATE TABLE ad.data_objects(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NOT NULL
+              , sd_oid                 VARCHAR        NOT NULL
               , sd_sid                 VARCHAR         NULL
               , display_title          VARCHAR         NULL
               , version                VARCHAR         NULL
@@ -38,6 +38,7 @@ namespace DataImporter
               , object_type_id         INT             NULL
               , managing_org_id        INT             NULL
               , managing_org           VARCHAR         NULL
+              , managing_org_ror_id    VARCHAR         NULL
               , lang_code              VARCHAR         NULL
               , access_type_id         INT             NULL
               , access_details         VARCHAR         NULL
@@ -67,7 +68,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_datasets;
             CREATE TABLE ad.object_datasets(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , record_keys_type_id    INT             NULL 
               , record_keys_details    VARCHAR         NULL    
               , deident_type_id        INT             NULL  
@@ -101,9 +102,9 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_dates;
             CREATE TABLE ad.object_dates(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , date_type_id           INT             NULL
-              , is_date_range          BOOLEAN         NULL default false
+              , date_is_range          BOOLEAN         NULL default false
               , date_as_string         VARCHAR         NULL
               , start_year             INT             NULL
               , start_month            INT             NULL
@@ -128,7 +129,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_instances;
             CREATE TABLE ad.object_instances(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , instance_type_id       INT             NOT NULL  default 1
               , repository_org_id      INT             NULL
               , repository_org         VARCHAR         NULL
@@ -155,7 +156,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_titles;
             CREATE TABLE ad.object_titles(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , title_type_id          INT             NULL
               , title_text             VARCHAR         NULL
               , lang_code              VARCHAR         NOT NULL
@@ -178,20 +179,18 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_contributors;
             CREATE TABLE ad.object_contributors(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , contrib_type_id        INT             NULL
               , is_individual          BOOLEAN         NULL
-              , organisation_id        INT             NULL
-              , organisation_name      VARCHAR         NULL
               , person_id              INT             NULL
               , person_given_name      VARCHAR         NULL
               , person_family_name     VARCHAR         NULL
               , person_full_name       VARCHAR         NULL
-              , person_identifier      VARCHAR         NULL
-              , identifier_type        VARCHAR         NULL
+              , orcid_id               VARCHAR         NULL
               , person_affiliation     VARCHAR         NULL
-              , affil_org_id           VARCHAR         NULL
-              , affil_org_id_type      VARCHAR         NULL
+              , organisation_id        INT             NULL
+              , organisation_name      VARCHAR         NULL
+              , organisation_ror_id    VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
@@ -208,17 +207,16 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_topics;
             CREATE TABLE ad.object_topics(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , topic_type_id          INT             NULL
               , mesh_coded             BOOLEAN         NULL
-              , topic_code             VARCHAR         NULL
-              , topic_value            VARCHAR         NULL
-              , topic_qualcode         VARCHAR         NULL
-              , topic_qualvalue        VARCHAR         NULL
+              , mesh_code              VARCHAR         NULL
+              , mesh_value             VARCHAR         NULL
+              , mesh_qualcode          VARCHAR         NULL
+              , mesh_qualvalue         VARCHAR         NULL
               , original_ct_id         INT             NULL
               , original_ct_code       VARCHAR         NULL
               , original_value         VARCHAR         NULL
-              , comments               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
@@ -235,7 +233,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_comments;
             CREATE TABLE ad.object_comments(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , ref_type               VARCHAR         NULL 
               , ref_source             VARCHAR         NULL 
               , pmid                   VARCHAR         NULL 
@@ -257,7 +255,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_descriptions;
             CREATE TABLE ad.object_descriptions(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , description_type_id    INT             NULL
               , label                  VARCHAR         NULL
               , description_text       VARCHAR         NULL
@@ -277,11 +275,12 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_identifiers;
 CREATE TABLE ad.object_identifiers(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , identifier_value       VARCHAR         NULL
               , identifier_type_id     INT             NULL
               , identifier_org_id      INT             NULL
               , identifier_org         VARCHAR         NULL
+              , identifier_org_ror_id  VARCHAR         NULL
               , identifier_date        VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
@@ -299,7 +298,7 @@ CREATE TABLE ad.object_identifiers(
             string sql_string = @"DROP TABLE IF EXISTS ad.object_db_links;
             CREATE TABLE ad.object_db_links(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , db_sequence            INT             NULL
               , db_name                VARCHAR         NULL
               , id_in_db               VARCHAR         NULL
@@ -319,7 +318,7 @@ CREATE TABLE ad.object_identifiers(
             string sql_string = @"DROP TABLE IF EXISTS ad.object_publication_types;
             CREATE TABLE ad.object_publication_types(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , type_name              VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
@@ -338,7 +337,7 @@ CREATE TABLE ad.object_identifiers(
             string sql_string = @"DROP TABLE IF EXISTS ad.object_rights;
             CREATE TABLE ad.object_rights(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , rights_name            VARCHAR         NULL
               , rights_uri             VARCHAR         NULL
               , comments               VARCHAR         NULL
@@ -359,7 +358,7 @@ CREATE TABLE ad.object_identifiers(
             string sql_string = @"DROP TABLE IF EXISTS ad.object_relationships;
             CREATE TABLE ad.object_relationships(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , relationship_type_id   INT             NULL
               , target_sd_oid          VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
@@ -378,7 +377,7 @@ CREATE TABLE ad.object_identifiers(
             string sql_string = @"DROP TABLE IF EXISTS ad.object_hashes;
             CREATE TABLE ad.object_hashes(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 CHAR(24)        NULL
+              , sd_oid                 VARCHAR        NULL
               , hash_type_id           INT             NULL
               , composite_hash         CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()

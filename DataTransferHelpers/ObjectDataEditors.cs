@@ -30,6 +30,7 @@ namespace DataImporter
              object_type_id = t.object_type_id,  
              managing_org_id = t.managing_org_id,  
              managing_org = t.managing_org,  
+             managing_org_ror_id = t.managing_org_ror_id,
              lang_code = t.lang_code, 
              access_type_id = t.access_type_id, 
              access_details = t.access_details,  
@@ -110,6 +111,7 @@ namespace DataImporter
             dbu.ExecuteDandI(sql_stringD, sql_stringI, "object_instances");
         }
 
+
         public void EditObjectTitles()
         {
             string sql_string = dbu.GetObjectTString(52);
@@ -135,10 +137,10 @@ namespace DataImporter
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_dates");
  
             string sql_stringI = sql_string + @"INSERT INTO ad.object_dates(sd_oid, 
-            date_type_id, is_date_range, date_as_string, start_year, 
+            date_type_id, date_is_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash)
             SELECT s.sd_oid, 
-            date_type_id, is_date_range, date_as_string, start_year, 
+            date_type_id, date_is_range, date_as_string, start_year, 
             start_month, start_day, end_year, end_month, end_day, details, record_hash
             FROM sd.object_dates s
             INNER JOIN t
@@ -153,15 +155,15 @@ namespace DataImporter
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_contributors");
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_contributors(sd_oid, 
-            contrib_type_id, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash)
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash)
             SELECT s.sd_oid, 
-            contrib_type_id, is_individual, organisation_id, organisation_name,
+            contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
-            person_identifier, identifier_type, person_affiliation, affil_org_id,
-            affil_org_id_type, record_hash
+            orcid_id, person_affiliation, organisation_id, 
+            organisation_name, organisation_ror_id, record_hash
             FROM sd.object_contributors s
             INNER JOIN t
             on s.sd_oid = t.sd_oid";
@@ -175,13 +177,13 @@ namespace DataImporter
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_topics");
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_topics(sd_oid, 
-            topic_type_id, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash)
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash)
             SELECT s.sd_oid,  
-            topic_type_id, mesh_coded, topic_code, topic_value, 
-            topic_qualcode, topic_qualvalue, original_ct_id, original_ct_code,
-            original_value, comments, record_hash
+            topic_type_id, mesh_coded, mesh_code, mesh_value, 
+            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_value, record_hash
             FROM sd.object_topics s
             INNER JOIN t
             on s.sd_oid = t.sd_oid";
@@ -232,10 +234,12 @@ namespace DataImporter
             string sql_stringD = sql_string + dbu.GetObjectDeleteString("object_identifiers");
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_identifiers(sd_oid, 
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
+            identifier_value, identifier_type_id, 
+            identifier_org_id, identifier_org, identifier_org_ror_id,
             identifier_date, record_hash)
             SELECT s.sd_oid, 
-            identifier_value, identifier_type_id, identifier_org_id, identifier_org,
+            identifier_value, identifier_type_id, 
+            identifier_org_id, identifier_org, identifier_org_ror_id,
             identifier_date, record_hash
             FROM sd.object_identifiers s
             INNER JOIN t
