@@ -459,10 +459,12 @@ namespace DataImporter
 
             sql_string = @"select count(*) from
                     (select " + sdid + @", count(id) as num from expected." + table + @"
-                    group by " + sdid + @") e
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") e
                     inner join
                     (select " + sdid + @", count(id) as num from adcomp." + table + @"
-                    group by " + sdid + @") a
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") a
                     on e." + sdid + @" = a." + sdid + @"
                     where e.num = a.num;";
 
@@ -477,12 +479,14 @@ namespace DataImporter
 
             sql_string = @"select count(*) from
                     (select " + sdid + @", count(id) as num from expected." + table + @"
+                    where " + sdid + @" is not null
                     group by " + sdid + @") e
                     inner join
                     (select " + sdid + @", count(id) as num from adcomp." + table + @"
+                    where " + sdid + @" is not null
                     group by " + sdid + @") a
                     on e." + sdid + @" = a." + sdid + @"
-                    where e.num<> a.num;";
+                    where e.num <> a.num;";
 
             int n = GetCount(sql_string);
             reporter.LogLine("Number of non-matching attribute numbers: " + n.ToString());
@@ -495,10 +499,12 @@ namespace DataImporter
 
             sql_string = @"select count(*) from
                     (select " + sdid + @", count(id) as num from expected." + table + @"
-                    group by " + sdid + @") e
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") e
                     left join
                     (select " + sdid + @", count(id) as num from adcomp." + table + @"
-                    group by " + sdid + @") a
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") a
                     on e." + sdid + @" = a." + sdid + @"
                     where a." + sdid + @" is null;";
 
@@ -513,10 +519,12 @@ namespace DataImporter
 
             sql_string = @"select count(*) from 
                     (select " + sdid + @", count(id) as num from expected." + table + @"
-                    group by " + sdid + @") e
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") e
                     right join
                     (select " + sdid + @", count(id) as num from adcomp." + table + @"
-                    group by " + sdid + @") a
+                     where " + sdid + @" is not null
+                     group by " + sdid + @") a
                     on e." + sdid + @" = a." + sdid + @"
                     where e." + sdid + @" is null;";
 
@@ -533,11 +541,13 @@ namespace DataImporter
             (select am." + sdid + @", count(t.id) as anum 
              from adcomp." + main_table + @" am left join adcomp." + table + @" t 
              on am." + sdid + @" = t." + sdid + @"
+             where am." + sdid + @" is not null
 	         group by am." + sdid + @") a
              inner join
              (select em." + sdid + @", count(et.id) as enum 
              from expected." + main_table + @" em left join expected." + table + @" et 
              on em." + sdid + @" = et." + sdid + @"
+             where em." + sdid + @" is not null
 	         group by em." + sdid + @") e
              on a." + sdid + @" = e." + sdid + @"
              where anum = 0 and enum = 0;";

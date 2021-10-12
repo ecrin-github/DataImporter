@@ -64,22 +64,25 @@ namespace DataImporter
 
         public void RetrieveStudyData()
         {
-            SDStudyDataRetriever sdr = new SDStudyDataRetriever(_source_id, _db_conn);
+            if (_source.has_study_tables)
+            {
+                SDStudyDataRetriever sdr = new SDStudyDataRetriever(_source_id, _db_conn);
 
-            sdr.TransferStudies();
-            sdr.TransferStudyIdentifiers();
-            sdr.TransferStudyTitles();
-            sdr.TransferStudyHashes();
+                sdr.TransferStudies();
+                sdr.TransferStudyIdentifiers();
+                sdr.TransferStudyTitles();
+                sdr.TransferStudyHashes();
 
-            // these are database dependent
+                // these are database dependent
 
-            if (_source.has_study_topics) sdr.TransferStudyTopics();
-            if (_source.has_study_features) sdr.TransferStudyFeatures();
-            if (_source.has_study_contributors) sdr.TransferStudyContributors();
-            if (_source.has_study_references) sdr.TransferStudyReferences();
-            if (_source.has_study_relationships) sdr.TransferStudyRelationships();
-            if (_source.has_study_links) sdr.TransferStudyLinks();
-            if (_source.has_study_ipd_available) sdr.TransferStudyIPDAvaiable();
+                if (_source.has_study_topics) sdr.TransferStudyTopics();
+                if (_source.has_study_features) sdr.TransferStudyFeatures();
+                if (_source.has_study_contributors) sdr.TransferStudyContributors();
+                if (_source.has_study_references) sdr.TransferStudyReferences();
+                if (_source.has_study_relationships) sdr.TransferStudyRelationships();
+                if (_source.has_study_links) sdr.TransferStudyLinks();
+                if (_source.has_study_ipd_available) sdr.TransferStudyIPDAvaiable();
+            }
 
         }
 

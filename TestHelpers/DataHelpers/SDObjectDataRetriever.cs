@@ -117,7 +117,7 @@ namespace DataImporter
 
         public void TransferObjectContributors()
         {
-            string sql_string = @"INSERT INTO sd.object_contributors(source_id, sd_oid,
+            string sql_string = @"INSERT INTO sd.object_contributors(sd_oid,
             contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
             orcid_id, person_affiliation, organisation_id, 
@@ -138,11 +138,11 @@ namespace DataImporter
         {
             string sql_string = @"INSERT INTO sd.object_topics(sd_oid, 
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash)
             SELECT sd_oid,
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash
             FROM sdcomp.object_topics
             where source_id = " + _source_id;

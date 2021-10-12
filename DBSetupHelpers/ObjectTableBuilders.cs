@@ -212,8 +212,6 @@ namespace DataImporter
               , mesh_coded             BOOLEAN         NULL
               , mesh_code              VARCHAR         NULL
               , mesh_value             VARCHAR         NULL
-              , mesh_qualcode          VARCHAR         NULL
-              , mesh_qualvalue         VARCHAR         NULL
               , original_ct_id         INT             NULL
               , original_ct_code       VARCHAR         NULL
               , original_value         VARCHAR         NULL
@@ -273,7 +271,7 @@ namespace DataImporter
         public void create_table_object_identifiers()
         {
             string sql_string = @"DROP TABLE IF EXISTS ad.object_identifiers;
-CREATE TABLE ad.object_identifiers(
+                CREATE TABLE ad.object_identifiers(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 VARCHAR        NULL
               , identifier_value       VARCHAR         NULL

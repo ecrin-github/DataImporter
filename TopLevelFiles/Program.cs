@@ -10,7 +10,6 @@ namespace DataImporter
 {
     class Program
     {
-
         static void Main(string[] args)
         {
             //var parsedArguments = Parser.Default.ParseArguments<Options>(args)
@@ -20,7 +19,7 @@ namespace DataImporter
             // Set up file based configuration environment.
 
             var configFiles = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                 .AddJsonFile("appsettings.json")
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", true)
                 .Build();

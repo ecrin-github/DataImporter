@@ -37,7 +37,10 @@ namespace DataImporter
         public IEnumerable<int> ObtainTestSourceIDs()
         {
             string sql_string = @"select distinct source_id 
-                                 from expected.source_studies;";
+                                 from expected.source_studies
+                                 union
+                                 select distinct source_id 
+                                 from expected.source_objects;";
 
             using (var conn = new NpgsqlConnection(_db_conn))
             {

@@ -126,7 +126,7 @@ namespace DataImporter
             contrib_type_id, is_individual, 
             person_id, person_given_name, person_family_name, person_full_name,
             orcid_id, person_affiliation, organisation_id, 
-            organisation_name, organisation_ror_id, record_hash)
+            organisation_name, organisation_ror_id, record_hash
             FROM sd.object_contributors s
             INNER JOIN sd.to_ad_object_recs nd
             ON s.sd_oid = nd.sd_oid
@@ -139,11 +139,11 @@ namespace DataImporter
         {
             string sql_string = @"INSERT INTO ad.object_topics(sd_oid, 
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash)
             SELECT s.sd_oid,  
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash
             FROM sd.object_topics s
             INNER JOIN sd.to_ad_object_recs nd

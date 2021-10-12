@@ -29,7 +29,7 @@ namespace DataImporter
               CREATE TABLE adcomp.data_objects(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 3001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , sd_sid                 VARCHAR         NULL
               , display_title          VARCHAR         NULL
               , version                VARCHAR         NULL
@@ -66,7 +66,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_datasets(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , record_keys_type_id    INT             NULL 
               , record_keys_details    VARCHAR         NULL    
               , deident_type_id        INT             NULL  
@@ -97,7 +97,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_dates(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , date_type_id           INT             NULL
               , date_is_range          BOOLEAN         NULL default false
               , date_as_string         VARCHAR         NULL
@@ -122,7 +122,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_instances(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , instance_type_id       INT             NOT NULL 
               , repository_org_id      INT             NULL
               , repository_org         VARCHAR         NULL
@@ -147,7 +147,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_contributors(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , contrib_type_id        INT             NULL
               , is_individual          BOOLEAN         NULL
               , person_id              INT             NULL
@@ -173,7 +173,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_titles(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , title_type_id          INT             NULL
               , title_text             VARCHAR         NULL
               , lang_code              VARCHAR         NULL
@@ -194,13 +194,11 @@ namespace DataImporter
             CREATE TABLE adcomp.object_topics(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , topic_type_id          INT             NULL
               , mesh_coded             BOOLEAN         NULL
               , mesh_code              VARCHAR         NULL
               , mesh_value             VARCHAR         NULL
-              , mesh_qualcode          VARCHAR         NULL
-              , mesh_qualvalue         VARCHAR         NULL
               , original_ct_id         INT             NULL
               , original_ct_code       VARCHAR         NULL
               , original_value         VARCHAR         NULL
@@ -218,7 +216,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_comments(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , ref_type               VARCHAR         NULL 
               , ref_source             VARCHAR         NULL 
               , pmid                   VARCHAR         NULL 
@@ -238,7 +236,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_descriptions(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , description_type_id    INT             NULL
               , label                  VARCHAR         NULL
               , description_text       VARCHAR         NULL
@@ -257,7 +255,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_identifiers(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , identifier_value       VARCHAR         NULL
               , identifier_type_id     INT             NULL
               , identifier_org_id      INT             NULL
@@ -278,7 +276,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_db_links(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , db_sequence            INT             NULL
               , db_name                VARCHAR         NULL
               , id_in_db               VARCHAR         NULL
@@ -296,7 +294,7 @@ namespace DataImporter
             CREATE TABLE adcomp.object_publication_types(
                 id                     INT             GENERATED ALWAYS AS IDENTITY (START WITH 4001 INCREMENT BY 1) PRIMARY KEY
               , source_id              INT             NOT NULL
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , type_name              VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
             );

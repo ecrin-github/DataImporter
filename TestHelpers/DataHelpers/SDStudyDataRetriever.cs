@@ -135,11 +135,11 @@ namespace DataImporter
         {
             string sql_string = @"INSERT INTO sd.study_topics(sd_sid,
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash)
             SELECT sd_sid,
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash
             FROM sdcomp.study_topics
             where source_id = " + _source_id;

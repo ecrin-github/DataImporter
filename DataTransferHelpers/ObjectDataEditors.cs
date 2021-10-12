@@ -178,11 +178,11 @@ namespace DataImporter
 
             string sql_stringI = sql_string + @"INSERT INTO ad.object_topics(sd_oid, 
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash)
             SELECT s.sd_oid,  
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash
             FROM sd.object_topics s
             INNER JOIN t

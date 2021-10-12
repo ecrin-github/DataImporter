@@ -73,22 +73,25 @@ namespace DataImporter
 
         public void TransferStudyData()
         {
-            StudyTablesTransferrer stt = new StudyTablesTransferrer(_source_id, _db_conn);
+            if (_source.has_study_tables)
+            {
+                StudyTablesTransferrer stt = new StudyTablesTransferrer(_source_id, _db_conn);
 
-            stt.TransferStudies();
-            stt.TransferStudyIdentifiers();
-            stt.TransferStudyTitles();
-            stt.TransferStudyHashes();
+                stt.TransferStudies();
+                stt.TransferStudyIdentifiers();
+                stt.TransferStudyTitles();
+                stt.TransferStudyHashes();
 
-            // these are database dependent
+                // these are database dependent
 
-            if (_source.has_study_topics) stt.TransferStudyTopics();
-            if (_source.has_study_features) stt.TransferStudyFeatures();
-            if (_source.has_study_contributors) stt.TransferStudyContributors();
-            if (_source.has_study_references) stt.TransferStudyReferences();
-            if (_source.has_study_relationships) stt.TransferStudyRelationships();
-            if (_source.has_study_links) stt.TransferStudyLinks();
-            if (_source.has_study_ipd_available) stt.TransferStudyIPDAvaiable();
+                if (_source.has_study_topics) stt.TransferStudyTopics();
+                if (_source.has_study_features) stt.TransferStudyFeatures();
+                if (_source.has_study_contributors) stt.TransferStudyContributors();
+                if (_source.has_study_references) stt.TransferStudyReferences();
+                if (_source.has_study_relationships) stt.TransferStudyRelationships();
+                if (_source.has_study_links) stt.TransferStudyLinks();
+                if (_source.has_study_ipd_available) stt.TransferStudyIPDAvaiable();
+            }
 
         }
 

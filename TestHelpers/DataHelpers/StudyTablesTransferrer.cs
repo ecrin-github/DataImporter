@@ -124,11 +124,11 @@ namespace DataImporter
         {
             string sql_string = @"INSERT INTO adcomp.study_topics(source_id, sd_sid,
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash)
             SELECT " + _source_id + @", sd_sid,
             topic_type_id, mesh_coded, mesh_code, mesh_value, 
-            mesh_qualcode, mesh_qualvalue, original_ct_id, original_ct_code,
+            original_ct_id, original_ct_code,
             original_value, record_hash
             FROM ad.study_topics";
 
