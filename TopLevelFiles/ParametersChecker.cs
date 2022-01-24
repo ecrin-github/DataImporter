@@ -133,7 +133,7 @@ namespace DataImporter
         [Option('F', "is a test", Required = false, HelpText = "If present, operates on the sd / ad tables in the test database")]
         public bool using_test_data { get; set; }
 
-        [Option('G', "test report only", Required = false, HelpText = "If present, compares and reports on adcomp and expected tables but does nmot recreate those tables")]
+        [Option('G', "test report only", Required = false, HelpText = "If present, compares and reports on adcomp and expected tables but does not recreate those tables")]
         public bool create_test_report_only { get; set; }
     }
 }
