@@ -21,8 +21,9 @@ namespace DataImporter
 
             string sql_string = @"UPDATE ad.data_objects a
              set 
-             display_title = t.display_title, 
+             title = t.title,
              version = t.version,
+             display_title = t.display_title, 
              doi = t.doi,  
              doi_status_id = t.doi_status_id,  
              publication_year = t.publication_year, 

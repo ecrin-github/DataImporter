@@ -55,7 +55,6 @@ namespace DataImporter
               , study_full_hash        CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX studies_sid ON ad.studies(sd_sid);
             CREATE INDEX studies_hash ON ad.studies(record_hash);
@@ -80,8 +79,6 @@ namespace DataImporter
               , identifier_link        VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_identifiers_sid ON ad.study_identifiers(sd_sid);";
 
@@ -99,8 +96,6 @@ namespace DataImporter
               , target_sd_sid          VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_relationships_sid ON ad.study_relationships(sd_sid);
             CREATE INDEX study_relationships_target_sid ON ad.study_relationships(target_sd_sid);";
@@ -121,8 +116,6 @@ namespace DataImporter
               , comments               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_references_sid ON ad.study_references(sd_sid);";
 
@@ -144,8 +137,6 @@ namespace DataImporter
               , comments               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_titles_sid ON ad.study_titles(sd_sid);";
 
@@ -172,8 +163,6 @@ namespace DataImporter
               , organisation_ror_id    VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_contributors_sid ON ad.study_contributors(sd_sid);";
 
@@ -196,8 +185,6 @@ namespace DataImporter
               , original_value         VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_topics_sid ON ad.study_topics(sd_sid);";
 
@@ -215,8 +202,6 @@ namespace DataImporter
               , feature_value_id       INT             NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_features_sid ON ad.study_features(sd_sid);";
 
@@ -234,8 +219,6 @@ namespace DataImporter
               , link_url               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_links_sd_sid ON ad.study_links(sd_sid);";
 
@@ -254,8 +237,6 @@ namespace DataImporter
               , ipd_comment            VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_ipd_available_sd_sid ON ad.study_ipd_available(sd_sid);";
 
@@ -272,8 +253,6 @@ namespace DataImporter
               , hash_type_id           INT             NULL
               , composite_hash         CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX study_hashes_sd_sid ON ad.study_hashes(sd_sid);
             CREATE INDEX study_hashes_composite_hash ON ad.study_hashes(composite_hash);";

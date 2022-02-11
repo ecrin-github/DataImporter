@@ -29,8 +29,9 @@ namespace DataImporter
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
               , sd_oid                 VARCHAR        NOT NULL
               , sd_sid                 VARCHAR         NULL
-              , display_title          VARCHAR         NULL
+              , title                  VARCHAR         NULL
               , version                VARCHAR         NULL
+              , display_title          VARCHAR         NULL
               , doi                    VARCHAR         NULL 
               , doi_status_id          INT             NULL
               , publication_year       INT             NULL
@@ -52,7 +53,6 @@ namespace DataImporter
               , object_full_hash       CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );    
             CREATE INDEX data_objects_sd_oid ON ad.data_objects(sd_oid);
             CREATE INDEX data_objects_sd_sid ON ad.data_objects(sd_sid);
@@ -68,7 +68,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_datasets;
             CREATE TABLE ad.object_datasets(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , record_keys_type_id    INT             NULL 
               , record_keys_details    VARCHAR         NULL    
               , deident_type_id        INT             NULL  
@@ -88,7 +88,6 @@ namespace DataImporter
               , record_hash            CHAR(32)        NULL              
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
 
             CREATE INDEX object_datasets_sd_oid ON ad.object_datasets(sd_oid);";
@@ -115,8 +114,6 @@ namespace DataImporter
               , details                VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_dates_sd_oid ON ad.object_dates(sd_oid);";
 
@@ -142,8 +139,6 @@ namespace DataImporter
               , resource_comments      VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_instances_sd_oid ON ad.object_instances(sd_oid);";
 
@@ -165,8 +160,6 @@ namespace DataImporter
               , comments               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_titles_sd_oid ON ad.object_titles(sd_oid);";
 
@@ -193,8 +186,6 @@ namespace DataImporter
               , organisation_ror_id    VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_contributors_sd_oid ON ad.object_contributors(sd_oid);";
 
@@ -217,8 +208,6 @@ namespace DataImporter
               , original_value         VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_topics_sd_oid ON ad.object_topics(sd_oid);";
 
@@ -239,8 +228,6 @@ namespace DataImporter
               , notes                  VARCHAR         NULL 
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_comments_sd_oid ON ad.object_comments(sd_oid);";
 
@@ -260,8 +247,6 @@ namespace DataImporter
               , lang_code              VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_descriptions_sd_oid ON ad.object_descriptions(sd_oid);";
 
@@ -283,7 +268,6 @@ namespace DataImporter
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
               , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_identifiers_sd_oid ON ad.object_identifiers(sd_oid);";
 
@@ -302,8 +286,6 @@ namespace DataImporter
               , id_in_db               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_db_links_sd_oid ON ad.object_db_links(sd_oid);";
 
@@ -320,8 +302,6 @@ namespace DataImporter
               , type_name              VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_publication_types_sd_oid ON ad.object_publication_types(sd_oid);";
 
@@ -341,8 +321,6 @@ namespace DataImporter
               , comments               VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_rights_sd_oid ON ad.object_rights(sd_oid);";
 
@@ -361,8 +339,6 @@ namespace DataImporter
               , target_sd_oid          VARCHAR         NULL
               , record_hash            CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_relationships_sd_oid ON ad.object_relationships(sd_oid);";
 
@@ -379,8 +355,6 @@ namespace DataImporter
               , hash_type_id           INT             NULL
               , composite_hash         CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()
-              , last_edited_on         TIMESTAMPTZ     NOT NULL default now()
-              , exported_on            TIMESTAMPTZ     NULL
             );
             CREATE INDEX object_hashes_sd_oid ON ad.object_hashes(sd_oid);
             CREATE INDEX object_hashes_composite_hash ON ad.object_hashes(composite_hash);";

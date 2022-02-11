@@ -19,13 +19,13 @@ namespace DataImporter
         public void TransferDataObjects()
         {
             string sql_string = @"INSERT INTO ad.data_objects(sd_oid, sd_sid, 
-            display_title, version, doi, doi_status_id, publication_year,
+            title, version, display_title, doi, doi_status_id, publication_year,
             object_class_id, object_type_id, 
             managing_org_id, managing_org, managing_org_ror_id, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash)
             SELECT s.sd_oid, s.sd_sid, 
-            display_title, version, doi, doi_status_id, publication_year,
+            title, version, display_title, doi, doi_status_id, publication_year,
             object_class_id, object_type_id, managing_org_id, 
             managing_org, managing_org_ror_id, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
