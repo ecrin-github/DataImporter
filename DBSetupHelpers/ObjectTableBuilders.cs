@@ -27,7 +27,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.data_objects;
             CREATE TABLE ad.data_objects(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 VARCHAR        NOT NULL
+              , sd_oid                 VARCHAR         NOT NULL
               , sd_sid                 VARCHAR         NULL
               , title                  VARCHAR         NULL
               , version                VARCHAR         NULL
@@ -351,7 +351,7 @@ namespace DataImporter
             string sql_string = @"DROP TABLE IF EXISTS ad.object_hashes;
             CREATE TABLE ad.object_hashes(
                 id                     INT             GENERATED ALWAYS AS IDENTITY PRIMARY KEY
-              , sd_oid                 VARCHAR        NULL
+              , sd_oid                 VARCHAR         NULL
               , hash_type_id           INT             NULL
               , composite_hash         CHAR(32)        NULL
               , added_on               TIMESTAMPTZ     NOT NULL default now()

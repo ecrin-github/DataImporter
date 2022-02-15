@@ -125,7 +125,7 @@ namespace DataImporter
         {
             try
             {
-                string sql_string = top_sql;
+                string sql_string = "";
                 string feedbackA = "Updating last imported dates and import ids, (" + table_name + "), ";
                 int rec_count = GetRecordCount(table_name);
                 int rec_batch = 100000;
@@ -133,8 +133,10 @@ namespace DataImporter
                 {
                     for (int r = 1; r <= rec_count; r += rec_batch)
                     {
-                        sql_string += " and so.id >= " + r.ToString() + " and so.id < " + (r + rec_batch).ToString();
-                        ExecuteSQL(sql_string + base_sql);
+                        sql_string = top_sql + 
+                                " and so.id >= " + r.ToString() + " and so.id < " + (r + rec_batch).ToString() 
+                                + base_sql;
+                        ExecuteSQL(sql_string);
                         
                         string feedback = feedbackA + r.ToString() + " to ";
                         feedback += (r + rec_batch < rec_count) ? (r + rec_batch - 1).ToString() : rec_count.ToString();
@@ -142,8 +144,9 @@ namespace DataImporter
                     }
                 }
                 else
-                { 
-                    ExecuteSQL(sql_string + base_sql);
+                {
+                    sql_string = top_sql + base_sql;
+                    ExecuteSQL(sql_string);
                     _logger.Information(feedbackA + " as a single batch");
                 }
             }
