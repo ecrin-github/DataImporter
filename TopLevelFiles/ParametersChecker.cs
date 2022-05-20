@@ -57,7 +57,7 @@ namespace DataImporter
                     opts.source_ids = _test_repo.ObtainTestSourceIDs();
                     return true;     // Should always be able to run
                 }
-                else if (opts.create_test_report_only)
+                else if (opts.create_test_report)
                 {
                     return true;     // Should always be able to run
                 }
@@ -133,7 +133,7 @@ namespace DataImporter
         [Option('F', "is a test", Required = false, HelpText = "If present, operates on the sd / ad tables in the test database")]
         public bool using_test_data { get; set; }
 
-        [Option('G', "test report only", Required = false, HelpText = "If present, compares and reports on adcomp and expected tables but does not recreate those tables")]
-        public bool create_test_report_only { get; set; }
+        [Option('G', "test report", Required = false, HelpText = "If present, compares and reports on adcomp and expected tables but does not recreate those tables")]
+        public bool create_test_report { get; set; }
     }
 }

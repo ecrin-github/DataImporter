@@ -44,7 +44,7 @@ namespace DataImporter
 
             if (opts.using_test_data)
             {
-                LogHeader("IMPORTING TEST DATAA");
+                LogHeader("IMPORTING TEST DATA");
             }
 
             int[] source_ids = opts.source_ids.ToArray();

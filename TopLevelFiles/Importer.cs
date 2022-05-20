@@ -28,7 +28,7 @@ namespace DataImporter
                 _logger_helper.LogHeader("STARTING IMPORTER");
                 _logger_helper.LogCommandLineParameters(opts);
 
-                if (!opts.using_test_data && !opts.create_test_report_only)
+                if (!opts.using_test_data && !opts.create_test_report)
                 {
                     // Simply import the data for each listed source.
 
@@ -39,7 +39,9 @@ namespace DataImporter
                 }
                 else
                 {
-                    if (!opts.create_test_report_only)
+                    // one or both of -F, -G have been used
+
+                    if (opts.using_test_data)
                     {
                         // first recreate the ADcomposite tables.
 
@@ -70,7 +72,10 @@ namespace DataImporter
                         // expacted and actual (composite ad) values.
                     }
 
-                    _test_repo.ConstructDiffReport();
+                    if (opts.create_test_report)
+                    {
+                        _test_repo.ConstructDiffReport();
+                    }
                 }
                 
 

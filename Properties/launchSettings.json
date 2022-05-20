@@ -2,7 +2,7 @@
   "profiles": {
     "DataImporter": {
       "commandName": "Project",
-      "commandLineArgs": "-s \"100120\" -T"
+      "commandLineArgs": "-G"
     }
   }
 }
