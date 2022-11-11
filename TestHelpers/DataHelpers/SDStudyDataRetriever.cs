@@ -175,6 +175,36 @@ namespace DataImporter
         }
 
 
+        public void TransferStudyCountries()
+        {
+
+            string sql_string = @"INSERT INTO sd.study_countries(sd_sid,
+            country_id, country_name, status_id, record_hash)
+            SELECT sd_sid,
+            country_id, country_name, status_id, record_hash
+            FROM sdcomp.study_countries
+            where source_id = " + _source_id;
+
+            Execute_SQL(sql_string);
+        }
+
+
+        public void TransferStudyLocations()
+        {
+
+            string sql_string = @"INSERT INTO sd.study_locations(sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash)
+            SELECT sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash
+            FROM sdcomp.study_locations
+            where source_id = " + _source_id;
+
+            Execute_SQL(sql_string);
+        }
+
+
         public void TransferStudyIPDAvaiable()
         {
             string sql_string = @"INSERT INTO sd.study_ipd_available(sd_sid,
@@ -185,8 +215,8 @@ namespace DataImporter
             where source_id = " + _source_id;
 
             Execute_SQL(sql_string);
-
         }
+
 
         public void TransferStudyHashes()
         {

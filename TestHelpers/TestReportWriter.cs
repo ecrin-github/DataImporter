@@ -20,7 +20,7 @@ namespace DataImporter
         {
             string dt_string = DateTime.Now.ToString("s", 
                                System.Globalization.CultureInfo.InvariantCulture)
-                              .Replace("-", "").Replace(":", "").Replace("T", " ");
+                              .Replace(":", "").Replace("T", " ");
             logfile_path = logfile_startofpath + "IMPORT TEST REPORT";
             logfile_path += " " + dt_string + ".log";
             sw = new StreamWriter(logfile_path, false, System.Text.Encoding.UTF8);

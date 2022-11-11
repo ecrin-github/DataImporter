@@ -1,4 +1,4 @@
-﻿using Serilog;
+﻿
 
 namespace DataImporter
 {
@@ -6,12 +6,12 @@ namespace DataImporter
     {
         ISource _source;
         IMonitorDataLayer _logging_repo;
-        ILogger _logger;
+        LoggingHelper _logger;
         ImportTableCreator itc;
         ImportTableManager itm;
         string _connstring;
 
-        public ImportBuilder(ISource source, IMonitorDataLayer logging_repo, ILogger logger)
+        public ImportBuilder(ISource source, IMonitorDataLayer logging_repo, LoggingHelper logger)
         {
             _source = source;
             _connstring = _source.db_conn;
@@ -28,11 +28,11 @@ namespace DataImporter
             {
                 itc.CreateStudyRecsToADTable();
                 itc.CreateStudyAttsToADTable();
-                _logger.Information("Created studies to_ad tables");
+                _logger.LogLine("Created studies to_ad tables");
             }
             itc.CreateObjectRecsToADTable();
             itc.CreateObjectAttsToADTable();
-            _logger.Information("Created data objects to_ad tables");
+            _logger.LogLine("Created data objects to_ad tables");
         }
 
 
@@ -47,7 +47,7 @@ namespace DataImporter
                 itm.IdentifyChangedStudyRecs();
             }
 
-            _logger.Information("Filled studies to_ad table");
+            _logger.LogLine("Filled studies to_ad table");
 
             itm.IdentifyNewDataObjects();
             itm.IdentifyIdenticalDataObjects();
@@ -55,7 +55,8 @@ namespace DataImporter
             if (count_deleted) itm.IdentifyDeletedDataObjects();
             itm.IdentifyChangedObjectRecs();
             if (_source.has_object_datasets) itm.IdentifyChangedDatasetRecs();
-            _logger.Information("Filled data objects to_ad table");
+
+            _logger.LogLine("Filled data objects to_ad table");
 
             if (_source.has_study_tables)
             {
@@ -64,14 +65,15 @@ namespace DataImporter
                 itm.IdentifyNewStudyAtts();
                 if (count_deleted) itm.IdentifyDeletedStudyAtts();
             }
-            _logger.Information("Filled study atts table");
+
+            _logger.LogLine("Filled study atts table");
 
             itm.SetUpTempObjectAttSets();
             itm.IdentifyChangedObjectAtts();
             itm.IdentifyNewObjectAtts();
             if (count_deleted) itm.IdentifyDeletedObjectAtts();
             itm.DropTempAttSets();
-            _logger.Information("Filled data objects atts table");
+            _logger.LogLine("Filled data objects atts table");
         }
 
         public ImportEvent CreateImportEvent(int import_id)

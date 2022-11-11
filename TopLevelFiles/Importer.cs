@@ -1,21 +1,16 @@
-﻿using Serilog;
+﻿
 using System;
 
 namespace DataImporter
 {
     public class Importer : IImporter
     {
-
-        ILogger _logger;
-        ILoggerHelper _logger_helper;
+        LoggingHelper _logging_helper;
         IMonitorDataLayer _mon_repo;
         ITestingDataLayer _test_repo;
 
-        public Importer(ILogger logger, ILoggerHelper logger_helper,
-                         IMonitorDataLayer mon_repo, ITestingDataLayer test_repo)
+        public Importer(IMonitorDataLayer mon_repo, ITestingDataLayer test_repo)
         {
-            _logger = logger;
-            _logger_helper = logger_helper;
             _mon_repo = mon_repo;
             _test_repo = test_repo;
         }
@@ -25,21 +20,28 @@ namespace DataImporter
         {
             try
             {
-                _logger_helper.LogHeader("STARTING IMPORTER");
-                _logger_helper.LogCommandLineParameters(opts);
-
                 if (!opts.using_test_data && !opts.create_test_report)
                 {
                     // Simply import the data for each listed source.
 
                     foreach (int source_id in opts.source_ids)
                     {
-                        ImportData(source_id, opts.rebuild_ad_tables, false);
+                        ISource source = _mon_repo.FetchSourceParameters(source_id);
+
+                        _logging_helper = new LoggingHelper(source.database_name);
+                        _logging_helper.LogHeader("STARTING IMPORTER");
+                        _logging_helper.LogCommandLineParameters(opts);
+
+                        ImportData(source, opts.rebuild_ad_tables, false, _logging_helper);
                     }
                 }
                 else
                 {
                     // one or both of -F, -G have been used
+                    // 'F' = is a test, If present, operates on the sd / ad tables in the test database
+                    // 'G' = test report, If present, compares and reports on adcomp and expected tables but does not recreate those tables
+
+                    _logging_helper = new LoggingHelper("test");
 
                     if (opts.using_test_data)
                     {
@@ -51,8 +53,9 @@ namespace DataImporter
 
                         foreach (int source_id in opts.source_ids)
                         {
-                            ImportData(source_id, true, true);
-                            _logger_helper.LogHeader("ENDING " + source_id.ToString() + " first test pass");
+                            ISource source = _mon_repo.FetchSourceParameters(source_id);
+                            ImportData(source, true, true, _logging_helper);
+                            _logging_helper.LogHeader("ENDING " + source_id.ToString() + ": " + source.database_name + " first test pass");
                         }
 
                         // make scripted changes to the ad tables to
@@ -64,45 +67,45 @@ namespace DataImporter
 
                         foreach (int source_id in opts.source_ids)
                         {
-                            ImportData(source_id, false, true);
-                            _logger_helper.LogHeader("ENDING " + source_id.ToString() + " second test pass");
+                            ISource source = _mon_repo.FetchSourceParameters(source_id);
+                            ImportData(source, false, true, _logging_helper);
+                            _logging_helper.LogHeader("ENDING " + source_id.ToString() + ": " + source.database_name + " second test pass");
                         }
-
-                        // construct a log detailing differences between the
-                        // expacted and actual (composite ad) values.
                     }
+
 
                     if (opts.create_test_report)
                     {
+                        // construct a log detailing differences between the
+                        // expacted and actual (composite ad) values.
+
                         _test_repo.ConstructDiffReport();
                     }
                 }
-                
 
-                _logger_helper.LogHeader("Closing Log");
+                _logging_helper.CloseLog();
                 return 0;
             }
 
             catch (Exception e)
             {
-                _logger.Error(e.Message);
-                _logger.Error(e.StackTrace);
-                _logger_helper.LogHeader("Closing Log");
+                _logging_helper.LogHeader("UNHANDLED EXCEPTION");
+                _logging_helper.LogCodeError("Importer application aborted", e.Message, e.StackTrace);
+                _logging_helper.CloseLog();
                 return -1;
             }
         }
 
 
-        private void ImportData(int source_id, bool rebuild_ad_tables, bool using_test_data)
+        private void ImportData(ISource source, bool rebuild_ad_tables, bool using_test_data, LoggingHelper logging_helper)
         {
             // Obtain source details, augment with connection string for this database.
 
-            ISource source = _mon_repo.FetchSourceParameters(source_id);
             Credentials creds = _mon_repo.Credentials;
             source.db_conn = creds.GetConnectionString(source.database_name, using_test_data);
 
-            _logger_helper.LogStudyHeader(using_test_data, "For source: " + source.id + ": " + source.database_name);
-            _logger_helper.LogHeader("Setup");
+            logging_helper.LogStudyHeader(using_test_data, "For source: " + source.id + ": " + source.database_name);
+            logging_helper.LogHeader("Setup");
 
             if (using_test_data)
             {
@@ -115,17 +118,17 @@ namespace DataImporter
             // Establish top level builder classes and 
             // set up sf monitor tables as foreign tables, temporarily.
 
-            ImportBuilder ib = new ImportBuilder(source, _mon_repo, _logger);
-            DataTransferrer transferrer = new DataTransferrer(source, _logger);
+            ImportBuilder ib = new ImportBuilder(source, _mon_repo, logging_helper);
+            DataTransferrer transferrer = new DataTransferrer(source, logging_helper);
             transferrer.EstablishForeignMonTables(creds);
-            _logger.Information("Foreign (mon) tables established in database");
+            logging_helper.LogLine("Foreign (mon) tables established in database");
 
             // Recreate ad tables if necessary. If the second pass of a 
             // test loop will need to retrieve the ad data back from compad
 
             if (rebuild_ad_tables)
             {
-                ADBuilder adb = new ADBuilder(source, _mon_repo, _logger);
+                ADBuilder adb = new ADBuilder(source, _mon_repo, logging_helper);
                 adb.BuildNewADTables();
             }
             else
@@ -139,8 +142,8 @@ namespace DataImporter
             // create and fill temporary tables to hold ids and edit statuses  
             // of new, edited, deleted tudies and data objects.
 
-            _logger_helper.LogHeader("Start Import Process");
-            _logger_helper.LogHeader("Create and fill diff tables");
+            logging_helper.LogHeader("Start Import Process");
+            logging_helper.LogHeader("Create and fill diff tables");
             ib.CreateImportTables();
             bool count_deleted = false;
             if (!using_test_data)
@@ -148,7 +151,7 @@ namespace DataImporter
                 count_deleted = _mon_repo.CheckIfFullHarvest(source.id);
             }
             ib.FillImportTables(count_deleted);
-            _mon_repo.LogDiffs(source);
+            logging_helper.LogDiffs(source);
 
 
             // Create import event log record and start 
@@ -160,7 +163,7 @@ namespace DataImporter
             // Consider new studies, record dates, edited studies and / or objects,
             // and any deleted studies / objects
 
-            _logger_helper.LogHeader("Adding new data");
+            logging_helper.LogHeader("Adding new data");
             if (source.has_study_tables)
             {
                 transferrer.AddNewStudies(import_id);
@@ -168,11 +171,11 @@ namespace DataImporter
             transferrer.AddNewDataObjects(import_id);
 
 
-            _logger_helper.LogHeader("Updating dates of data");
+            logging_helper.LogHeader("Updating dates of data");
             transferrer.UpdateDatesOfData();
 
 
-            _logger_helper.LogHeader("Editing existing data where necessary");
+            logging_helper.LogHeader("Editing existing data where necessary");
             if (source.has_study_tables)
             {
                 transferrer.UpdateEditedStudyData(import_id);
@@ -180,13 +183,19 @@ namespace DataImporter
             transferrer.UpdateEditedDataObjectData(import_id);
 
 
-            _logger_helper.LogHeader("Deleting data no longer present in source");
+            logging_helper.LogHeader("Deleting data no longer present in source");
             if (source.has_study_tables)
             {
                 transferrer.RemoveDeletedStudyData(import_id);
             }
             transferrer.RemoveDeletedDataObjectData(import_id);
 
+            // Ensure that the full hash records have been updated
+            // may not have been if change was only in attribute(s).
+            // Remove foreign tables 
+
+            logging_helper.LogHeader("Tidy up and finish");
+            transferrer.UpdateFullRecordHashes();
 
             // Update the 'date imported' record in the mon.source data tables
             // Affects all records with status 1, 2 or 3 (non-test imports only)
@@ -204,15 +213,8 @@ namespace DataImporter
                 }
             }
 
-
-            // Ensure that the full hash records have been updated
-            // may not have been if change was only in attribute(s).
-            // Remove foreign tables 
-
-            _logger_helper.LogHeader("Tidy up and finish");
-            transferrer.UpdateFullStudyHashes();
             transferrer.DropForeignMonTables();
-            _logger.Information("Foreign (mon) tables removed from database");
+            logging_helper.LogLine("Foreign (mon) tables removed from database");
 
             if (using_test_data)
             {

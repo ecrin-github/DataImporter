@@ -29,6 +29,6 @@ namespace DataImporter
         int StoreImportEvent(ImportEvent import);
         bool CheckIfFullHarvest(int source_id);
 
-        void LogDiffs(ISource s);
+        // void LogDiffs(ISource s);
     }
 }

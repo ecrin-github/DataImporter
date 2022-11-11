@@ -1,13 +1,13 @@
-﻿using Serilog;
+﻿
 
 namespace DataImporter
 {
     class DataObjectDataAdder
     {
-        ILogger _logger;
+        LoggingHelper _logger;
         DBUtilities dbu;
 
-        public DataObjectDataAdder(string connstring, ILogger logger)
+        public DataObjectDataAdder(string connstring, LoggingHelper logger)
         {
             _logger = logger;
             dbu = new DBUtilities(connstring, _logger);
@@ -25,7 +25,7 @@ namespace DataImporter
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
             add_study_topics, datetime_of_data_fetch, record_hash, object_full_hash)
             SELECT s.sd_oid, s.sd_sid, 
-            title, version, display_title, doi, doi_status_id, publication_year,
+            trim(title), version, trim(display_title), doi, doi_status_id, publication_year,
             object_class_id, object_type_id, managing_org_id, 
             managing_org, managing_org_ror_id, lang_code, access_type_id,
             access_details, access_details_url, url_last_checked, eosc_category, add_study_contribs,
@@ -278,8 +278,36 @@ namespace DataImporter
                  and d.hash_type_id = " + n.ToString();
 
                 int res = dbu.ExecuteSQL(sql_string);
-                if (res > 0) _logger.Information("Inserting " + res.ToString() + " new object hashes - type " + n.ToString());
+                if (res > 0)
+                {
+                    string hashType = GetHashType(n);
+                    _logger.LogLine("Inserting " + res.ToString() + " new object hashes - type " + n.ToString() + ": " + hashType);
+                }
             }
+        }
+
+
+        private string GetHashType(int n)
+        {
+            string hashType = "??????";
+            switch (n)
+            {
+                case 50: { hashType = "datasets"; break; }
+                case 51: { hashType = "instances"; break; }
+                case 52: { hashType = "titles"; break; }
+                case 53: { hashType = "dates"; break; }
+                case 54: { hashType = "topics"; break; }
+                case 55: { hashType = "contributors"; break; }
+                case 56: { hashType = "relationships"; break; }
+                case 57: { hashType = "descriptions"; break; }
+                case 58: { hashType = "languages"; break; }
+                case 59: { hashType = "rights"; break; }
+                case 60: { hashType = "db links"; break; }
+                case 61: { hashType = "comments"; break; }
+                case 62: { hashType = "publication types"; break; }
+                case 63: { hashType = "identifiers"; break; }
+            }
+            return hashType;
         }
     }
 }

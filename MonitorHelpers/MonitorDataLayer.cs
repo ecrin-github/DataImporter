@@ -2,17 +2,14 @@
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
-using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace DataImporter
 {
     public class MonitorDataLayer : IMonitorDataLayer
     {
-        private ILogger _logger;
         ICredentials _credentials;
         private Source source;
         private string sql_file_select_string;
@@ -20,10 +17,8 @@ namespace DataImporter
         NpgsqlConnectionStringBuilder builder;
 
 
-        public MonitorDataLayer(ILogger logger, ICredentials credentials)
+        public MonitorDataLayer(ICredentials credentials)
         {
-            _logger = logger;
-
             builder = new NpgsqlConnectionStringBuilder();
             builder.Host = credentials.Host;
             builder.Username = credentials.Username;
@@ -41,102 +36,7 @@ namespace DataImporter
 
         public Source SourceParameters => source;
         public Credentials Credentials => (Credentials)_credentials;
-
-
-        public void LogDiffs(ISource s)
-        {
-            string db_conn = s.db_conn;
-
-            // Gets and logs record count for each table in the sd schema of the database
-
-            _logger.Information("");
-            _logger.Information("SD - AD Differences");
-            _logger.Information("");
-            if (s.has_study_tables)
-            {
-                _logger.Information(GetTableRecordCount(db_conn, "to_ad_study_recs"));
-                _logger.Information(GetEntityRecDiffs(db_conn, "study"));
-                GetStudyStats(db_conn, "recs");
-                _logger.Information(GetTableRecordCount(db_conn, "to_ad_study_atts"));
-                GetStudyStats(db_conn, "atts");
-            }
-            _logger.Information(GetTableRecordCount(db_conn, "to_ad_object_recs"));
-            _logger.Information(GetEntityRecDiffs(db_conn, "object"));
-            _logger.Information(GetDatasetRecDiffs(db_conn));
-            GetObjectStats(db_conn, "recs");
-            _logger.Information(GetTableRecordCount(db_conn, "to_ad_object_atts"));
-            GetObjectStats(db_conn, "atts");
-        }
-
-
-        private string GetTableRecordCount(string db_conn, string table_name)
-        {
-            string sql_string = "select count(*) from sd." + table_name;
-
-            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
-            {
-                int res = conn.ExecuteScalar<int>(sql_string);
-                return res.ToString() + " records found in sd." + table_name;
-            }
-        }
-
-
-        private void GetStudyStats(string db_conn, string table_type)
-        {
-            string sql_string = "select status, count(sd_sid) as num from sd.to_ad_study_" + table_type;
-            sql_string += " group by status order by status;";
-            GetAndWriteStats(db_conn, sql_string);
-        }
-
-        private void GetObjectStats(string db_conn, string table_type)
-        {
-            string sql_string = "select status, count(sd_oid) as num from sd.to_ad_object_" + table_type;
-            sql_string += " group by status order by status;";
-            GetAndWriteStats(db_conn, sql_string);
-        }
-
-        private void GetAndWriteStats(string db_conn, string sql_string)
-        {
-            IEnumerable<att_stat> status_stats;
-            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
-            {
-                status_stats = conn.Query<att_stat>(sql_string);
-            }
-            if (status_stats.Count() > 0)
-            {
-                foreach (att_stat hs in status_stats)
-                {
-                    _logger.Information("Status " + hs.status.ToString() + ": " + hs.num.ToString());
-                }
-            }
-            _logger.Information("");
-        }
-
-        private string GetEntityRecDiffs(string db_conn, string entity_type)
-        {
-            string table_name = (entity_type == "study") ? "to_ad_study_recs" : "to_ad_object_recs";
-            string sql_string = "select count(*) from sd." + table_name + 
-                                " where " + entity_type + "_rec_status = 2;";
-
-            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
-            {
-                int res = conn.ExecuteScalar<int>(sql_string);
-                return res.ToString() + " records found with edits to the " + entity_type + " record itself;";
-            }
-        }
-
-        private string GetDatasetRecDiffs(string db_conn)
-        {
-            string sql_string = @"select count(*) from sd.to_ad_object_recs
-                                 where object_dataset_status = 4;";
-            using (NpgsqlConnection conn = new NpgsqlConnection(db_conn))
-            {
-                int res = conn.ExecuteScalar<int>(sql_string);
-                return res.ToString() + " records found with edits to the dataset data;";
-            }
-        }
-
-
+               
         public bool SourceIdPresent(int source_id)
         {
             string sql_string = "Select id from sf.source_parameters where id = " + source_id.ToString();

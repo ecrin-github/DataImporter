@@ -217,6 +217,46 @@ namespace DataImporter
         }
 
 
+        public void create_table_study_locations()
+        {
+            string sql_string = @"DROP TABLE IF EXISTS ad.study_locations;
+            CREATE TABLE ad.study_locations(
+                id                     INT             GENERATED ALWAYS AS IDENTITY(START WITH 201 INCREMENT BY 1) PRIMARY KEY
+              , source_id              INT             NOT NULL
+              , sd_sid                 VARCHAR         NOT NULL
+              , facility_org_id        INT             NULL
+              , facility               VARCHAR         NULL
+              , facility_ror_id        VARCHAR         NULL
+              , city_id                INT             NULL
+              , city_name              VARCHAR         NULL
+              , country_id             INT             NULL
+              , country_name           VARCHAR         NULL
+              , status_id              INT             NULL
+              , record_hash            CHAR(32)        NULL
+            );
+            CREATE INDEX study_locations_sd_sid ON ad.study_locations(sd_sid);";
+
+            Execute_SQL(sql_string);
+        }
+
+
+        public void create_table_study_countries()
+        {
+            string sql_string = @"DROP TABLE IF EXISTS ad.study_countries;
+            CREATE TABLE ad.study_countries(
+                id                     INT             GENERATED ALWAYS AS IDENTITY(START WITH 201 INCREMENT BY 1) PRIMARY KEY
+              , source_id              INT             NOT NULL
+              , sd_sid                 VARCHAR         NOT NULL
+              , country_id             INT             NULL
+              , country_name           VARCHAR         NULL
+              , status_id              INT             NULL
+              , record_hash            CHAR(32)        NULL
+            );
+            CREATE INDEX study_countries_sd_sid ON ad.study_countries(sd_sid);";
+
+            Execute_SQL(sql_string);
+        }
+
         public void create_table_ipd_available()
         {
             string sql_string = @"DROP TABLE IF EXISTS adcomp.study_ipd_available;

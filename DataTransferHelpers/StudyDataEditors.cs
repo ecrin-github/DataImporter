@@ -1,14 +1,14 @@
 ﻿
-using Serilog;
+
 
 namespace DataImporter
 {
     class StudyDataEditor
     {
-        ILogger _logger;
+        LoggingHelper _logger;
         DBUtilities dbu;
 
-        public StudyDataEditor(string connstring, ILogger logger)
+        public StudyDataEditor(string connstring, LoggingHelper logger)
         {
             _logger = logger;
             dbu = new DBUtilities(connstring, _logger);
@@ -234,6 +234,48 @@ namespace DataImporter
         }
 
 
+        public void EditStudyCountries()
+        {
+            // Where the composite hash value indicates that a change has taken place in one or more 
+            // of the records replace the whole set for the relevant studies
+            // Composite hash id for study links = 18
+
+            string sql_string = dbu.GetStudyTString(21);
+            string sql_stringD = sql_string + dbu.GetStudyDeleteString("study_countries");
+
+            string sql_stringI = sql_string + @"INSERT INTO ad.study_countries(sd_sid,
+            country_id, country_name, status_id, record_hash)
+            SELECT s.sd_sid, 
+            country_id, country_name, status_id, record_hash
+            FROM sd.study_countries s
+            INNER JOIN t
+            on s.sd_sid = t.sd_sid";
+
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "study_countries");
+        }
+
+        public void EditStudyLocations()
+        {
+            // Where the composite hash value indicates that a change has taken place in one or more 
+            // of the records replace the whole set for the relevant studies
+            // Composite hash id for study links = 18
+
+            string sql_string = dbu.GetStudyTString(20);
+            string sql_stringD = sql_string + dbu.GetStudyDeleteString("study_locations");
+
+            string sql_stringI = sql_string + @"INSERT INTO ad.study_locations(sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash)
+            SELECT s.sd_sid, 
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash
+            FROM sd.study_locations s
+            INNER JOIN t
+            on s.sd_sid = t.sd_sid";
+
+            dbu.ExecuteDandI(sql_stringD, sql_stringI, "study_locations");
+        }
+
         public void EditStudyIpdAvailable()
         {
             // Where the composite hash value indicates that a change has taken place in one or more 
@@ -331,8 +373,8 @@ namespace DataImporter
                  FROM sd.to_ad_study_atts ia
                  WHERE ia.status = 1";
 
-                dbu.ExecuteSQL(sql_string);
-                _logger.Information("Inserting new study hashtype combinations in study hash records");
+            int n = dbu.ExecuteSQL(sql_string);
+            _logger.LogLine("Inserting " + n.ToString() + " new composite hashes to study hash records");
         }
 
 
@@ -344,12 +386,12 @@ namespace DataImporter
                  and sh.hash_type_id = ia.hash_type_id 
                  and ia.status = 4";
 
-            dbu.ExecuteSQL(sql_string);
-            _logger.Information("Dropping deleted study hashtype combinations from study hash records");
+            int n = dbu.ExecuteSQL(sql_string);
+            _logger.LogLine("Dropping " + n.ToString() + " composite hashes from study hash records");
         }
 
 
-        public void DeleteStudyRecords(string table_name)
+        public int DeleteStudyRecords(string table_name)
         {
             string sql_string = @"with t as (
                   select sd_sid from sd.to_ad_study_recs
@@ -358,7 +400,8 @@ namespace DataImporter
               using t
               where a.sd_sid = t.sd_sid;";
 
-            dbu.ExecuteSQL(sql_string);
+            return dbu.ExecuteSQL(sql_string);
+
         }
 
 

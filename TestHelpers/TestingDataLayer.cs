@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Npgsql;
-using Serilog;
+
 using System.Collections.Generic;
 
 
@@ -11,10 +11,9 @@ namespace DataImporter
         ICredentials _credentials;
         NpgsqlConnectionStringBuilder builder;
         private string _db_conn;
-        ILogger _logger;
-        ILoggerHelper _logger_helper;
+        LoggingHelper _logger;
 
-        public TestingDataLayer(ILogger logger, ICredentials credentials, ILoggerHelper logger_helper)
+        public TestingDataLayer(ICredentials credentials)
         {
             builder = new NpgsqlConnectionStringBuilder();
 
@@ -27,8 +26,6 @@ namespace DataImporter
 
             _credentials = credentials;
 
-            _logger = logger;
-            _logger_helper = logger_helper;
         }
 
         public Credentials Credentials => (Credentials)_credentials;
@@ -54,7 +51,7 @@ namespace DataImporter
             ADCompTableBuilder atb = new ADCompTableBuilder(_db_conn);
             atb.BuildStudyTables();
             atb.BuildObjectTables();
-            _logger.Information("Composite AD tables established");
+            _logger.LogLine("Composite AD tables established");
         }
 
        
@@ -66,7 +63,7 @@ namespace DataImporter
             rsdb.DeleteExistingSDObjectData();
             rsdb.RetrieveStudyData();
             rsdb.RetrieveObjectData();
-            _logger.Information("SD test data for source " + source.id + " retrieved from CompSD");
+            _logger.LogLine("SD test data for source " + source.id + " retrieved from CompSD");
         }
 
 
@@ -77,7 +74,7 @@ namespace DataImporter
             radb.DeleteExistingADObjectData();
             radb.RetrieveStudyData();
             radb.RetrieveObjectData();
-            _logger.Information("AD test data for source " + source.id + " retrieved from CompAD");
+            _logger.LogLine("AD test data for source " + source.id + " retrieved from CompAD");
         }
 
 
@@ -86,10 +83,10 @@ namespace DataImporter
             TransferADDataBuilder tdb = new TransferADDataBuilder(source);
             tdb.DeleteExistingStudyData();
             tdb.DeleteExistingObjectData();
-            _logger.Information("Any existing AD test data for source " + source.id + " removed from CompAD");
+            _logger.LogLine("Any existing AD test data for source " + source.id + " removed from CompAD");
             tdb.TransferStudyData();
             tdb.TransferObjectData();
-            _logger.Information("New AD test data for source " + source.id + " added to CompAD");
+            _logger.LogLine("New AD test data for source " + source.id + " added to CompAD");
         }
 
 

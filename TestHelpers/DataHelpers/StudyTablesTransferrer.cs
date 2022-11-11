@@ -161,6 +161,34 @@ namespace DataImporter
         }
 
 
+        public void TransferStudyCountries()
+        {
+
+            string sql_string = @"INSERT INTO adcomp.study_countries(source_id, sd_sid,
+            country_id, country_name, status_id, record_hash)
+            SELECT " + _source_id + @", sd_sid,
+            country_id, country_name, status_id, record_hash
+            FROM ad.study_countries";
+
+            Execute_SQL(sql_string);
+        }
+
+
+        public void TransferStudyLocations()
+        {
+
+            string sql_string = @"INSERT INTO adcomp.study_locations(source_id, sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash)
+            SELECT " + _source_id + @", sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash
+            FROM ad.study_locations";
+
+            Execute_SQL(sql_string);
+        }
+
+
         public void TransferStudyIPDAvaiable()
         {
             string sql_string = @"INSERT INTO adcomp.study_ipd_available(source_id, sd_sid,

@@ -28,6 +28,8 @@ namespace DataImporter
             studytablebuilder.create_table_study_relationships();
             studytablebuilder.create_table_ipd_available();
             studytablebuilder.create_table_study_links();
+            studytablebuilder.create_table_study_countries();
+            studytablebuilder.create_table_study_locations();
             studytablebuilder.create_table_study_hashes();
         }
 

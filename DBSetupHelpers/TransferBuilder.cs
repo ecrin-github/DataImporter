@@ -1,11 +1,11 @@
-﻿using Serilog;
+﻿
 
 namespace DataImporter
 {
     class DataTransferrer
     {
         ISource _source;
-        ILogger _logger;
+        LoggingHelper _logger;
         string _connstring;
 
         ForeignTableManager FTM;
@@ -14,7 +14,7 @@ namespace DataImporter
         StudyDataEditor study_editor;
         DataObjectDataEditor object_editor;
 
-        public DataTransferrer(ISource source, ILogger logger)
+        public DataTransferrer(ISource source, LoggingHelper logger)
         {
             _source = source;
             _connstring = _source.db_conn;
@@ -51,13 +51,16 @@ namespace DataImporter
             if (_source.has_study_features) study_adder.TransferStudyFeatures();
             if (_source.has_study_relationships) study_adder.TransferStudyRelationships();
             if (_source.has_study_links) study_adder.TransferStudyLinks();
+            if (_source.has_study_countries) study_adder.TransferStudyCountries();
+            if (_source.has_study_locations) study_adder.TransferStudyLocations();
             if (_source.has_study_ipd_available) study_adder.TransferStudyIpdAvailable();
-            _logger.Information("Added new source specific study data");
+            _logger.LogLine("Added new source specific study data");
 
            // study_adder.UpdateStudiesLastImportedDate(import_id, source.id);
 
             study_adder.TransferStudyHashes();
-            _logger.Information("Added new study hashes");
+            _logger.LogLine("Added new study hashes");
+            _logger.LogLine("");
         }
 
 
@@ -83,10 +86,10 @@ namespace DataImporter
                 object_adder.TransferObjectDBLinks();
                 object_adder.TransferObjectPublicationTypes();
             }
-            _logger.Information("Added new source specific object data");
+            _logger.LogLine("Added new source specific object data");
 
             object_adder.TransferObjectHashes();
-            _logger.Information("Added new object hashes");
+            _logger.LogLine("Added new object hashes");
         }
 
         public void UpdateDatesOfData()
@@ -112,14 +115,18 @@ namespace DataImporter
             if (_source.has_study_features) study_editor.EditStudyFeatures();
             if (_source.has_study_relationships) study_editor.EditStudyRelationships();
             if (_source.has_study_links) study_editor.EditStudyLinks();
+            if (_source.has_study_countries) study_editor.EditStudyCountries();
+            if (_source.has_study_locations) study_editor.EditStudyLocations();
             if (_source.has_study_ipd_available) study_editor.EditStudyIpdAvailable();
 
-            study_editor.UpdateStudiesLastImportedDate(import_id, _source.id);
-            _logger.Information("Edited study data");
+            //study_editor.UpdateStudiesLastImportedDate(import_id, _source.id);
 
             study_editor.UpdateStudyCompositeHashes();
             study_editor.AddNewlyCreatedStudyHashTypes();
             study_editor.DropNewlyDeletedStudyHashTypes();
+
+            _logger.LogLine("Edited study data");
+            _logger.LogLine("");
         }
 
 
@@ -150,13 +157,13 @@ namespace DataImporter
             object_editor.AddNewlyCreatedObjectHashTypes();
             object_editor.DropNewlyDeletedObjectHashTypes();
 
-            _logger.Information("Edited data object data");
+            _logger.LogLine("Edited data object data");
         }
 
 
         public void RemoveDeletedStudyData(int import_id)
         {
-            study_editor.DeleteStudyRecords("studies");
+            int res = study_editor.DeleteStudyRecords("studies");
             study_editor.DeleteStudyRecords("study_identifiers");
             study_editor.DeleteStudyRecords("study_titles");
             study_editor.DeleteStudyRecords("study_hashes"); ;
@@ -168,17 +175,19 @@ namespace DataImporter
             if (_source.has_study_features) study_editor.DeleteStudyRecords("study_features"); ;
             if (_source.has_study_relationships) study_editor.DeleteStudyRecords("study_relationships");
             if (_source.has_study_links) study_editor.DeleteStudyRecords("study_links");
+            if (_source.has_study_countries) study_editor.DeleteStudyRecords("study_countries");
+            if (_source.has_study_locations) study_editor.DeleteStudyRecords("study_locations");
             if (_source.has_study_ipd_available) study_editor.DeleteStudyRecords("study_ipd_available");
 
             study_editor.UpdateStudiesDeletedDate(import_id, _source.id);
 
-            _logger.Information("Deleted now missing study data");
+            _logger.LogLine("Deleted " + res.ToString() + " study records and related data");
         }
 
 
         public void RemoveDeletedDataObjectData(int import_id)
         {
-            object_editor.DeleteObjectRecords("data_objects");
+            int res = object_editor.DeleteObjectRecords("data_objects");
             object_editor.DeleteObjectRecords("object_instances");
             object_editor.DeleteObjectRecords("object_titles");
             object_editor.DeleteObjectRecords("object_hashes");
@@ -203,18 +212,18 @@ namespace DataImporter
                 object_editor.UpdateObjectsDeletedDate(import_id, _source.id);
             }
 
-            _logger.Information("Deleted now missing data object data");
+            _logger.LogLine("Deleted " + res.ToString() + " object records and related data");
         }
 
 
-        public void UpdateFullStudyHashes()
+        public void UpdateFullRecordHashes()
         {
             if (_source.has_study_tables)
             {
                 study_editor.UpdateFullStudyHash();
             }
             object_editor.UpdateFullObjectHash();
-            _logger.Information("Full hash values updated");
+            _logger.LogLine("Full hash values updated");
         }
 
 

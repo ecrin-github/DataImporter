@@ -1,13 +1,13 @@
-﻿using Serilog;
+﻿
 
 namespace DataImporter
 {
     class StudyDataAdder
     {
-        ILogger _logger;
+        LoggingHelper _logger;
         DBUtilities dbu;
 
-        public StudyDataAdder(string connstring, ILogger logger)
+        public StudyDataAdder(string connstring, LoggingHelper logger)
         {
             _logger = logger;
             dbu = new DBUtilities(connstring, _logger);
@@ -170,6 +170,38 @@ namespace DataImporter
         }
 
 
+        public void TransferStudyCountries()
+        {
+            string sql_string = @"INSERT INTO ad.study_countries(sd_sid,
+            country_id, country_name, status_id, record_hash)
+            SELECT s.sd_sid, 
+            country_id, country_name, status_id, record_hash
+            FROM sd.study_countries s
+            INNER JOIN sd.to_ad_study_recs ts
+            ON s.sd_sid = ts.sd_sid
+            where ts.status = 1";
+
+            dbu.ExecuteTransferSQL(sql_string, "study_countries", "Adding");
+        }
+
+
+        public void TransferStudyLocations()
+        {
+            string sql_string = @"INSERT INTO ad.study_locations(sd_sid,
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash)
+            SELECT s.sd_sid, 
+            facility_org_id, facility, facility_ror_id, 
+            city_id, city_name, country_id, country_name, status_id, record_hash
+            FROM sd.study_locations s
+            INNER JOIN sd.to_ad_study_recs ts
+            ON s.sd_sid = ts.sd_sid
+            where ts.status = 1";
+
+            dbu.ExecuteTransferSQL(sql_string, "study_locations", "Adding");
+        }
+
+
         public void TransferStudyIpdAvailable()
         {
             string sql_string = @"INSERT INTO ad.study_ipd_available(sd_sid,
@@ -188,7 +220,7 @@ namespace DataImporter
 
         public void TransferStudyHashes()
         {
-            for (int n = 11; n < 21; n++)
+            for (int n = 11; n < 22; n++)
             {
                 string sql_string = @"INSERT INTO ad.study_hashes(sd_sid,
                   hash_type_id, composite_hash)
@@ -201,9 +233,33 @@ namespace DataImporter
                   and s.hash_type_id = " + n.ToString();
 
                 int res = dbu.ExecuteSQL(sql_string);
-                if (res > 0) _logger.Information("Inserting " + res.ToString() + " new study hashes - type " + n.ToString());
+                if (res > 0)
+                {
+                    string hashType = GetHashType(n);
+                    _logger.LogLine("Inserting " + res.ToString() + " new study hashes - type " + n.ToString() + ": " + hashType);
+
+                }
             }
         }
 
+        private string GetHashType(int n)
+        {
+            string hashType = "??????";
+            switch (n)
+            {
+                case 11: { hashType = "identifiers"; break; }
+                case 12: { hashType = "titles"; break; }
+                case 13: { hashType = "features"; break; }
+                case 14: { hashType = "topics"; break; }
+                case 15: { hashType = "contributors"; break; }
+                case 16: { hashType = "relationships"; break; }
+                case 17: { hashType = "references"; break; }
+                case 18: { hashType = "study links"; break; }
+                case 19: { hashType = "ipd available"; break; }
+                case 20: { hashType = "locations"; break; }
+                case 21: { hashType = "countries"; break; }
+            }
+            return hashType;
+        }
     }
 }

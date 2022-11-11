@@ -37,6 +37,8 @@ namespace DataImporter
                 if (_source.has_study_references) DeleteData(_source_id, "study_references");
                 if (_source.has_study_relationships) DeleteData(_source_id, "study_relationships");
                 if (_source.has_study_links) DeleteData(_source_id, "study_links");
+                if (_source.has_study_countries) DeleteData(_source_id, "study_countgries");
+                if (_source.has_study_locations) DeleteData(_source_id, "study_locations");
                 if (_source.has_study_ipd_available) DeleteData(_source_id, "study_ipd_available");
             }
         }
@@ -90,6 +92,8 @@ namespace DataImporter
                 if (_source.has_study_references) stt.TransferStudyReferences();
                 if (_source.has_study_relationships) stt.TransferStudyRelationships();
                 if (_source.has_study_links) stt.TransferStudyLinks();
+                if (_source.has_study_countries) stt.TransferStudyCountries();
+                if (_source.has_study_locations) stt.TransferStudyLocations();
                 if (_source.has_study_ipd_available) stt.TransferStudyIPDAvaiable();
             }
 

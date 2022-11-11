@@ -1,13 +1,13 @@
-﻿using Serilog;
+﻿
 
 namespace DataImporter
 {
     class DataObjectDataEditor
     {
-        ILogger _logger;
+        LoggingHelper _logger;
         DBUtilities dbu;
 
-        public DataObjectDataEditor(string connstring, ILogger logger)
+        public DataObjectDataEditor(string connstring, LoggingHelper logger)
         {
             _logger = logger;
             dbu = new DBUtilities(connstring, _logger);
@@ -21,9 +21,9 @@ namespace DataImporter
 
             string sql_string = @"UPDATE ad.data_objects a
              set 
-             title = t.title,
+             title = trim(t.title),
              version = t.version,
-             display_title = t.display_title, 
+             display_title = trim(t.display_title), 
              doi = t.doi,  
              doi_status_id = t.doi_status_id,  
              publication_year = t.publication_year, 
@@ -391,8 +391,8 @@ namespace DataImporter
                  FROM sd.to_ad_object_atts ia
                  WHERE ia.status = 1";
 
-            dbu.ExecuteSQL(sql_string);
-            _logger.Information("Inserting new object hashtype combinations in object hash records");
+            int n = dbu.ExecuteSQL(sql_string);
+            _logger.LogLine("Inserting " + n.ToString() + " new composite hashes to object hash records");
         }
 
 
@@ -404,12 +404,12 @@ namespace DataImporter
                  and sh.hash_type_id = ia.hash_type_id 
                  and ia.status = 4";
 
-            dbu.ExecuteSQL(sql_string);
-            _logger.Information("Dropping deleted object hashtype combinations from object hash records");
+            int n = dbu.ExecuteSQL(sql_string);
+            _logger.LogLine("Dropping " + n.ToString() + " composite hashes from object hash records");
         }
 
 
-        public void DeleteObjectRecords(string table_name)
+        public int DeleteObjectRecords(string table_name)
         {
             string sql_string = @"with t as (
                   select sd_oid from sd.to_ad_object_recs
@@ -418,7 +418,7 @@ namespace DataImporter
               using t
               where a.sd_oid = t.sd_oid;";
 
-            dbu.ExecuteSQL(sql_string);
+            return dbu.ExecuteSQL(sql_string);
         }
 
 

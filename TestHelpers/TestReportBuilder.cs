@@ -1,7 +1,7 @@
 ﻿ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
-using Serilog;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,6 +128,8 @@ namespace DataImporter
             CompareAttributeNumbers("studies", "study_ipd_available");
             CompareAttributeNumbers("studies", "study_references");
             CompareAttributeNumbers("studies", "study_links");
+            CompareAttributeNumbers("studies", "study_countries");
+            CompareAttributeNumbers("studies", "study_locationss");
             CompareAttributeNumbers("studies", "study_relationships");
         }
 
@@ -142,6 +144,9 @@ namespace DataImporter
             CompareHashes("studies", "study_ipd_available", 19);
             CompareHashes("studies", "study_references", 17);
             CompareHashes("studies", "study_links", 18);
+            CompareHashes("studies", "study_countries", 21);
+            CompareHashes("studies", "study_locations", 20);
+            CompareHashes("studies", "study_relartionships", 16);
         }
 
 
